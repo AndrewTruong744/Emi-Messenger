@@ -145,7 +145,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/nateclickbait/downloads/repos/Emi-Messenger/backend/generated/prisma",
+      "value": "/home/nateclickbait/repos/Emi-Messenger/backend/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -159,11 +159,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/nateclickbait/downloads/repos/Emi-Messenger/backend/prisma/schema.prisma",
+    "sourceFilePath": "/home/nateclickbait/repos/Emi-Messenger/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -173,6 +173,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {
