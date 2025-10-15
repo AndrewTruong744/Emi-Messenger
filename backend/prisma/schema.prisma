@@ -26,6 +26,8 @@ model User {
 
   settingsId Int? @unique
   settings Settings? @relation(fields: [settingsId], references: [id])
+
+  tokens Token[]
 }
 
 model Message {
@@ -43,4 +45,12 @@ model Message {
 model Settings {
   id Int @id @default(autoincrement())
   user User?
+}
+
+model Token {
+  id Int @id @default(autoincrement())
+  refreshToken String
+
+  userId Int
+  user User @relation(fields: [userId], references: [id])
 }

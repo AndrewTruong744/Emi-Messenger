@@ -1,15 +1,9 @@
-import {Outlet, Navigate} from 'react-router-dom'
-import {create} from 'zustand'
-
-const useAuth = create((set) => ({
-  isAuthenticated: false,
-  authSuccess: () => set({isAuthenticated: true}),
-  authFail: () => set({isAuthenticated: false})
-}))
+import {Outlet, Navigate} from 'react-router-dom';
+import {useAuth} from '../helper/store.js';
 
 function Auth() {
-  const isAuthenticated = useAuth((state) => state.isAuthenticated);
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace/>
+  const accessToken = useAuth((state) => state.accessToken);
+  return accessToken.length !== 0 ? <Outlet /> : <Navigate to="/login" replace/>
 }
 
 export default Auth;

@@ -1,13 +1,34 @@
 const express = require("express");
 require('dotenv').config();
-const path = require("node:path");
 const cors = require('cors');
 const app = express();
+const cookieParser = require('cookie-parser');
+const passport = require("passport");
+const path = require("node:path");
 
-const assetsPath = path.join(__dirname, "public");
+require('./authentication/passport.js');
+const apiRouter = require('./routes/api.js');
+
+const assetsPath = path.join(__dirname, 'public');
 app.use(express.static(assetsPath));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(cookieParser());
+app.use(cors({
+  origin: process.env.ORIGIN,
+  credentials: true
+}));
+app.use(passport.initialize());
 
-app.use(cors());
+app.use('/api', apiRouter);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  return res.status(500).json({
+    message: 'An unexpected server error occurred'
+  });
+})
 
 const PORT = 3000;
 app.listen(PORT, (error) => {
