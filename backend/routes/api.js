@@ -26,6 +26,8 @@ router.post('/signup', async (req, res, next) => {
   }
 })
 
+//add something that prevents refresh token from being
+//created if it already exists
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {session: false}, 
     async (err, user, info) => {
@@ -47,21 +49,24 @@ router.post('/login', (req, res, next) => {
         ACCESS_SECRET, 
         {expiresIn: '15m'}
       );
-      const refreshToken = jwt.sign(
-        payload, 
-        REFRESH_SECRET, 
-        { expiresIn: '7d' }
-      );
+      
+      if(!query.checkRefreshTokenWithUserId(user.id, req.cookies.refreshToken)) {
+        const refreshToken = jwt.sign(
+          payload, 
+          REFRESH_SECRET, 
+          { expiresIn: '7d' }
+        );
 
-      const updatedUser = await query.saveRefreshToken(user.id, refreshToken);
-      console.log(updatedUser);
+        const updatedUser = await query.saveRefreshToken(user.id, refreshToken);
+        console.log(updatedUser);
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: (process.env.MODE === 'production') ? true : false,
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
-      });
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: (process.env.MODE === 'production') ? true : false,
+          sameSite: 'none',
+          maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
+        });
+      }
 
       return res.json({
         user: user.username,

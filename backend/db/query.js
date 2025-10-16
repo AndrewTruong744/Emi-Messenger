@@ -80,6 +80,21 @@ async function checkRefreshToken(token) {
   return user;
 }
 
+async function checkRefreshTokenWithUserId(userId, token) {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      tokens: {
+        some: {
+          refreshToken: token,
+        }
+      }
+    }
+  });
+
+  return user;
+}
+
 async function deleteRefreshToken(userId, token) {
   const deleteTokensCount = await prisma.token.deleteMany({
     where: {
@@ -97,6 +112,7 @@ module.exports = {
   getUserById, 
   saveRefreshToken,
   checkRefreshToken,
+  checkRefreshTokenWithUserId,
   deleteRefreshToken,
 };
 
