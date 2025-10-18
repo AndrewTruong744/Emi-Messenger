@@ -9,7 +9,7 @@ const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 router.post('/signup', async (req, res, next) => {
   try {
-    if (await query.getUser(req.body.username)) {
+    if (await query.getUser(req.body.username, req.body.email)) {
       console.error('User already exists');
       return res.status(409).json({
         message: 'User already exists'
@@ -26,8 +26,6 @@ router.post('/signup', async (req, res, next) => {
   }
 })
 
-//add something that prevents refresh token from being
-//created if it already exists
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {session: false}, 
     async (err, user, info) => {
@@ -75,6 +73,15 @@ router.post('/login', (req, res, next) => {
       });
     })(req, res, next);
 });
+
+router.get('/login/google', passport.authenticate('oidc-google'));
+
+//implement
+router.get('/oauth2/redirect/google', (req, res, next) => {
+  passport.authenticate('oidc-google', {failureMessage: true}, (err, user, info) => {
+
+  })
+})
 
 router.post('/logout', async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
