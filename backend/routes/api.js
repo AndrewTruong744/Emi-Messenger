@@ -1,8 +1,10 @@
-const express = require("express");
+import express from "express";
+import query from '../db/query.js';
+import jwt from 'jsonwebtoken';
+import passport from "passport";
+import generateJwt from "../authentication/jwt.js";
+
 const router = express.Router();
-const query = require("../db/query.js"); 
-const jwt = require('jsonwebtoken');
-const passport = require("passport");
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;   
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -37,51 +39,52 @@ router.post('/login', (req, res, next) => {
         });
       }
 
-      const payload = {
-        id: user.id,
-        username: user.username
-      };
-
-      const accessToken = jwt.sign(
-        payload, 
-        ACCESS_SECRET, 
-        {expiresIn: '15m'}
-      );
-      
-      if(!query.checkRefreshTokenWithUserId(user.id, req.cookies.refreshToken)) {
-        const refreshToken = jwt.sign(
-          payload, 
-          REFRESH_SECRET, 
-          { expiresIn: '7d' }
-        );
-
-        const updatedUser = await query.saveRefreshToken(user.id, refreshToken);
-        console.log(updatedUser);
-
-        res.cookie('refreshToken', refreshToken, {
-          httpOnly: true,
-          secure: (process.env.MODE === 'production') ? true : false,
-          sameSite: 'none',
-          maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
-        });
-      }
-
-      return res.json({
-        user: user.username,
-        accessToken: accessToken,
-        expiresIn: 900 //15 minutes
-      });
+      return await generateJwt(user, req.cookies.refreshToken, res);
     })(req, res, next);
 });
 
-router.get('/login/google', passport.authenticate('oidc-google'));
+router.get('/login/google', passport.authenticate('google', {session: false}));
 
-//implement
+//another path for refreshToken
+
 router.get('/oauth2/redirect/google', (req, res, next) => {
-  passport.authenticate('oidc-google', {failureMessage: true}, (err, user, info) => {
+  passport.authenticate('google', {
+    session: false, 
+    failureMessage: true
+  }, async (err, user, info) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
 
-  })
-})
+    if (err || !user) {
+      const script = `<script>
+        window.opener.postMessage(
+          { 
+            type: 'OAUTH_FAILURE',
+            message: 'failure' 
+          }, 
+          '${process.env.ORIGIN}'
+        );
+
+        window.close();
+      </script>`;
+      return res.send(script);
+    }
+
+    const accessToken = await generateJwt(user, req.cookies.refreshToken, res, true);
+    //send access token and refresh httpOnly cookie token
+    const script = `<script>
+      window.opener.postMessage(
+        { 
+          type: 'OAUTH_SUCCESS', 
+          accessToken: '${JSON.stringify(accessToken)}'
+        }, 
+        '${process.env.ORIGIN}'
+      );
+
+      window.close();
+    </script>`;
+    return res.send(script);
+  })(req, res, next);
+});
 
 router.post('/logout', async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
@@ -121,37 +124,7 @@ router.post('/refresh', async (req, res) => {
     if (!user)
       throw new Error('Refresh token does not exist');
 
-    const newPayload = {
-        id: user.id,
-        username: user.username
-      };
-
-    const newAccessToken = jwt.sign(
-      newPayload, 
-      ACCESS_SECRET, 
-      {expiresIn: '15m'}
-    );
-    const newRefreshToken = jwt.sign(
-      newPayload, 
-      REFRESH_SECRET, 
-      { expiresIn: '7d' }
-    );
-
-    const message = await query.deleteRefreshToken(decoded.id, refreshToken);
-    console.log(message);
-
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: (process.env.MODE === 'production') ? true : false,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
-    });
-
-    return res.json({
-      user: user.username,
-      accessToken: newAccessToken,
-      expiresIn: 900 //15 minutes
-    });
+    return await generateJwt(user, refreshToken, res);
   } catch (err) {
     res.clearCookie('refreshToken', {
       httpOnly: true,
@@ -162,4 +135,4 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

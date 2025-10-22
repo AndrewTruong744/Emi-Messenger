@@ -1,13 +1,18 @@
-const express = require("express");
-require('dotenv').config();
-const cors = require('cors');
-const app = express();
-const cookieParser = require('cookie-parser');
-const passport = require("passport");
-const path = require("node:path");
+import express from "express";
+import 'dotenv/config';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import path from 'node:path';
+import { fileURLToPath } from "node:url";
 
-require('./authentication/passport.js');
-const apiRouter = require('./routes/api.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import "./authentication/passport.js";
+import apiRouter from './routes/api.js';
+
+const app = express();
 
 const assetsPath = path.join(__dirname, 'public');
 app.use(express.static(assetsPath));
@@ -31,10 +36,8 @@ app.use((err, req, res, next) => {
 })
 
 const PORT = 3000;
+
 app.listen(PORT, (error) => {
-  // This is important!
-  // Without this, any startup errors will silently fail
-  // instead of giving you a helpful error message.
   if (error) {
     throw error;
   }

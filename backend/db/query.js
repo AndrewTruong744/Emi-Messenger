@@ -1,16 +1,18 @@
-const { PrismaClient } = require('../generated/prisma');
-const bcrypt = require("bcryptjs");
+import {PrismaClient} from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function createUser(reqBody) {
-  const hashedPassword = await bcrypt.hash(reqBody.password, 10);
+  const hashedPassword = 
+    (reqBody.password === undefined) ? null : await bcrypt.hash(reqBody.password, 10);
   const user = await prisma.user.create({
     data: {
       username: reqBody.username,
       displayName: reqBody.displayName,
       email: reqBody.email,
       password: hashedPassword,
+      sub: (reqBody.sub === undefined) ? null : reqBody.sub,
 
       settings: {
         create: {}
@@ -21,7 +23,7 @@ async function createUser(reqBody) {
   return user;
 }
 
-async function getUser(username = '', email = '') {
+async function getUser(username='', email='') {
   if (username === '' && email === '')
     return []
 
@@ -29,7 +31,7 @@ async function getUser(username = '', email = '') {
     where: {
       AND: [
         {username: {contains: username}},
-        {email: {contains: email}}
+        {email: {contains: email}},
       ]
     }
   });
@@ -43,6 +45,16 @@ async function getUserById(id) {
       id: id
     }
   })
+
+  return user;
+}
+
+async function getUserBySub(sub) {
+  const user = await prisma.user.findFirst({
+    where: {
+      sub: sub
+    }
+  });
 
   return user;
 }
@@ -106,10 +118,11 @@ async function deleteRefreshToken(userId, token) {
   return deleteTokensCount;
 }
 
-module.exports = {
+export default {
   createUser,
   getUser, 
-  getUserById, 
+  getUserById,
+  getUserBySub,
   saveRefreshToken,
   checkRefreshToken,
   checkRefreshTokenWithUserId,

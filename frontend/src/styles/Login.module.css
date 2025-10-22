@@ -1,0 +1,33 @@
+.login {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding: 25px;
+  /* max-width: 1200px;
+  min-width: 1200px; */
+  background-image: linear-gradient(#c2e9fb,rgb(209, 157, 90));
+}
+
+.logo, .formBox {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.formAndOAuth {
+  border: 1px solid rgb(226, 195, 58);
+  border-radius: 10px;
+  padding: 25px;
+  background-color: white;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.ceo {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}

@@ -1,12 +1,9 @@
-const passport = require("passport");
-const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require("bcryptjs");
-const query = require("../db/query.js");
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-const OidcStrategy = require('passport-openid-client').Strategy;
-const {Issuer} = require('openid-client');
-const { Strategy } = require("passport-local");
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import bcrypt from 'bcryptjs';
+import query from '../db/query.js';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -47,54 +44,35 @@ passport.use('access-token',
   })
 );
 
-(async () => {
-  try {
-    const googleIssuer = await Issuer.discover('https://accounts.google.com');
+passport.use('google', new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: 'http://localhost:3000/api/oauth2/redirect/google',
+    scope: ['profile', 'email']
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    const googleSub = profile.id;
 
-    const client = new googleIssuer.Client({
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uris: ['http://localhost:3000/oauth2/redirect/google'],
-      response_types: ['code'],
-    });
+    const userContents = {
+      email: profile.emails[0].value,
+      displayName: profile.displayName,
+      sub: googleSub,
+      username: crypto.randomUUID(),
+    }
 
-    passport.use('oidc-google', new Strategy({
-        client: client,
-        params: {
-          scope: 'openid profile email',
-        },
-        passReqToCallback: false,
-      },
-      async (tokenSet, done) => {
-        const claims = tokenSet.claims();
+    try {
+      const user = await query.getUserBySub(googleSub);
 
-        //get rid of password field later (handle it later for Oauth)
-        const userContents = {
-          email: claims.email,
-          displayName: claims.name,
-          username: claims.sub,
-          password: crypto.randomUUID(),
-        }
-
-        try {
-          const user = await query.getUser("", claims.email);
-          
-          if (user)
-            return done(null, user);
-          else if (claims.email_verified) {
-            const createdUser = await query.createUser(userContents);
-            return done(null, createdUser);
-          }
-          else
-            return done(null, false);
-
-        } catch (err) {
-          return done(err);
-        }
+      if (user) {
+        return done(null, user);
+      } else {
+        const createdUser = await query.createUser(userContents);
+        console.log('authenticated');
+        return done(null, createdUser);
       }
-    ));
-  } catch (err) {
-    console.error('FATAL ERROR: Google OIDC config failed');
-    process.exit(1);
+    } catch (err) {
+      console.log(err);
+      return done(err);
+    }
   }
-})();
+));

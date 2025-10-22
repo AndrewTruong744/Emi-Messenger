@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -19,7 +18,8 @@ model User {
   username String @unique
   displayName String
   email String @unique
-  password String
+  password String?
+  sub String? 
   
   sentMessages Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
