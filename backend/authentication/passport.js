@@ -10,6 +10,9 @@ passport.use(
     try {
       const user = await query.getUser(username, "");
 
+      if (user.sub !== null) {
+        return done(null, false, { message: "Use Single Sign On" });
+      }
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
@@ -26,14 +29,15 @@ passport.use(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.ACCESS_TOKEN_SECRET
+  secretOrKey: process.env.ACCESS_TOKEN_SECRET,
+  session: false
 };
 
 passport.use('access-token',
   new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
     try {
       const user = await query.getUserById(jwt_payload.id);
-
+      console.log(user);
       if (user)
         return done(null, user);
       else

@@ -1,10 +1,9 @@
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import styles from "../styles/Login.module.css";
 import api from '../helper/axios.js';
 import {useAuth} from '../helper/store.js';
 import Emi from '../assets/Emi6.jpg';
-import useGoogleOdic from '../helper/useGoogleOdic.js';
 
 function Login() {
   const authSuccess = useAuth((state) => state.authSuccess);
@@ -16,20 +15,8 @@ function Login() {
   //implement this later
   //const [isLoading, setIsLoading] = useState(true);
 
-  const handleSuccess = (accessToken) => {
-    console.log('Access Token Received:', accessToken);
-    authSuccess(accessToken);
-    navigate('/messages');
-  }
-
-  const handleFailure = (message) => {
-    console.log(message);
-  }
-
-  const initiateGoogleLogin = useGoogleOdic(handleSuccess, handleFailure);
-
   const handleGoogleClick = () => {
-    initiateGoogleLogin();
+    window.location.replace(`${import.meta.env.VITE_API_URL}/login/google`);
   }
 
   const handleMicrosoftClick = () => {

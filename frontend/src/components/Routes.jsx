@@ -2,6 +2,7 @@ import Auth from "./Auth.jsx";
 import Conversation from "./Conversation.jsx";
 import Home from "./Home.jsx"
 import Login from "./Login.jsx";
+import LoginComplete from "./LoginComplete.jsx";
 import Messages from "./Messages.jsx";
 import NotFound from "./NotFound.jsx";
 import Settings from "./Settings.jsx";
@@ -19,6 +20,10 @@ const routes = [
   {
     path: '/signup',
     element: <Signup />
+  },
+  {
+    path: '/login-complete',
+    element: <LoginComplete />
   },
   
   // Protexted Routes

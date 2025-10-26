@@ -79,19 +79,6 @@ async function saveRefreshToken(userId, token) {
   return user;
 }
 
-async function checkRefreshToken(token) {
-  const user = await prisma.token.findFirst({
-    where: {
-      refreshToken: token
-    },
-    include: {
-      user: true
-    }
-  });
-
-  return user;
-}
-
 async function checkRefreshTokenWithUserId(userId, token) {
   const user = await prisma.user.findFirst({
     where: {
@@ -124,7 +111,6 @@ export default {
   getUserById,
   getUserBySub,
   saveRefreshToken,
-  checkRefreshToken,
   checkRefreshTokenWithUserId,
   deleteRefreshToken,
 };

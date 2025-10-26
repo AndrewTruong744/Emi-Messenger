@@ -45,44 +45,43 @@ router.post('/login', (req, res, next) => {
 
 router.get('/login/google', passport.authenticate('google', {session: false}));
 
-//another path for refreshToken
-
+//send a html file with script instead
 router.get('/oauth2/redirect/google', (req, res, next) => {
   passport.authenticate('google', {
     session: false, 
     failureMessage: true
   }, async (err, user, info) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-
     if (err || !user) {
-      const script = `<script>
-        window.opener.postMessage(
-          { 
-            type: 'OAUTH_FAILURE',
-            message: 'failure' 
-          }, 
-          '${process.env.ORIGIN}'
-        );
-
-        window.close();
-      </script>`;
-      return res.send(script);
+      return res.send(`
+        <html>
+          <head>
+            <title>Authentication Complete</title>
+          </head>
+          <body>
+            <script>
+              window.location.replace('${process.env.ORIGIN}/login-complete');
+            </script>
+            <h1>Redirecting</h1>
+          </body>
+        </html>
+      `);
     }
 
     const accessToken = await generateJwt(user, req.cookies.refreshToken, res, true);
-    //send access token and refresh httpOnly cookie token
-    const script = `<script>
-      window.opener.postMessage(
-        { 
-          type: 'OAUTH_SUCCESS', 
-          accessToken: '${JSON.stringify(accessToken)}'
-        }, 
-        '${process.env.ORIGIN}'
-      );
-
-      window.close();
-    </script>`;
-    return res.send(script);
+    const finalRedirectUrl = `${process.env.ORIGIN}/login-complete#accessToken=${accessToken}`;
+    res.send(`
+      <html>
+        <head>
+          <title>Authentication Complete</title>
+        </head>
+        <body>
+          <script>
+            window.location.replace('${finalRedirectUrl}');
+          </script>
+          <h1>Redirecting</h1>
+        </body>
+      </html>
+    `);
   })(req, res, next);
 });
 
@@ -106,12 +105,13 @@ router.post('/logout', async (req, res, next) => {
     sameSite: 'none',
   });
 
-  return res.status(200).json({message: 'Logout sucessful'});
+  return res.status(200).json({message: 'Logout successful'});
 });
 
+//make sure to hash the refresh token using bcrypt
 router.post('/refresh', async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-
+  console.log(refreshToken);
   if (!refreshToken) {
     return res.status(401).json(
       { message: 'No Refresh Token provided. Please log in.' });
@@ -119,7 +119,7 @@ router.post('/refresh', async (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
-    const user = await query.checkRefreshToken(refreshToken);
+    const user = await query.checkRefreshTokenWithUserId(decoded.id, refreshToken);
 
     if (!user)
       throw new Error('Refresh token does not exist');
@@ -129,10 +129,23 @@ router.post('/refresh', async (req, res) => {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: (process.env.MODE === 'production') ? true : false,
-      sameSite: 'none',
+      sameSite: 'lax',
     });
     return res.status(401).json({ message: 'Invalid or expired Refresh Token.' });
   }
 });
+
+router.get('/authenticate', 
+  passport.authenticate('access-token', {session: false}),
+  (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    const authHeader = req.headers.authorization;
+
+    return res.json({
+      message: 'Authentication successful',
+      user: req.user
+    });
+  }
+);
 
 export default router;

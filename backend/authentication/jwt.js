@@ -23,17 +23,17 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
   );
 
   const updatedUser = await query.saveRefreshToken(user.id, refreshToken);
-  console.log(updatedUser);
+  //console.log(updatedUser);
 
-  if (query.checkRefreshTokenWithUserId(user.id, refreshTokenCookie)) {
-    const message = await query.deleteRefreshToken(user.id, refreshTokenCookie);
-    console.log(message);
+  if (refreshTokenCookie) {
+    const deleteCount = await query.deleteRefreshToken(user.id, refreshTokenCookie);
+    //console.log(`Deleted ${deleteCount} old token(s) for user ${user.id}`);
   }
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: (process.env.MODE === 'production') ? true : false,
-    sameSite: 'none',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
   });
 

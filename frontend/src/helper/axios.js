@@ -34,12 +34,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshRes = await axios.post('/refresh', {}, {withCredentials: true});
+        const refreshRes = await api.post('/refresh', {});
         const newAccessToken = refreshRes.data.accessToken;
 
         const {authSuccess} = useAuth.getState();
         authSuccess(newAccessToken);
-
+        
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
 
         return api(originalRequest);
