@@ -35,7 +35,7 @@ function Login() {
       const res = await api.post('/login', loginData);
       const accessToken = res.data.accessToken;
       console.log('Login successful!', res.data);
-      authSuccess(accessToken);
+      sessionStorage.setItem("accessToken", accessToken);
       
       navigate('/messages');
     } catch (err) {

@@ -26,7 +26,7 @@ const routes = [
     element: <LoginComplete />
   },
   
-  // Protexted Routes
+  // Protected Routes
   {
     element: <Auth />,
     children: [

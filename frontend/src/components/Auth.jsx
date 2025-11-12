@@ -15,10 +15,9 @@ function Auth() {
       }
     }
 
-    if (valid === null)
-      validateAccessToken();
+    validateAccessToken();
     
-  }, [setValid, valid])
+  }, [])
   
   if (valid === null)
     return <h1>Login Complete!</h1>

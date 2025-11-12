@@ -13,9 +13,9 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const {accessToken} = useAuth.getState();
+    const accessToken = sessionStorage.getItem("accessToken");
 
-    if (accessToken.length !== 0)
+    if (accessToken)
       config.headers.Authorization = `Bearer ${accessToken}`;
 
     return config;
@@ -37,16 +37,13 @@ api.interceptors.response.use(
         const refreshRes = await api.post('/refresh', {});
         const newAccessToken = refreshRes.data.accessToken;
 
-        const {authSuccess} = useAuth.getState();
-        authSuccess(newAccessToken);
+        sessionStorage.setItem("accessToken", newAccessToken);
         
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-
+        
         return api(originalRequest);
-
       } catch(err) {
-        const {authFail} = useAuth.getState();
-        authFail();
+        sessionStorage.removeItem("accessToken");
         console.error("Refresh failed, logging user out");
         return Promise.reject(err);
       }
