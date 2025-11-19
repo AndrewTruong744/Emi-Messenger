@@ -20,7 +20,7 @@ function Auth() {
   }, [])
   
   if (valid === null)
-    return <h1>Login Complete!</h1>
+    return <h1>Auth!</h1>
   else if (valid === true)
     return <Outlet />;
   else

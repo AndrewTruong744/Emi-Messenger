@@ -1,7 +1,7 @@
 import axios from 'axios';
-import {useAuth} from './store.js';
 
 const baseUrl = import.meta.env.VITE_API_URL;
+let isRefreshing = null;
 
 const api = axios.create({
   baseURL: baseUrl,
@@ -33,9 +33,15 @@ api.interceptors.response.use(
     if (err.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      if (!isRefreshing) {
+        isRefreshing = api.post('/refresh', {});
+      }
+
       try {
-        const refreshRes = await api.post('/refresh', {});
+        const refreshRes = await isRefreshing;
         const newAccessToken = refreshRes.data.accessToken;
+
+        isRefreshing = null;
 
         sessionStorage.setItem("accessToken", newAccessToken);
         
@@ -45,6 +51,9 @@ api.interceptors.response.use(
       } catch(err) {
         sessionStorage.removeItem("accessToken");
         console.error("Refresh failed, logging user out");
+
+        isRefreshing = null;
+
         return Promise.reject(err);
       }
     }
