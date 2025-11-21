@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import styles from "../styles/Messages.module.css";
+import Conversation from './Conversation';
 
 const friends = [
   ["jesus", 1],
@@ -11,10 +12,10 @@ const friends = [
   ["chris", 7],
   ["enoch", 8],
   ["emi", 9],
-  ["william", 9],
-  ["cesar", 9],
-  ["bryan", 9],
-  ["minh", 9],
+  ["william", 10],
+  ["cesar", 11],
+  ["bryan", 12],
+  ["minh", 13],
 ]
 
 function Messages() { 
@@ -27,11 +28,11 @@ function Messages() {
         <h2>Welcome User!</h2>
       </div>
       <div className={styles.conversation}>
+        <Conversation />
       </div>
       <div className={styles.sidebar}>
         <div className={styles.friends}>
           <div className={styles.search}>
-            {/* add image of search icon */}
             <input placeholder="Find Friend" type="text" className={styles.input}/>
             <button className={styles.button} aria-label='find people'>＋</button>
           </div>
