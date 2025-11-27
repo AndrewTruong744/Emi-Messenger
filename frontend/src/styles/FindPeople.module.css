@@ -1,0 +1,62 @@
+.findPeople {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.subTitle {
+  text-align: center;
+  font-size: 2rem;
+}
+
+.input {
+  background-color: rgb(60,60,60);
+  border: none;
+  padding: 10px 15px 10px 15px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  caret-color: white;
+  color: white;
+  margin: 0px 20px;
+}
+
+.input::placeholder {
+  color: rgb(200,200,200)
+}
+
+.peopleList {
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.peopleList::-webkit-scrollbar {
+  background-color: rgb(60,60,60);
+  border-radius: 20px;
+  width: 10px;
+}
+
+.peopleList::-webkit-scrollbar-thumb {
+  background: #888; /* Dark gray thumb */
+  border-radius: 10px;
+}
+
+.person {
+  list-style-type: none;
+  padding: 10px 20px 10px 20px;
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  border-bottom: 1px solid white;
+}
+
+.profileImage {
+  height: 75px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: bisque;
+}
+
+.name {
+  font-size: 1.75rem;
+}
