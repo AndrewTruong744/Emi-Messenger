@@ -100,8 +100,66 @@ async function addContact(userAId, userBId) {
   }
 }
 
-async function getMessages() {
-  
+async function getMessages(userAId, userBId) {
+  let sentMessages = await prisma.message.findMany({
+    where: {
+      AND: [
+        {senderId: userAId},
+        {receiverId: userBId}
+      ]
+    },
+    select: {
+      sent: true,
+      content: true
+    },
+    orderBy: {
+      sent: 'desc'
+    }
+  });
+
+  let receivedMessages = await prisma.message.findMany({
+    where: {
+      AND: [
+        {senderId: userBId},
+        {receiverId: userAId}
+      ]
+    },
+    select: {
+      sent: true,
+      content: true
+    },
+    orderBy: {
+      sent: 'desc'
+    }
+  });
+
+  sentMessages = sentMessages.map(sentMessage => {
+    return {
+      ...sentMessage,
+      from: "sender",
+    }
+  });
+
+  receivedMessages = receivedMessages.map(receivedMessages => {
+    return {
+      ...receivedMessages,
+      from: "receiver",
+    }
+  });
+
+  const messages = [...receivedMessages, ...sentMessages];
+  messages.sort((a, b) => b.sent.getTime() - a.sent.getTime());
+  return messages;
+}
+
+async function addMessage(userAId, userBId, message) {
+  await prisma.message.create({
+    data: {
+      content: message,
+      senderId: userAId,
+      receiverId: userBId
+    }
+  });
 }
 
 export default {
@@ -109,4 +167,6 @@ export default {
   getUsers,
   getConversations,
   addContact,
+  getMessages,
+  addMessage,
 }
