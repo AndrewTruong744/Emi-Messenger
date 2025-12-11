@@ -1,14 +1,14 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
-import query from '../db/query.js';
+import authQuery from '../db/authQuery.js';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const user = await query.getUser(username, "");
+      const user = await authQuery.getUser(username, "");
 
       if (user.sub !== null) {
         return done(null, false, { message: "Use Single Sign On" });
@@ -36,7 +36,7 @@ const jwtOptions = {
 passport.use('access-token',
   new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
     try {
-      const user = await query.getUserById(jwt_payload.id);
+      const user = await authQuery.getUserById(jwt_payload.id);
       console.log(user);
       if (user)
         return done(null, user);
@@ -51,7 +51,7 @@ passport.use('access-token',
 passport.use('google', new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/api/oauth2/redirect/google',
+    callbackURL: 'http://localhost:3000/api/auth/oauth2/redirect/google',
     scope: ['profile', 'email']
   },
   async (accessToken, refreshToken, profile, done) => {
@@ -65,12 +65,12 @@ passport.use('google', new GoogleStrategy({
     }
 
     try {
-      const user = await query.getUserBySub(googleSub);
+      const user = await authQuery.getUserBySub(googleSub);
 
       if (user) {
         return done(null, user);
       } else {
-        const createdUser = await query.createUser(userContents);
+        const createdUser = await authQuery.createUser(userContents);
         console.log('authenticated');
         return done(null, createdUser);
       }

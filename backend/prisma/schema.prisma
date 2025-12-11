@@ -22,6 +22,9 @@ model User {
   email String @unique
   password String?
   sub String? 
+
+  contactsAdded Contact[] @relation("ContactInitiator")
+  contactsOf Contact[] @relation("ContactReceiver")
   
   sentMessages Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
@@ -30,6 +33,14 @@ model User {
   settings Settings? @relation(fields: [settingsId], references: [id])
 
   tokens Token[]
+}
+
+model Contact {
+  userAId Int
+  userBId Int
+
+  userA User @relation("ContactInitiator", fields: [userAId], references: [id])
+  userB User @relation("ContactReceiver", fields: [userBId], references: [id])
 }
 
 model Message {

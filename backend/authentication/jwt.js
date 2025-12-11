@@ -1,4 +1,4 @@
-import query from '../db/query.js';
+import authQuery from '../db/authQuery.js';
 import jwt from 'jsonwebtoken';
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;   
@@ -22,11 +22,11 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
     { expiresIn: '7d' }
   );
 
-  const updatedUser = await query.saveRefreshToken(user.id, refreshToken);
+  const updatedUser = await authQuery.saveRefreshToken(user.id, refreshToken);
   //console.log(updatedUser);
 
   if (refreshTokenCookie) {
-    const deleteCount = await query.deleteRefreshToken(user.id, refreshTokenCookie);
+    const deleteCount = await authQuery.deleteRefreshToken(user.id, refreshTokenCookie);
     //console.log(`Deleted ${deleteCount} old token(s) for user ${user.id}`);
   }
 
