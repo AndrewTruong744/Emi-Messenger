@@ -16,7 +16,7 @@ function Login() {
   //const [isLoading, setIsLoading] = useState(true);
 
   const handleGoogleClick = () => {
-    window.location.replace(`${import.meta.env.VITE_API_URL}/login/google`);
+    window.location.replace(`${import.meta.env.VITE_API_URL}/auth/login/google`);
   }
 
   const handleMicrosoftClick = () => {
@@ -32,7 +32,7 @@ function Login() {
     }
 
     try {
-      const res = await api.post('/login', loginData);
+      const res = await api.post('/auth/login', loginData);
       const accessToken = res.data.accessToken;
       console.log('Login successful!', res.data);
       sessionStorage.setItem("accessToken", accessToken);

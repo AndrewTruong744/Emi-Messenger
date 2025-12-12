@@ -7,7 +7,7 @@ function Auth() {
   useEffect(() => {
     async function validateAccessToken() {
       try {
-        await api.get('/authenticate');
+        await api.get('/auth/authenticate');
         setValid(true);
       } catch (err) {
         console.log(err);

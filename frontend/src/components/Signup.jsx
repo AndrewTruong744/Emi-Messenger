@@ -23,7 +23,7 @@ function Signup() {
     }
 
     try {
-      const res = await api.post('/signup', signupData);
+      const res = await api.post('/auth/signup', signupData);
       console.log('Signup successful!', res.data);
       
       navigate('/login');

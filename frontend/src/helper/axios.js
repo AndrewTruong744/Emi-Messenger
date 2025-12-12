@@ -34,7 +34,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       if (!isRefreshing) {
-        isRefreshing = api.post('/refresh', {});
+        isRefreshing = api.post('/auth/refresh', {});
       }
 
       try {

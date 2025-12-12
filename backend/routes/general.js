@@ -4,7 +4,22 @@ import passport from "passport";
 
 const router = express.Router();
 
-router.get('/users/:username?', 
+router.get('/users', 
+  passport.authenticate('access-token', {session: false}),
+  async (req, res) => {
+    try {
+      const users = await generalQuery.getUsers('');
+      return res.json({users});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      })
+    }
+  }
+);
+
+router.get('/users/:username', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {

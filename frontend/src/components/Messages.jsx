@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom'
 import styles from "../styles/Messages.module.css";
 import Conversation from './Conversation';
 import FindPeople from './FindPeople';
+import api from '../helper/axios';
 
 const friends = [
   ["jesus", 1],
@@ -22,10 +23,26 @@ const friends = [
 
 function Messages() { 
   const navigate = useNavigate();
+
   const [activeMessage, setActiveMessage] = useState(null);
+  const [conversations, setConversations] = useState([]);
 
   // can be either messaging or finding
   const [currentFocus, setCurrentFocus] = useState('messaging');
+
+  // useEffect(() => {
+  //   async function getConversations() {
+  //     try {
+  //       const conversationsObj = api.get('/general/conversations');
+  //       setConversations(conversationsObj.conversations);
+  //       console.log(conversationsObj.conversations);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   }
+
+  //   getConversations();
+  // }, [conversations]);
 
   function handleSettings() {
     navigate('/settings');
