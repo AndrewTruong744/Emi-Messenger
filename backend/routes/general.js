@@ -72,4 +72,11 @@ router.post('/message/:username',
   }
 );
 
+router.get('/current-user', 
+  passport.authenticate('access-token', {session: false}),
+  (req, res) => {
+    return res.json({username: req.user.username});
+  }
+)
+
 export default router;

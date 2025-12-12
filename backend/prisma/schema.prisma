@@ -41,6 +41,8 @@ model Contact {
 
   userA User @relation("ContactInitiator", fields: [userAId], references: [id])
   userB User @relation("ContactReceiver", fields: [userBId], references: [id])
+
+  @@id([userAId, userBId])
 }
 
 model Message {
