@@ -10,7 +10,7 @@ router.get('/users/:username?',
     try {
       const username = (req.params.username) ? req.params.username : '?';
       const users = await generalQuery.getUsers(username);
-      
+
       return res.json({users});
     } catch (err) {
       return res.status(503).json({
@@ -23,31 +23,52 @@ router.get('/users/:username?',
 
 router.get('/conversations',
   passport.authenticate('access-token', {session: false}),
-  (req, res) => {
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const conversations = await generalQuery.getConversations(userId);
 
-    return res.json({
-
-    });
+      return res.json({conversations});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
   }
 );
 
 router.get('/messages/:username',
   passport.authenticate('access-token', {session: false}),
-  (req, res) => {
-
-    return res.json({
-
-    });
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const otherUserId = await generalQuery.getDatabaseId(req.params.username);
+      const messages = await generalQuery.getMessages(userId, otherUserId);
+      return res.json({messages});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
   }
 )
 
 router.post('/message/:username',
   passport.authenticate('access-token', {session: false}),
-  (req, res) => {
-
-    return res.json({
-
-    });
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const otherUserId = await generalQuery.getDatabaseId(req.params.username);
+      await generalQuery.addMessage(userId, otherUserId, req.body.message);
+      return res.status(201).json({message: "success!"});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
   }
 );
 
