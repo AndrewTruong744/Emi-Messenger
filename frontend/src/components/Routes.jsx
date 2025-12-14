@@ -7,6 +7,7 @@ import Messages from "./Messages.jsx";
 import NotFound from "./NotFound.jsx";
 import Settings from "./Settings.jsx";
 import Signup from "./Signup.jsx";
+import FindPeople from "./FindPeople.jsx";
 
 const routes = [
   {
@@ -32,17 +33,23 @@ const routes = [
     children: [
       {
         path: '/messages',
-        element: <Messages />
+        element: <Messages />,
+        children: [
+          {
+            path: 'conversation/:user',
+            element: <Conversation />
+          },
+          {
+            path: 'find-people',
+            element: <FindPeople />
+          },
+          {
+            path: 'settings',
+            element: <Settings />
+            //add children to this path
+          }
+        ]
       },
-      {
-        path: '/conversation/:user',
-        element: <Conversation />
-      },
-      {
-        path: '/settings',
-        element: <Settings />
-        //add children to this path
-      }
     ]
   },
 

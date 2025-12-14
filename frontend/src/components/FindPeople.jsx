@@ -1,9 +1,14 @@
 import {useState, useEffect} from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import styles from "../styles/FindPeople.module.css";
 import api from '../helper/axios';
-import axios from 'axios';
 
 function FindPeople() {
+  const navigate = useNavigate();
+
+  const context = useOutletContext();
+  const {onSetActiveMessage, getConversations} = context;
+
   const [users, setUsers] = useState([]);
   const [username, setUsername] = useState('');
 
@@ -35,6 +40,17 @@ function FindPeople() {
     }
   }
 
+  async function handleUserClicked(e) {
+    try {
+      await api.put(`general/conversation/${e.target.id}`, {});
+      await getConversations();
+      onSetActiveMessage(e.target.id);
+      navigate(`/messages/conversation/${e.target.id}`);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <main className={styles.findPeople}>
       <h2 className={styles.subTitle}>Find People</h2>
@@ -48,7 +64,7 @@ function FindPeople() {
       <ul className={styles.peopleList}>
         {users.map(user => {
           return (
-            <li key={user.username} className={styles.person}>
+            <li key={user.username} id={user.username} className={styles.person} onClick={handleUserClicked}>
               {/* update to get profile pic */}
               <div className={styles.profileImage}></div>
               <h3 className={styles.name}>{user.username}</h3>

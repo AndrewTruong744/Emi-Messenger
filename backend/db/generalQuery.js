@@ -31,6 +31,26 @@ async function getUsers(username) {
   return users;
 }
 
+async function getCurrentUser(userId) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId
+    },
+    select: {
+      username: true,
+      displayName: true,
+      email: true,
+      settings: {
+        select: {
+          id: true
+        }
+      }
+    }
+  });
+
+  return user;
+}
+
 async function getConversations(userId) {
   // returns an array of contact entry objects where userId is
   // in the first column
@@ -165,6 +185,7 @@ async function addMessage(userAId, userBId, message) {
 export default {
   getDatabaseId,
   getUsers,
+  getCurrentUser,
   getConversations,
   addContact,
   getMessages,

@@ -1,9 +1,10 @@
 import {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom'
+import {Outlet, useNavigate} from 'react-router-dom'
 import styles from "../styles/Messages.module.css";
 import Conversation from './Conversation';
 import FindPeople from './FindPeople';
 import api from '../helper/axios';
+import axios from 'axios';
 
 const friends = [
   ["jesus", 1],
@@ -26,36 +27,46 @@ function Messages() {
 
   const [activeMessage, setActiveMessage] = useState(null);
   const [conversations, setConversations] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // can be either messaging or finding
-  const [currentFocus, setCurrentFocus] = useState('messaging');
+  async function getCurrentUser() {
+    try {
+      const axiosRes = await api.get('/general/current-user');
+      const currentUserObj = axiosRes.data;
+      setCurrentUser(currentUserObj.currentUser);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
-  // useEffect(() => {
-  //   async function getConversations() {
-  //     try {
-  //       const conversationsObj = api.get('/general/conversations');
-  //       setConversations(conversationsObj.conversations);
-  //       console.log(conversationsObj.conversations);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   }
+  async function getConversations() {
+    try {
+      const axiosRes = await api.get('/general/conversations');
+      const conversationsObj = axiosRes.data;
+      setConversations(conversationsObj.conversations);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
-  //   getConversations();
-  // }, [conversations]);
+  useEffect(() => {
+    getCurrentUser();
+    getConversations();
+  }, []);
+
+  console.log(conversations);
+  console.log(currentUser);
 
   function handleSettings() {
-    navigate('/settings');
+    navigate('settings');
   }
 
   function handleFindPeople() {
-    setCurrentFocus('finding');
+    navigate('find-people');
   }
 
-  function handleFriendSelected(e) {
-    setCurrentFocus('messaging');
-    setActiveMessage(e.target.id);
-    console.log(e.currentTarget.id);
+  function handleFriendSelected(username) {
+    navigate(`conversation/${username}`);
   }
 
   return ( 
@@ -65,7 +76,7 @@ function Messages() {
         <h2>Welcome User!</h2>
       </div>
       <div className={styles.main}>
-        {(currentFocus === 'messaging') ? <Conversation /> : <FindPeople />}
+        <Outlet context={{onSetActiveMessage: setActiveMessage, getConversations: getConversations}}/>
       </div>
       <div className={styles.sidebar}>
         <div className={styles.friends}>
@@ -75,12 +86,17 @@ function Messages() {
           </div>
           <ul className={styles.friendList}>
             {/* make sure to update when api is implemented */}
-            {friends.map(friend => {
+            {conversations.map(conversation => {
               return (
-                <li key={friend[1]} className={styles.friend} id={friend[1]} onClick={handleFriendSelected}>
+                <li 
+                  key={conversation.username} 
+                  className={styles.friend} 
+                  id={conversation.username} 
+                  onClick={() => handleFriendSelected(conversation.username)}
+                >
                   {/* change to image when implemented */}
                   <div className={styles.profileImage}></div>
-                  <h3>{friend[0]}</h3>
+                  <h3>{conversation.username}</h3>
                   <p className={styles.recentMessage}>Most Recent Text Message</p>
                   <p className={styles.recentMessageTime}>2min</p>
                 </li>
@@ -92,7 +108,7 @@ function Messages() {
           {/* change to image when implemented */}
           <div className={styles.profile}>
             <div className={styles.yourProfileImage}></div>
-            <h2>Emi Sama</h2>
+            {(currentUser) ? <h2>{currentUser.username}</h2> : <h2>Loading</h2>}
           </div>
           <button className={styles.settings} onClick={handleSettings}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={styles.gear}>
