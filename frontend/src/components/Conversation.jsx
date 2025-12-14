@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react';
 import styles from "../styles/Conversation.module.css";
 import {format} from "date-fns";
+import api from '../helper/axios';
+import { useOutletContext, useParams } from 'react-router-dom';
 
-const messages = [
+const messagess = [
   [0, "Hewwo Jechuchi"],
   [1, "YESSA, what is up???"],
   [0, "lab3 is super easy, how did you know"],
@@ -40,12 +42,46 @@ const messages = [
 ] 
 
 function Conversation() {
+  const params = useParams();
+  const otherUser = params.user;
+
+  const {conversations} = useOutletContext();
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    async function getMessages() {
+      try {
+        const axiosRes = await api.get(`/general/messages/${otherUser}`);
+        const messagesObj = axiosRes.data;
+        setMessages(messagesObj.messages);
+        console.log(axiosRes);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    getMessages();
+  }, [otherUser]);
+
+  async function submitMessage(e) {
+    if (e.key === "Enter") {
+      try {
+        const axiosRes = await api.post(`/general/message/${otherUser}`, {message: message});
+        setMessage("");
+        console.log(axiosRes.data.message);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+
   return (
     <main className={styles.conversation}>
       <header className={styles.header}>
         <div className={styles.profile}>
           <div className={styles.profileImage}></div>
-          <h2>Jesus</h2>
+          <h2>{otherUser}</h2>
         </div>
         <div className={styles.buttons}>
           <button className={styles.button}>
@@ -66,14 +102,12 @@ function Conversation() {
       {/* use flexbox column, and if from friend, put message on left, if not, put message on right */}
       <div className={styles.texts}>
         {messages.map(message => {
-          // change to CometChat dates 
-          const timeStamp = new Date();
-          const formattedTimeStamp = format(timeStamp, 'HH:mm MM/dd/yyyy');
-          const className = (message[0] === 0) ? "textRight" : "textLeft";
+          const formattedTimeStamp = format(message.sent, 'HH:mm MM/dd/yyyy');
+          const className = (message.from === "sender") ? "textRight" : "textLeft";
 
           return (
             <div key={crypto.randomUUID()} className={styles[className]}>
-              <p>{message[1]}</p>
+              <p>{message.content}</p>
               {/* on hover should the time show up */}
               <p className={styles.time}>{formattedTimeStamp}</p>
             </div>
@@ -83,7 +117,13 @@ function Conversation() {
 
       <div className={styles.bottom}>
         <div className={styles.bar}>
-          <input placeholder='Enter Message' className={styles.input}/>
+          <input 
+            placeholder='Enter Message'
+            value={message}
+            className={styles.input} 
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={submitMessage}
+          />
           <button className={styles.button}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={styles.icon}>
               <title>dog</title>

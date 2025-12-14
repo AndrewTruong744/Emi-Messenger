@@ -1,26 +1,7 @@
 import {useState, useEffect} from 'react';
 import {Outlet, useNavigate} from 'react-router-dom'
 import styles from "../styles/Messages.module.css";
-import Conversation from './Conversation';
-import FindPeople from './FindPeople';
 import api from '../helper/axios';
-import axios from 'axios';
-
-const friends = [
-  ["jesus", 1],
-  ["christian", 2],
-  ["xavior", 3],
-  ["david", 4],
-  ["priscilla", 5],
-  ["andrew", 6],
-  ["chris", 7],
-  ["enoch", 8],
-  ["emi", 9],
-  ["william", 10],
-  ["cesar", 11],
-  ["bryan", 12],
-  ["minh", 13],
-]
 
 function Messages() { 
   const navigate = useNavigate();
@@ -76,7 +57,13 @@ function Messages() {
         <h2>Welcome User!</h2>
       </div>
       <div className={styles.main}>
-        <Outlet context={{onSetActiveMessage: setActiveMessage, getConversations: getConversations}}/>
+        <Outlet 
+          context={{
+            onSetActiveMessage: setActiveMessage, 
+            getConversations: getConversations,
+            conversations: conversations,
+          }}
+        />
       </div>
       <div className={styles.sidebar}>
         <div className={styles.friends}>

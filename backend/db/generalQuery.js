@@ -168,7 +168,7 @@ async function getMessages(userAId, userBId) {
   });
 
   const messages = [...receivedMessages, ...sentMessages];
-  messages.sort((a, b) => b.sent.getTime() - a.sent.getTime());
+  messages.sort((a, b) => a.sent.getTime() - b.sent.getTime());
   return messages;
 }
 
