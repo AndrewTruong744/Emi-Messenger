@@ -1,5 +1,4 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../helper/store";
 
 function LoginComplete() {
   const hash = window.location.hash.substring(1);

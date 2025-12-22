@@ -91,9 +91,14 @@ router.post('/message/:username',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
+      const io = req.io;
       const userId = req.user.id;
       const otherUserId = await generalQuery.getDatabaseId(req.params.username);
-      await generalQuery.addMessage(userId, otherUserId, req.body.message);
+
+      const messageCreated = await generalQuery.addMessage(userId, otherUserId, req.body.message);
+      const roomId = [userId, otherUserId].sort().join("_");
+      io.to(`room-${roomId}`).emit('sentMessage', messageCreated);
+
       return res.status(201).json({message: "success!"});
     } catch (err) {
       return res.status(503).json({

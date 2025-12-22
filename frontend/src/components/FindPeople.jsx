@@ -2,12 +2,14 @@ import {useState, useEffect} from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import styles from "../styles/FindPeople.module.css";
 import api from '../helper/axios';
+import { useSocket } from '../helper/store';
 
 function FindPeople() {
   const navigate = useNavigate();
+  const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
 
   const context = useOutletContext();
-  const {onSetActiveMessage, getConversations} = context;
+  const {onSetActiveMessage} = context;
 
   const [users, setUsers] = useState([]);
   const [username, setUsername] = useState('');
@@ -43,7 +45,7 @@ function FindPeople() {
   async function handleUserClicked(e) {
     try {
       await api.put(`general/conversation/${e.target.id}`, {});
-      await getConversations();
+      updateConversationsAndMessages(e.target.id, null);
       onSetActiveMessage(e.target.id);
       navigate(`/messages/conversation/${e.target.id}`);
     } catch (err) {

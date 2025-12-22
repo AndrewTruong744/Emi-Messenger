@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "bcryptjs": "^3.0.2",
+    "cookie": "^1.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -25,7 +26,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "passport-openidconnect": "^0.1.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "prisma": "^6.17.1",

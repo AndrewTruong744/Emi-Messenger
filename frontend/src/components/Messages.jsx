@@ -2,41 +2,53 @@ import {useState, useEffect} from 'react';
 import {Outlet, useNavigate} from 'react-router-dom'
 import styles from "../styles/Messages.module.css";
 import api from '../helper/axios';
+import { useSocket } from '../helper/store';
 
 function Messages() { 
   const navigate = useNavigate();
+  const currentUser = useSocket(state => state.currentUser);
+  const setCurrentUser = useSocket(state => state.setCurrentUser);
+  const connect = useSocket(state => state.connect);
+  const disconnect = useSocket(state => state.disconnect);
+  const setConversationsAndMessages = useSocket(state => state.setConversationsAndMessages);
+  const conversationsAndMessages = useSocket(state => state.conversationsAndMessages);
 
   const [activeMessage, setActiveMessage] = useState(null);
-  const [conversations, setConversations] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  async function getCurrentUser() {
-    try {
-      const axiosRes = await api.get('/general/current-user');
-      const currentUserObj = axiosRes.data;
-      setCurrentUser(currentUserObj.currentUser);
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async function getConversations() {
-    try {
-      const axiosRes = await api.get('/general/conversations');
-      const conversationsObj = axiosRes.data;
-      setConversations(conversationsObj.conversations);
-    } catch (err) {
-      console.log(err);
-    }
-  }
 
   useEffect(() => {
-    getCurrentUser();
-    getConversations();
-  }, []);
+    async function getCurrentUser() {
+      try {
+        const axiosRes = await api.get('/general/current-user');
+        const currentUserObj = axiosRes.data;
+        setCurrentUser(currentUserObj.currentUser);
+      } catch (err) {
+        throw new Error(err);
+      }
+    }
 
-  console.log(conversations);
-  console.log(currentUser);
+    async function getConversations() {
+      try {
+        const axiosRes = await api.get('/general/conversations');
+        const conversationsObj = axiosRes.data;
+        setConversationsAndMessages(conversationsObj.conversations);
+      } catch (err) {
+        throw new Error(err);
+      }
+    }
+
+    async function initialize() {
+      try {
+        await getCurrentUser();
+        await getConversations();
+        await connect();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    initialize();
+    return () => disconnect();
+  }, [connect, disconnect, setConversationsAndMessages, setCurrentUser]);
 
   function handleSettings() {
     navigate('settings');
@@ -60,8 +72,6 @@ function Messages() {
         <Outlet 
           context={{
             onSetActiveMessage: setActiveMessage, 
-            getConversations: getConversations,
-            conversations: conversations,
           }}
         />
       </div>
@@ -72,23 +82,24 @@ function Messages() {
             <button className={styles.button} aria-label='find people' onClick={handleFindPeople}>＋</button>
           </div>
           <ul className={styles.friendList}>
-            {/* make sure to update when api is implemented */}
-            {conversations.map(conversation => {
-              return (
-                <li 
-                  key={conversation.username} 
-                  className={styles.friend} 
-                  id={conversation.username} 
-                  onClick={() => handleFriendSelected(conversation.username)}
-                >
-                  {/* change to image when implemented */}
-                  <div className={styles.profileImage}></div>
-                  <h3>{conversation.username}</h3>
-                  <p className={styles.recentMessage}>Most Recent Text Message</p>
-                  <p className={styles.recentMessageTime}>2min</p>
-                </li>
-              );
-            })}
+            {
+              Object.keys(conversationsAndMessages).map(username => {
+                return (
+                  <li 
+                    key={username} 
+                    className={styles.friend} 
+                    id={username} 
+                    onClick={() => handleFriendSelected(username)}
+                  >
+                    {/* change to image when implemented */}
+                    <div className={styles.profileImage}></div>
+                    <h3>{username}</h3>
+                    <p className={styles.recentMessage}>Most Recent Text Message</p>
+                    <p className={styles.recentMessageTime}>2min</p>
+                  </li>
+                );
+              }) 
+            }
           </ul>
         </div>
         <div className={styles.config}>

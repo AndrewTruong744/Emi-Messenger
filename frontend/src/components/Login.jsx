@@ -2,11 +2,9 @@ import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import styles from "../styles/Login.module.css";
 import api from '../helper/axios.js';
-import {useAuth} from '../helper/store.js';
 import Emi from '../assets/Emi6.jpg';
 
 function Login() {
-  const authSuccess = useAuth((state) => state.authSuccess);
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');

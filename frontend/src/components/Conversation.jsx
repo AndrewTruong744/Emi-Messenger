@@ -2,59 +2,28 @@ import {useState, useEffect} from 'react';
 import styles from "../styles/Conversation.module.css";
 import {format} from "date-fns";
 import api from '../helper/axios';
-import { useOutletContext, useParams } from 'react-router-dom';
-
-const messagess = [
-  [0, "Hewwo Jechuchi"],
-  [1, "YESSA, what is up???"],
-  [0, "lab3 is super easy, how did you know"],
-  [0, "I did it in like 2 hours, so light work"],
-  [1, "wowww, you did it without me"],
-  [1, "thats it hmph"],
-  [0, `
-    Representatives and direct Taxes shall be apportioned among the several States 
-    which may be included within this Union, according to their respective Numbers, 
-    which shall be determined by adding to the whole Number of free Persons, including 
-    those bound to Service for a Term of Years, and excluding Indians not taxed, three 
-    fifths of all other Persons. The actual Enumeration shall be made within three Years after 
-    the first Meeting of the Congress of the United States, and within every subsequent Term of 
-    ten Years, in such Manner as they shall by Law direct. The Number of Representatives shall 
-    not exceed one for every thirty Thousand, but each State shall have at Least one Representative; 
-    and until such enumeration shall be made, the State of New Hampshire shall be entitled to chuse 
-    three, Massachusetts eight, Rhode-Island and Providence Plantations one, Connecticut five, 
-    New-York six, New Jersey four, Pennsylvania eight, Delaware one, Maryland six, Virginia ten, 
-    North Carolina five, South Carolina five, and Georgia three.
-  `],
-  [1, `
-    Representatives and direct Taxes shall be apportioned among the several States 
-    which may be included within this Union, according to their respective Numbers, 
-    which shall be determined by adding to the whole Number of free Persons, including 
-    those bound to Service for a Term of Years, and excluding Indians not taxed, three 
-    fifths of all other Persons. The actual Enumeration shall be made within three Years after 
-    the first Meeting of the Congress of the United States, and within every subsequent Term of 
-    ten Years, in such Manner as they shall by Law direct. The Number of Representatives shall 
-    not exceed one for every thirty Thousand, but each State shall have at Least one Representative; 
-    and until such enumeration shall be made, the State of New Hampshire shall be entitled to chuse 
-    three, Massachusetts eight, Rhode-Island and Providence Plantations one, Connecticut five, 
-    New-York six, New Jersey four, Pennsylvania eight, Delaware one, Maryland six, Virginia ten, 
-    North Carolina five, South Carolina five, and Georgia three.
-  `],
-] 
+import { useParams } from 'react-router-dom';
+import { useSocket } from '../helper/store';
 
 function Conversation() {
   const params = useParams();
   const otherUser = params.user;
 
-  const {conversations} = useOutletContext();
-  const [messages, setMessages] = useState([]);
+  const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
+  const messages = useSocket(state => state.conversationsAndMessages[otherUser]) || [];
+
+  //const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function getMessages() {
+      const currentMsgs = useSocket.getState().conversationsAndMessages[otherUser] || [];
+      if (currentMsgs.length > 0) return;
+
       try {
         const axiosRes = await api.get(`/general/messages/${otherUser}`);
         const messagesObj = axiosRes.data;
-        setMessages(messagesObj.messages);
+        updateConversationsAndMessages(otherUser, messagesObj.messages);
         console.log(axiosRes);
       } catch (err) {
         console.log(err);
@@ -75,6 +44,8 @@ function Conversation() {
       }
     }
   }
+
+  console.log(messages);
 
   return (
     <main className={styles.conversation}>
@@ -99,16 +70,14 @@ function Conversation() {
         </div>
       </header>
 
-      {/* use flexbox column, and if from friend, put message on left, if not, put message on right */}
       <div className={styles.texts}>
         {messages.map(message => {
           const formattedTimeStamp = format(message.sent, 'HH:mm MM/dd/yyyy');
           const className = (message.from === "sender") ? "textRight" : "textLeft";
 
           return (
-            <div key={crypto.randomUUID()} className={styles[className]}>
+            <div key={message.content} className={styles[className]}>
               <p>{message.content}</p>
-              {/* on hover should the time show up */}
               <p className={styles.time}>{formattedTimeStamp}</p>
             </div>
           );

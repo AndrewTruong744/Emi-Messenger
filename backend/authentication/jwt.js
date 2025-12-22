@@ -30,11 +30,13 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
     //console.log(`Deleted ${deleteCount} old token(s) for user ${user.id}`);
   }
 
+  // set domain on prod
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: (process.env.MODE === 'production') ? true : false,
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000 //7 days in milliseconds
+    maxAge: 7 * 24 * 60 * 60 * 1000, //7 days in milliseconds
+    path: '/'
   });
 
   if (isOdic)

@@ -61,6 +61,7 @@ async function getConversations(userId) {
     include: {
       userB: {
         select: {
+          id: true,
           username: true,
         }
       }
@@ -76,6 +77,7 @@ async function getConversations(userId) {
     include: {
       userA: {
         select: {
+          id: true,
           username: true,
         }
       }
@@ -173,13 +175,27 @@ async function getMessages(userAId, userBId) {
 }
 
 async function addMessage(userAId, userBId, message) {
-  await prisma.message.create({
+  const messageCreated = await prisma.message.create({
     data: {
       content: message,
       senderId: userAId,
       receiverId: userBId
+    },
+    include: {
+      sender: {
+        select: {
+          username: true
+        }
+      },
+      receiver: {
+        select: {
+          username: true
+        }
+      }
     }
   });
+
+  return messageCreated;
 }
 
 export default {

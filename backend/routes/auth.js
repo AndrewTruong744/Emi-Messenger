@@ -108,7 +108,6 @@ router.post('/logout', async (req, res, next) => {
 
 //make sure to hash the refresh token using bcrypt
 router.post('/refresh', async (req, res) => {
-  // fix
   const refreshToken = req.cookies.refreshToken;
 
   console.log(refreshToken);
@@ -128,8 +127,8 @@ router.post('/refresh', async (req, res) => {
   } catch (err) {
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: (process.env.MODE === 'production') ? true : false,
       sameSite: 'lax',
+      path: '/'
     });
     return res.status(401).json({ message: 'Invalid or expired Refresh Token.' });
   }
