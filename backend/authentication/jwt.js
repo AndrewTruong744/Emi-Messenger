@@ -23,11 +23,9 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
   );
 
   const updatedUser = await authQuery.saveRefreshToken(user.id, refreshToken);
-  //console.log(updatedUser);
 
   if (refreshTokenCookie) {
     const deleteCount = await authQuery.deleteRefreshToken(user.id, refreshTokenCookie);
-    //console.log(`Deleted ${deleteCount} old token(s) for user ${user.id}`);
   }
 
   // set domain on prod

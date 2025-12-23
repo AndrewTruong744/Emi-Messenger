@@ -65,6 +65,7 @@ model Settings {
 model Token {
   id String @id @default(uuid())
   refreshToken String @unique
+  expiresBy DateTime
 
   userId String
   user User @relation(fields: [userId], references: [id])
