@@ -16,7 +16,7 @@ datasource db {
 
 // add blocked list soon
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   username String @unique
   displayName String
   email String @unique
@@ -29,15 +29,15 @@ model User {
   sentMessages Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
-  settingsId Int? @unique
+  settingsId String? @unique
   settings Settings? @relation(fields: [settingsId], references: [id])
 
   tokens Token[]
 }
 
 model Contact {
-  userAId Int
-  userBId Int
+  userAId String
+  userBId String
 
   userA User @relation("ContactInitiator", fields: [userAId], references: [id])
   userB User @relation("ContactReceiver", fields: [userBId], references: [id])
@@ -46,26 +46,26 @@ model Contact {
 }
 
 model Message {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   sent DateTime @default(now())
   content String
 
-  senderId  Int
+  senderId String
   sender User @relation("SentMessages", fields: [senderId], references: [id])
 
-  receiverId Int
+  receiverId String
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
 model Settings {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   user User?
 }
 
 model Token {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   refreshToken String @unique
 
-  userId Int
+  userId String
   user User @relation(fields: [userId], references: [id])
 }
