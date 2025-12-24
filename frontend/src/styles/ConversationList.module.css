@@ -67,6 +67,10 @@
   border-bottom: 1px solid white;
 }
 
+.conversationHighlight {
+  background-color: rgb(75,75,75);
+}
+
 .profileImage {
   height: 50px;
   aspect-ratio: 1 / 1;
@@ -74,6 +78,12 @@
   background-color: bisque;
   grid-row: 1 / -1;
   place-self: center;
+}
+
+.name {
+  white-space: nowrap;      
+  overflow: hidden;     
+  text-overflow: ellipsis;
 }
 
 .recentMessage {

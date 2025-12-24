@@ -12,6 +12,7 @@ function Home() {
   const disconnect = useSocket(state => state.disconnect);
   const setConversationsAndMessages = useSocket(state => state.setConversationsAndMessages);
 
+  // holds uuid of person you are chatting with
   const [activeMessage, setActiveMessage] = useState(null);
 
   useEffect(() => {
@@ -63,7 +64,7 @@ function Home() {
         />
       </div>
       <div className={styles.sidebar}>
-        <ConversationList />
+        <ConversationList activeMessage={activeMessage} onSetActiveMessage={setActiveMessage}/>
         <ProfileCard />
       </div>
     </div>

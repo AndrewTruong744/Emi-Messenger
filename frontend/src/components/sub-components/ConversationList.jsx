@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Loading from "./Loading";
 
-function ConversationList() {
+function ConversationList({activeMessage, onSetActiveMessage}) {
   const navigate = useNavigate();
   const conversationsAndMessages = useSocket(state => state.conversationsAndMessages);
   const socket = useSocket(state => state.socket);
@@ -15,9 +15,16 @@ function ConversationList() {
     navigate('find-people');
   }
 
-  function handleConversationSelected(username) {
-    navigate(`conversation/${username}`);
+  function handleConversationSelected(id) {
+    if (id === activeMessage) {
+      onSetActiveMessage(null);
+      navigate('/home');
+    }
+    else
+      navigate(`conversation/${id}`);
   }
+
+  console.log(activeMessage);
 
   return (
     <div className={styles.conversations}>
@@ -28,17 +35,17 @@ function ConversationList() {
       {(isLoading) ? <Loading /> : 
         <ul className={styles.conversationList}>
           {
-            Object.keys(conversationsAndMessages).map(username => {
+            Object.keys(conversationsAndMessages).map(id => {
               return (
                 <li 
-                  key={username} 
-                  className={styles.conversation} 
-                  id={username} 
-                  onClick={() => handleConversationSelected(username)}
+                  key={id} 
+                  className={`${styles.conversation} ${(id === activeMessage) ? styles.conversationHighlight : ""}`} 
+                  id={id} 
+                  onClick={() => handleConversationSelected(id)}
                 >
                   {/* change to image when implemented */}
                   <div className={styles.profileImage}></div>
-                  <h3>{username}</h3>
+                  <h3 className={styles.name}>{id}</h3>
                   <p className={styles.recentMessage}>Most Recent Text Message</p>
                   <p className={styles.recentMessageTime}>2min</p>
                 </li>
