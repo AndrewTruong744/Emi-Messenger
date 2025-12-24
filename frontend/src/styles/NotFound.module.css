@@ -1,0 +1,17 @@
+.notFound {
+  height: 100%;
+  background-image: linear-gradient(#c2e9fb,rgb(209, 157, 90));
+  display: grid;
+  place-content: center;
+}
+
+.image {
+  width: 400px;
+  aspect-ratio: 1 / 1;
+  place-self: center;
+  border-radius: 10%;
+  margin-bottom: 20px;
+}
+
+.text {
+}
