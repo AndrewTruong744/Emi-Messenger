@@ -7,8 +7,6 @@ import ConversationList from './sub-components/ConversationList';
 import ProfileCard from './sub-components/ProfileCard';
 
 function Home() { 
-  const navigate = useNavigate();
-  const currentUser = useSocket(state => state.currentUser);
   const setCurrentUser = useSocket(state => state.setCurrentUser);
   const connect = useSocket(state => state.connect);
   const disconnect = useSocket(state => state.disconnect);
@@ -52,7 +50,7 @@ function Home() {
   }, [connect, disconnect, setConversationsAndMessages, setCurrentUser]);
 
   return ( 
-    <div className={styles.messages}>
+    <div className={styles.home}>
       <div className={styles.title}>
         <h1>Emi Messenger</h1>
         <h2>Welcome User!</h2>

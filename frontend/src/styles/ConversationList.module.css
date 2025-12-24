@@ -31,7 +31,7 @@
   color: rgb(200,200,200)
 }
 
-.friends {
+.conversations {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -39,25 +39,25 @@
   min-height: 0;
 }
 
-.friendList {
+.conversationList {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
   /* scrollbar-color: #888 rgb(60,60,60); */
 }
 
-.friendList::-webkit-scrollbar {
+.conversationList::-webkit-scrollbar {
   background-color: rgb(60,60,60);
   border-radius: 20px;
   width: 10px;
 }
 
-.friendList::-webkit-scrollbar-thumb {
+.conversationList::-webkit-scrollbar-thumb {
   background: #888; /* Dark gray thumb */
   border-radius: 10px;
 }
 
-.friend {
+.conversation {
   list-style-type: none;
   padding: 10px 10px 10px 0px;
   display: grid;
