@@ -52,19 +52,28 @@ router.get('/conversations',
   }
 );
 
-router.put('/conversation/:username', 
+router.put('/conversation/:id', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
+      const io = req.io;
       const userId = req.user.id;
-      const otherUserId = await generalQuery.getDatabaseId(req.params.username);
-      await generalQuery.addContact(userId, otherUserId);
+      const otherUserId = req.params.id;
+      const addedContact = await generalQuery.addContact(userId, otherUserId);
+      
+      if (addedContact) {
+        const roomId = [userId, otherUserId].sort().join("_");
+        await io.in(`user-${userId}`).socketsJoin(`room-${roomId}`);
+        await io.in(`user-${otherUserId}`).socketsJoin(`room-${roomId}`);
+
+        io.to(`room-${roomId}`).emit('addContact', {userA: userId, userB: otherUserId});
+      }
 
       return res.json({message: "success!"});
     } catch (err) {
       return res.status(503).json({
         error: true,
-        message: 'Database is currently unreachable'
+        message: 'Database is currently unreachable: ' + err
       });
     }
   }
@@ -93,7 +102,7 @@ router.post('/message/:username',
     try {
       const io = req.io;
       const userId = req.user.id;
-      const otherUserId = await generalQuery.getDatabaseId(req.params.username);
+      const otherUserId = req.params.username;
 
       const messageCreated = await generalQuery.addMessage(userId, otherUserId, req.body.message);
       const roomId = [userId, otherUserId].sort().join("_");

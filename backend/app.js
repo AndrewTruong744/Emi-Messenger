@@ -90,7 +90,7 @@ io.on("connection", async (socket) => {
     const roomId = [userId, conversation.id].sort().join("_");
     socket.join(`room-${roomId}`);
   }
-  
+
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });

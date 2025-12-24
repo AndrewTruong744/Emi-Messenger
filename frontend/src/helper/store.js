@@ -15,10 +15,18 @@ const useSocket = create((set, get) => ({
     const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
 
     socket.on("sentMessage", (sentMessage) => {
-      const sender = sentMessage.sender.username;
-      const receiver = sentMessage.receiver.username;
+      const senderId = sentMessage.sender.id;
+      const receiverId = sentMessage.receiver.id;
 
-      const key = (get().currentUser.username == sender) ? receiver : sender;
+      let key = "";
+      if (get().currentUser.id === receiverId) {
+        key = senderId;
+        sentMessage.from = "receiver";
+      }
+      else {
+        key = receiverId;
+        sentMessage.from = "sender";
+      }
 
       set((state) => ({
         conversationsAndMessages: {
@@ -30,6 +38,20 @@ const useSocket = create((set, get) => ({
         }
       }));
     })
+
+    socket.on("addContact", (users) => {
+      const userA = users.userA;
+      const userB = users.userB;
+
+      const userToAdd = (get().currentUser.id === userA) ? userB : userA;
+
+      set((state) => ({
+        conversationsAndMessages: {
+          ...state.conversationsAndMessages,
+          [userToAdd]: [],
+        }
+      }));
+    });
 
     set({socket});
   },
@@ -44,21 +66,20 @@ const useSocket = create((set, get) => ({
       return;
 
     const initialCache = conversations.reduce((acc, conversation) => {
-      const key = conversation.username;
+      const key = conversation.id;
       acc[key] = [];
       return acc;
     }, {});
 
     set({conversationsAndMessages: initialCache});
   },
-  updateConversationsAndMessages: (username, messages) => {
+  updateConversationsAndMessages: (id, messages) => {
     const newMessages = messages || [];
-    const updatedMessages = [ ...newMessages];
 
     set((state) => ({
       conversationsAndMessages: {
         ...state.conversationsAndMessages,
-        [username]: updatedMessages,
+        [id]: newMessages,
       }
     }));
   },

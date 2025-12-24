@@ -35,7 +35,7 @@ function Login() {
       console.log('Login successful!', res.data);
       sessionStorage.setItem("accessToken", accessToken);
       
-      navigate('/messages');
+      navigate('/home');
     } catch (err) {
       if (err.response)
         console.error('Login Error');

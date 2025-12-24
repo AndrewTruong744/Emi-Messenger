@@ -47,7 +47,7 @@ function FindPeople() {
       await api.put(`general/conversation/${e.target.id}`, {});
       updateConversationsAndMessages(e.target.id, null);
       onSetActiveMessage(e.target.id);
-      navigate(`/messages/conversation/${e.target.id}`);
+      navigate(`/home/conversation/${e.target.id}`);
     } catch (err) {
       console.log(err);
     }
@@ -66,7 +66,7 @@ function FindPeople() {
       <ul className={styles.peopleList}>
         {users.map(user => {
           return (
-            <li key={user.username} id={user.username} className={styles.person} onClick={handleUserClicked}>
+            <li key={user.username} id={user.id} className={styles.person} onClick={handleUserClicked}>
               {/* update to get profile pic */}
               <div className={styles.profileImage}></div>
               <h3 className={styles.name}>{user.username}</h3>

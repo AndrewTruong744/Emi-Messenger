@@ -24,6 +24,7 @@ async function getUsers(username) {
       }
     },
     select: {
+      id: true,
       username: true,
     }
   });
@@ -37,6 +38,7 @@ async function getCurrentUser(userId) {
       id: userId
     },
     select: {
+      id: true,
       username: true,
       displayName: true,
       email: true,
@@ -118,8 +120,12 @@ async function addContact(userAId, userBId) {
         userAId: userAId,
         userBId: userBId
       }
-    })
+    });
+
+    return true;
   }
+
+  return false;
 }
 
 async function getMessages(userAId, userBId) {
@@ -129,10 +135,6 @@ async function getMessages(userAId, userBId) {
         {senderId: userAId},
         {receiverId: userBId}
       ]
-    },
-    select: {
-      sent: true,
-      content: true
     },
     orderBy: {
       sent: 'desc'
@@ -145,10 +147,6 @@ async function getMessages(userAId, userBId) {
         {senderId: userBId},
         {receiverId: userAId}
       ]
-    },
-    select: {
-      sent: true,
-      content: true
     },
     orderBy: {
       sent: 'desc'
@@ -184,11 +182,13 @@ async function addMessage(userAId, userBId, message) {
     include: {
       sender: {
         select: {
+          id: true,
           username: true
         }
       },
       receiver: {
         select: {
+          id: true,
           username: true
         }
       }

@@ -1,9 +1,9 @@
 import Auth from "./Auth.jsx";
 import Conversation from "./Conversation.jsx";
-import Home from "./Home.jsx"
+import Welcome from "./Welcome.jsx"
 import Login from "./Login.jsx";
 import LoginComplete from "./LoginComplete.jsx";
-import Messages from "./Messages.jsx";
+import Home from "./Home.jsx";
 import NotFound from "./NotFound.jsx";
 import Settings from "./Settings.jsx";
 import Signup from "./Signup.jsx";
@@ -12,7 +12,7 @@ import FindPeople from "./FindPeople.jsx";
 const routes = [
   {
     path: '/',
-    element: <Home />
+    element: <Welcome />
   },
   {
     path: '/login',
@@ -32,8 +32,8 @@ const routes = [
     element: <Auth />,
     children: [
       {
-        path: '/messages',
-        element: <Messages />,
+        path: '/home',
+        element: <Home />,
         children: [
           {
             path: 'conversation/:user',

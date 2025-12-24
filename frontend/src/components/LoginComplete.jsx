@@ -6,7 +6,7 @@ function LoginComplete() {
   const accessToken = params.get('accessToken');
 
   sessionStorage.setItem("accessToken", accessToken);
-  return <Navigate to="/messages" replace/>;
+  return <Navigate to="/home" replace/>;
 }
 
 export default LoginComplete;

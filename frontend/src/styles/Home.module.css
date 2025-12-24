@@ -1,0 +1,157 @@
+.messages {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 1fr 6fr;
+  height: 100%;
+  /* padding: 25px; */
+  /* max-width: 1200px;
+  min-width: 1200px; */
+  background-color: rgb(40,40,40);
+  color: white;
+  gap: 20px;
+}
+
+.title {
+  padding-top: 25px;
+  padding-left: 25px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 20px;
+  padding-left: 25px;
+  padding-bottom: 25px;
+}
+
+.search {
+  display: flex;
+  gap: 20px;
+}
+
+.input {
+  flex: 1;
+  background-color: rgb(60,60,60);
+  border: none;
+  padding: 10px 15px 10px 15px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  caret-color: white;
+  color: white;
+}
+
+.button {
+  background-color: rgb(60,60,60);
+  border-radius: 50%;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 0;
+  width: 45px;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+}
+
+.input::placeholder {
+  color: rgb(200,200,200)
+}
+
+.friends {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.friendList {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  /* scrollbar-color: #888 rgb(60,60,60); */
+}
+
+.friendList::-webkit-scrollbar {
+  background-color: rgb(60,60,60);
+  border-radius: 20px;
+  width: 10px;
+}
+
+.friendList::-webkit-scrollbar-thumb {
+  background: #888; /* Dark gray thumb */
+  border-radius: 10px;
+}
+
+.friend {
+  list-style-type: none;
+  padding: 10px 10px 10px 0px;
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  grid-template-rows: 30px 30px;
+  column-gap: 10px;
+  border-bottom: 1px solid white;
+}
+
+.profileImage {
+  height: 50px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: bisque;
+  grid-row: 1 / -1;
+  place-self: center;
+}
+
+.recentMessage {
+  grid-column: 2;
+}
+
+.recentMessageTime {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  place-self: center;
+  font-size: 1.2rem;
+}
+
+.main {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  border-left: 2px solid rgb(200,200,200);
+}
+
+.config {
+  display: flex;
+  padding: 10px;
+  background-color: rgb(75,75,75);
+  border-radius: 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.yourProfileImage {
+  background-color: blanchedalmond;
+  height: 75px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.settings {
+  justify-self: end;
+  background-color: rgb(75,75,75);
+  padding: 5px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gear {
+  height: 40px;
+  aspect-ratio: 1 / 1;
+  fill: white;
+
+}
