@@ -1,6 +1,8 @@
 import {Outlet, Navigate} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 import api from '../helper/axios.js';
+import styles from "../styles/Auth.module.css";
+import Loading from './sub-components/Loading.jsx';
 
 function Auth() {
   const [valid, setValid] = useState(null);
@@ -19,8 +21,14 @@ function Auth() {
     
   }, [])
   
-  if (valid === null)
-    return <h1>Auth!</h1>
+  if (valid === null) {
+    return (
+      <div className={styles.auth}>
+        <h1>Authenticating...</h1>
+        <Loading />
+      </div>
+    );
+  }
   else if (valid === true)
     return <Outlet />;
   else

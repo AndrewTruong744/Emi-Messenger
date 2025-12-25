@@ -16,6 +16,12 @@ function Conversation() {
     onSetActiveMessage(otherUser);
   }, [otherUser, onSetActiveMessage]);
 
+  useEffect(() => {
+    return () => {
+      onSetActiveMessage(null);
+    }
+  }, [onSetActiveMessage])
+
   return (
     <main className={styles.conversation}>
       <MessageHeader otherUser={otherUser}/>

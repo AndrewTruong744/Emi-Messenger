@@ -1,7 +1,6 @@
 import styles from "../../styles/ConversationList.module.css";
 import { useSocket } from "../../helper/store";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import Loading from "./Loading";
 
 function ConversationList({activeMessage, onSetActiveMessage}) {

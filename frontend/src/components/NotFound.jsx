@@ -1,4 +1,3 @@
-import {useState, useEffect} from 'react';
 import styles from "../styles/NotFound.module.css";
 import EmiSleepy from "../assets/EmiSleepy.jpg";
 
