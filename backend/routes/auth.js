@@ -9,7 +9,8 @@ const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 router.post('/signup', async (req, res, next) => {
   try {
-    if (await authQuery.getUser(req.body.username, req.body.email)) {
+    const user = await authQuery.getUser(req.body.username, req.body.email);
+    if (user) {
       console.error('User already exists');
       return res.status(409).json({
         message: 'User already exists'
