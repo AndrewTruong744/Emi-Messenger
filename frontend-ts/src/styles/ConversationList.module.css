@@ -1,0 +1,98 @@
+.search {
+  display: flex;
+  gap: 20px;
+}
+
+.input {
+  flex: 1;
+  background-color: rgb(60,60,60);
+  border: none;
+  padding: 10px 15px 10px 15px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  caret-color: white;
+  color: white;
+}
+
+.button {
+  background-color: rgb(60,60,60);
+  border-radius: 50%;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 0;
+  width: 45px;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+}
+
+.input::placeholder {
+  color: rgb(200,200,200)
+}
+
+.conversations {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.conversationList {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  /* scrollbar-color: #888 rgb(60,60,60); */
+}
+
+.conversationList::-webkit-scrollbar {
+  background-color: rgb(60,60,60);
+  border-radius: 20px;
+  width: 10px;
+}
+
+.conversationList::-webkit-scrollbar-thumb {
+  background: #888; /* Dark gray thumb */
+  border-radius: 10px;
+}
+
+.conversation {
+  list-style-type: none;
+  padding: 10px 10px 10px 0px;
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  grid-template-rows: 30px 30px;
+  column-gap: 10px;
+  border-bottom: 1px solid white;
+}
+
+.conversationHighlight {
+  background-color: rgb(75,75,75);
+}
+
+.profileImage {
+  height: 50px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: bisque;
+  grid-row: 1 / -1;
+  place-self: center;
+}
+
+.name {
+  white-space: nowrap;      
+  overflow: hidden;     
+  text-overflow: ellipsis;
+}
+
+.recentMessage {
+  grid-column: 2;
+}
+
+.recentMessageTime {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  place-self: center;
+  font-size: 1.2rem;
+}

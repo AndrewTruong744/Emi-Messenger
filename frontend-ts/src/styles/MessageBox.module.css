@@ -1,0 +1,42 @@
+.bottom {
+  display: flex;
+  justify-content: center;
+}
+
+.bar {
+  width: 90%;
+  max-width: 1000px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 0 15px;
+  background-color: rgb(60,60,60);
+  border-radius: 20px;
+}
+
+.input {
+  flex: 1;
+  background-color: rgb(60,60,60);
+  border: none;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.iconBottom {
+  height: 20px;
+  fill: white;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  background-color: rgb(60,60,60);
+}
+
+.icon {
+  height: 30px;
+  fill: white;
+}

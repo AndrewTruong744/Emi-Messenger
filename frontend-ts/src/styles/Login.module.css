@@ -1,0 +1,117 @@
+.login {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding: 25px;
+  /* max-width: 1200px;
+  min-width: 1200px; */
+  background-image: linear-gradient(#c2e9fb,rgb(209, 157, 90));
+}
+
+.logo, .right {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.ceo {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+}
+
+.right {
+  row-gap: 10px;
+}
+
+.error {
+  background-color: rgb(200,100,100);
+  padding: 20px 20px;
+  border-radius: 10px;
+  border: 2px solid red;
+  color: black;
+  font-weight: bold;
+}
+
+.subTitle {
+  font-size: 2.5rem;
+}
+
+.formAndOAuth {
+  width: 400px;
+  height: 550px;
+  border: 2px solid rgb(226, 195, 58);
+  border-radius: 10px;
+  padding: 25px 40px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.labelAndInput {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.input {
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background-color: rgb(220,220,220);
+  height: 25px;
+  padding: 0 10px;
+  font-size: 0.9rem;
+}
+
+.oAuthTitle {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.oAuth {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.button {
+  background-color: #c2e9fb;
+  width: 125px;
+  align-self: center;
+}
+
+.signup { 
+  margin-top: 40px;
+  background-color: rgb(209, 157, 90);
+  width: 125px;
+}
+
+.input, .button, .signup {
+  border: 1px solid rgb(226, 195, 58);
+}
+
+.input:hover {
+  background-color: rgb(240,240,240)
+}
+
+.button:hover, .signup:hover {
+  background-image: linear-gradient(to right, white,rgb(255, 215, 0));
+}
