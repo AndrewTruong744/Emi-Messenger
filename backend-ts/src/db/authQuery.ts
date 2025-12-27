@@ -1,10 +1,10 @@
 import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import jwt from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-async function createUser(reqBody) {
+async function createUser(reqBody : any) {
   const hashedPassword = 
     (reqBody.password === undefined) ? null : await bcrypt.hash(reqBody.password, 10);
   const user = await prisma.user.create({
@@ -26,7 +26,7 @@ async function createUser(reqBody) {
 
 async function getUser(username='', email='') {
   if (username === '' && email === '')
-    return []
+    return null;
 
   const user = await prisma.user.findFirst({
     where: {
@@ -40,7 +40,7 @@ async function getUser(username='', email='') {
   return user;
 }
 
-async function getUserById(id) {
+async function getUserById(id : string) {
   const user = await prisma.user.findFirst({
     where: {
       id: id
@@ -50,7 +50,7 @@ async function getUserById(id) {
   return user;
 }
 
-async function getUserBySub(sub) {
+async function getUserBySub(sub : string) {
   const user = await prisma.user.findFirst({
     where: {
       sub: sub
@@ -60,11 +60,11 @@ async function getUserBySub(sub) {
   return user;
 }
 
-async function saveRefreshToken(userId, token) {
+async function saveRefreshToken(userId : string, token : string) {
   const hashedToken = await bcrypt.hash(token, 10);
 
-  const decodedRefreshToken = jwt.decode(token);
-  const expiresBy = decodedRefreshToken.exp * 1000;
+  const decodedRefreshToken = jwt.decode(token) as JwtPayload;
+  const expiresBy = decodedRefreshToken.exp! * 1000;
 
   const user = await prisma.user.update({
     where: {
@@ -86,7 +86,7 @@ async function saveRefreshToken(userId, token) {
   return user;
 }
 
-async function checkRefreshTokenWithUserId(userId, token) {
+async function checkRefreshTokenWithUserId(userId : string, token : string) {
   const user = await prisma.user.findFirst({
     where: {
       id: userId,
@@ -109,7 +109,7 @@ async function checkRefreshTokenWithUserId(userId, token) {
   return null;
 }
 
-async function deleteRefreshToken(userId, token) {
+async function deleteRefreshToken(userId : string, token : string) {
   const tokenEntries = await prisma.token.findMany({
     where: {
       userId: userId,

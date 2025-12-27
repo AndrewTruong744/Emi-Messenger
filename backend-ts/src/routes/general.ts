@@ -1,6 +1,7 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
 import passport from "passport";
+import {type User as PrismaUser} from '@prisma/client'
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.get('/conversations',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = (req.user as PrismaUser).id;
       const conversations = await generalQuery.getConversations(userId);
       return res.json({conversations});
     } catch (err) {
@@ -57,7 +58,7 @@ router.put('/conversation/:id',
   async (req, res) => {
     try {
       const io = req.io;
-      const userId = req.user.id;
+      const userId = (req.user as PrismaUser).id;
       const otherUserId = req.params.id;
       const addedContact = await generalQuery.addContact(userId, otherUserId);
       
@@ -83,9 +84,17 @@ router.get('/messages/:username',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = (req.user as PrismaUser).id;
       const otherUserId = await generalQuery.getDatabaseId(req.params.username);
-      const messages = await generalQuery.getMessages(userId, otherUserId);
+
+      if (otherUserId) {
+        return res.status(503).json({
+        error: true,
+        message: 'User not found'
+      });
+      }
+
+      const messages = await generalQuery.getMessages(userId, otherUserId!);
       return res.json({messages});
     } catch (err) {
       return res.status(503).json({
@@ -101,7 +110,7 @@ router.post('/message/:username',
   async (req, res) => {
     try {
       const io = req.io;
-      const userId = req.user.id;
+      const userId = (req.user as PrismaUser).id;
       const otherUserId = req.params.username;
 
       const messageCreated = await generalQuery.addMessage(userId, otherUserId, req.body.message);
@@ -121,7 +130,7 @@ router.post('/message/:username',
 router.get('/current-user', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
-    const userId = req.user.id;
+    const userId = (req.user as PrismaUser).id;
     const currentUser = await generalQuery.getCurrentUser(userId);
     return res.json({currentUser});
   }

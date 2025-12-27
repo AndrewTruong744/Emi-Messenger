@@ -1,10 +1,12 @@
 import authQuery from '../db/authQuery.js';
 import jwt from 'jsonwebtoken';
+import { type Response } from 'express';
+import {type User as PrismaUser} from '@prisma/client'
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;   
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const ACCESS_SECRET = process.env['ACCESS_TOKEN_SECRET'];   
+const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET'];
 
-async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
+async function generateJwt(user : PrismaUser, refreshTokenCookie : string | undefined, res : Response, isOdic=false) {
   const payload = {
     id: user.id,
     username: user.username
@@ -12,13 +14,13 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
 
   const accessToken = jwt.sign(
     payload, 
-    ACCESS_SECRET, 
+    ACCESS_SECRET!, 
     {expiresIn: '15m'}
   );
   
   const refreshToken = jwt.sign(
     payload, 
-    REFRESH_SECRET, 
+    REFRESH_SECRET!, 
     { expiresIn: '7d' }
   );
 
@@ -31,7 +33,7 @@ async function generateJwt(user, refreshTokenCookie, res, isOdic=false) {
   // set domain on prod
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: (process.env.MODE === 'production') ? true : false,
+    secure: (process.env['MODE'] === 'production') ? true : false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, //7 days in milliseconds
     path: '/'

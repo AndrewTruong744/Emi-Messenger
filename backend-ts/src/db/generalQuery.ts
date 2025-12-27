@@ -2,7 +2,7 @@ import {PrismaClient} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function getDatabaseId(username) {
+async function getDatabaseId(username : string) {
   const userIdObj = await prisma.user.findUnique({
     where: {
       username: username
@@ -16,7 +16,7 @@ async function getDatabaseId(username) {
   return userIdObj?.id;
 }
 
-async function getUsers(username) {
+async function getUsers(username : string) {
   const users = await prisma.user.findMany({
     where: {
       username: {
@@ -32,7 +32,7 @@ async function getUsers(username) {
   return users;
 }
 
-async function getCurrentUser(userId) {
+async function getCurrentUser(userId : string) {
   const user = await prisma.user.findUnique({
     where: {
       id: userId
@@ -53,7 +53,7 @@ async function getCurrentUser(userId) {
   return user;
 }
 
-async function getConversations(userId) {
+async function getConversations(userId : string) {
   // returns an array of contact entry objects where userId is
   // in the first column
   const usersAddedEntry = await prisma.contact.findMany({
@@ -94,7 +94,7 @@ async function getConversations(userId) {
 
 // add a contact if there isnt an existing relationship between userA and userB
 // ex. if A -> B or B -> A exist, no need to add a contact
-async function addContact(userAId, userBId) {
+async function addContact(userAId : string, userBId : string) {
   const contactEntry = await prisma.contact.findMany({
     where: {
       OR: [
@@ -128,7 +128,7 @@ async function addContact(userAId, userBId) {
   return false;
 }
 
-async function getMessages(userAId, userBId) {
+async function getMessages(userAId : string, userBId : string) {
   let sentMessages = await prisma.message.findMany({
     where: {
       AND: [
@@ -172,7 +172,7 @@ async function getMessages(userAId, userBId) {
   return messages;
 }
 
-async function addMessage(userAId, userBId, message) {
+async function addMessage(userAId : string, userBId : string, message : string) {
   const messageCreated = await prisma.message.create({
     data: {
       content: message,

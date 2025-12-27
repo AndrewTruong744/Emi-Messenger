@@ -2,21 +2,28 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
 import authQuery from '../db/authQuery.js';
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
+import { Strategy as JwtStrategy, ExtractJwt, type VerifiedCallback } from 'passport-jwt';
+import {Strategy as GoogleStrategy, type Profile } from 'passport-google-oauth20';
+
+interface JwtPayload {
+  id: string,
+  username: string,
+  iat: number,
+  exp: number
+}
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
       const user = await authQuery.getUser(username, "");
 
-      if (user.sub !== null) {
+      if (user?.sub !== null) {
         return done(null, false, { message: "Use Single Sign On" });
       }
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
-      const match = await bcrypt.compare(password, user.password);
+      const match = await bcrypt.compare(password, user.password!);
       if (!match) {
         return done(null, false, { message: "Incorrect password" })
       }
@@ -29,12 +36,12 @@ passport.use(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.ACCESS_TOKEN_SECRET,
+  secretOrKey: process.env['ACCESS_TOKEN_SECRET']!,
   session: false
 };
 
 passport.use('access-token',
-  new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
+  new JwtStrategy(jwtOptions, async (jwt_payload : JwtPayload, done : VerifiedCallback) => {
     try {
       const user = await authQuery.getUserById(jwt_payload.id);
       console.log(user);
@@ -49,8 +56,8 @@ passport.use('access-token',
 );
 
 passport.use('google', new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    clientID: process.env['GOOGLE_CLIENT_ID']!,
+    clientSecret: process.env['GOOGLE_CLIENT_SECRET']!,
     callbackURL: 'http://localhost:3000/api/auth/oauth2/redirect/google',
     scope: ['profile', 'email']
   },
@@ -58,7 +65,7 @@ passport.use('google', new GoogleStrategy({
     const googleSub = profile.id;
 
     const userContents = {
-      email: profile.emails[0].value,
+      email: profile.emails?.[0]?.value,
       displayName: profile.displayName,
       sub: googleSub,
       username: crypto.randomUUID(),

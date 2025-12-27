@@ -1,0 +1,13 @@
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      DATABASE_URL: string;
+      REFRESH_TOKEN_SECRET: string;
+      ACCESS_TOKEN_SECRET: string;
+      MODE: string;
+      ORIGIN: string;
+      GOOGLE_CLIENT_ID: string;
+      GOOGLE_CLIENT_SECRET: string;
+    }
+  }
+}

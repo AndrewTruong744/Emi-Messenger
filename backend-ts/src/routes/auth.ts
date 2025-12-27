@@ -1,11 +1,12 @@
 import express from "express";
 import authQuery from '../db/authQuery.js';
-import jwt from 'jsonwebtoken';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
 import passport from "passport";
 import generateJwt from "../authentication/jwt.js";
+import type { User } from "@prisma/client";
 
 const router = express.Router();
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET']!;
 
 router.post('/signup', async (req, res, next) => {
   try {
@@ -29,7 +30,7 @@ router.post('/signup', async (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {session: false}, 
-    async (err, user, info) => {
+    async (err : any, user : User, info : object | undefined) => {
       if (err || !user) {
         return res.status(401).json({
           message: 'Authentication failed',
@@ -58,7 +59,7 @@ router.get('/oauth2/redirect/google', (req, res, next) => {
           </head>
           <body>
             <script>
-              window.location.replace('${process.env.ORIGIN}/login-complete');
+              window.location.replace('${process.env['ORIGIN']}/login-complete');
             </script>
             <h1>Redirecting</h1>
           </body>
@@ -67,7 +68,7 @@ router.get('/oauth2/redirect/google', (req, res, next) => {
     }
 
     const accessToken = await generateJwt(user, req.cookies.refreshToken, res, true);
-    const finalRedirectUrl = `${process.env.ORIGIN}/login-complete#accessToken=${accessToken}`;
+    const finalRedirectUrl = `${process.env['ORIGIN']}/login-complete#accessToken=${accessToken}`;
     res.send(`
       <html>
         <head>
@@ -89,9 +90,9 @@ router.post('/logout', async (req, res, next) => {
 
   if (refreshToken) {
     try {
-      const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
+      const decoded = jwt.verify(refreshToken, REFRESH_SECRET) as JwtPayload;
 
-      const message = await authQuery.deleteRefreshToken(decoded.id, refreshToken);
+      const message = await authQuery.deleteRefreshToken(decoded['id'], refreshToken);
       console.log(message);
     } catch (err) {
       console.log("Token invalid during logout, proceeding to clear cookies");
@@ -100,7 +101,7 @@ router.post('/logout', async (req, res, next) => {
 
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: (process.env.MODE === 'production') ? true : false,
+    secure: (process.env['MODE'] === 'production') ? true : false,
     sameSite: 'lax',
   });
 
@@ -118,8 +119,8 @@ router.post('/refresh', async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
-    const user = await authQuery.checkRefreshTokenWithUserId(decoded.id, refreshToken);
+    const decoded = jwt.verify(refreshToken, REFRESH_SECRET) as JwtPayload;
+    const user = await authQuery.checkRefreshTokenWithUserId(decoded['id'], refreshToken);
 
     if (!user)
       throw new Error('Refresh token does not exist');
