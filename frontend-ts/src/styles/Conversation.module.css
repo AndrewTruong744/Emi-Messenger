@@ -6,3 +6,9 @@
   min-width: 0;
 }
 
+@media (max-width: 768px) {
+  .conversation {
+    height: 100vh;
+  }
+}
+

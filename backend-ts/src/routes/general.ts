@@ -145,6 +145,6 @@ router.get('/current-user',
   }
 );
 
-router.put('/current-user')
+// router.put('/current-user')
 
 export default router;

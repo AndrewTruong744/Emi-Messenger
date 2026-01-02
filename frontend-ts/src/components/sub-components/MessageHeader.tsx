@@ -10,7 +10,7 @@ function MessageHeader({otherUsername} : Props) {
     <header className={styles.header}>
       <div className={styles.profile}>
         <div className={styles.profileImage}></div>
-        <h2>{otherUsername}</h2>
+        <h2 className={styles.username}>{otherUsername}</h2>
       </div>
       <div className={styles.buttons}>
         <button className={styles.button}>

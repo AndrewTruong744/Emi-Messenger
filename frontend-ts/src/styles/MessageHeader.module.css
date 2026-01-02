@@ -20,6 +20,11 @@
   border-radius: 50%;
 }
 
+.username {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .buttons {
   display: flex;
   gap: 10px;
@@ -27,9 +32,44 @@
 
 .button {
   background-color: rgb(60,60,60);
+  display: grid;
+  place-items: center;
 }
 
 .icon {
   height: 30px;
   fill: white;
+}
+
+@media (max-width: 768px) {
+  .profileImage {
+    height: 50px;
+  }
+
+  .username {
+    font-size: 1.5rem;
+    min-width: 100px;
+  }
+
+  .button {
+    width: 50px;
+  }
+}
+
+@media (max-width: 400px) {
+  .profile {
+    gap: 10px;
+  }
+
+  .profileImage {
+    height: 40px;
+  }
+
+  .username {
+    font-size: 1.3rem;
+  }
+
+  .button {
+    width: 40px;
+  }
 }

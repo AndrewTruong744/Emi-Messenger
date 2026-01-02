@@ -1,3 +1,11 @@
+.conversations {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
 .search {
   display: flex;
   gap: 20px;
@@ -29,14 +37,6 @@
 
 .input::placeholder {
   color: rgb(200,200,200)
-}
-
-.conversations {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-height: 0;
 }
 
 .conversationList {
@@ -96,3 +96,46 @@
   place-self: center;
   font-size: 1.2rem;
 }
+
+@media (max-width: 1100px) {
+  .conversation {
+    padding: 5px 5px 5px 0px;
+  }
+
+  .input {
+    height: 40px;
+    min-width: 200px;
+    font-size: 1rem;
+  }
+
+  .button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+
+  .input::placeholder {
+    font-size: 1rem;
+  }
+
+  .recentMessage {
+    font-size: 0.8rem;
+    grid-column: 2 / -1;
+  }
+
+  .recentMessageTime {
+    grid-row: 1;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .conversations {
+    padding-right: 15px;
+  }
+
+  .greetingBox {
+    padding-left: 15px;
+  }
+}
+

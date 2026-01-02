@@ -7,7 +7,9 @@
 
 .subTitle {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 
 .input {
@@ -19,6 +21,7 @@
   caret-color: white;
   color: white;
   margin: 0px 20px;
+  margin-bottom: 10px;
 }
 
 .input::placeholder {
@@ -27,6 +30,7 @@
 
 .peopleList {
   min-width: 0;
+  margin: 0 25px;
   overflow-y: auto;
 }
 
@@ -59,4 +63,32 @@
 
 .name {
   font-size: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .subTitle {
+    font-size: 2rem;
+  }
+
+  .input {
+    font-size: 1rem;
+  }
+
+  .peopleList {
+    margin: 15px;
+  }
+
+  .profileImage {
+    height: 50px;
+  }
+
+  .name {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .name {
+    font-size: 1rem;
+  }
 }

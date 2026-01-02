@@ -9,7 +9,7 @@ interface Props {
 function MessageBox({otherUserId} : Props) {
   const [message, setMessage] = useState("");
 
-  async function submitMessage(e : React.KeyboardEvent<HTMLInputElement>) {
+  async function submitMessage(e : React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter") {
       try {
         const axiosRes = await api.post(`/general/message/${otherUserId}`, {message: message});
@@ -24,13 +24,14 @@ function MessageBox({otherUserId} : Props) {
   return(
     <div className={styles.bottom}>
       <div className={styles.bar}>
-        <input 
+        <textarea
           placeholder='Enter Message'
           value={message}
           className={styles.input} 
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={submitMessage}
-        />
+        >
+        </textarea>
         <button className={styles.button}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={styles.icon}>
             <title>dog</title>

@@ -1,6 +1,6 @@
 .home {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(300px, 1fr) minmax(450px, 2fr);
   grid-template-rows: 1fr 6fr;
   height: 100%;
   /* padding: 25px; */
@@ -24,4 +24,20 @@
   grid-row: 1 / -1;
   grid-column: 2;
   border-left: 2px solid rgb(200,200,200);
+}
+
+@media (max-width: 768px) {
+  .home {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: 1;
+    padding-left: 15px;
+  }
+
+  .main {
+    border: none;
+  }
 }

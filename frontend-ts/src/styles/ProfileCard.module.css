@@ -33,3 +33,19 @@
   fill: white;
 
 }
+
+@media (max-width: 1100px) {
+  .yourProfileImage {
+    height: 50px;
+  }
+
+  .username {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .config {
+    margin-right: 15px;
+  }
+}

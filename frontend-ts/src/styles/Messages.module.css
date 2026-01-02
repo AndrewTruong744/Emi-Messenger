@@ -50,3 +50,15 @@
 .textLeft:hover .time {
   font-size: 0.8rem;
 }
+
+
+@media (max-width: 400px) {
+  .textLeft, .textRight {
+    font-size: 0.9rem;
+  }
+
+  .textRight:hover .time,
+.textLeft:hover .time {
+  font-size: 0.7rem;
+}
+}

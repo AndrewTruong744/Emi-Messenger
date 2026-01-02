@@ -15,7 +15,7 @@ function ProfileCard() {
       {/* change to image when implemented */}
       <div className={styles.profile}>
         <div className={styles.yourProfileImage}></div>
-        {(currentUser) ? <h2>{currentUser.username}</h2> : <h2>Loading</h2>}
+        <h2 className={styles.username}>{(currentUser) ? currentUser.username : "Loading"}</h2>
       </div>
       <button className={styles.settings} onClick={handleSettings}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={styles.gear}>

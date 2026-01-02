@@ -1,4 +1,3 @@
-import { set } from "date-fns";
 import { useState, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -10,12 +9,12 @@ function useIsMobile() {
   useLayoutEffect(() => {
 
     function updateSize() {
-      if (location.pathname === '/home')
+      if (location.pathname === '/home' || location.pathname === '/home/')
         setAtHome(true);
       else
         setAtHome(false);
 
-      if (window.innerWidth < 768)
+      if (window.innerWidth <= 768)
         setIsMobile(true);
       else 
         setIsMobile(false);

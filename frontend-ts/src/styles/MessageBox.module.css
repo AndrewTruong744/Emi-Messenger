@@ -4,6 +4,7 @@
 }
 
 .bar {
+  max-height: 200px;
   width: 90%;
   max-width: 1000px;
   display: flex;
@@ -20,6 +21,14 @@
   border: none;
   font-size: 1.1rem;
   color: white;
+  min-width: 180px;
+  resize: none;
+  overflow-y: auto;
+  max-height: 200px;
+  line-height: 1.5;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  field-sizing: content;
+  place-self: center;
 }
 
 .iconBottom {
@@ -34,9 +43,36 @@
 
 .button {
   background-color: rgb(60,60,60);
+  display: grid;
+  place-items: center;
 }
 
 .icon {
   height: 30px;
   fill: white;
+  
+}
+
+@media (max-width: 500px) {
+  .bottom {
+    margin: 0 10px;
+  }
+
+  .bar {
+    width: 100%;
+    gap: 5px;
+  }
+
+  .input {
+    font-size: 1rem;
+  }
+
+  .iconBottom {
+    height: 10px;
+    fill: white;
+  }
+
+  .button {
+    width: 40px;
+  }
 }

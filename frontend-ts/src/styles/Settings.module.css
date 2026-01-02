@@ -64,3 +64,18 @@
   place-self: end;
   width: 200px;
 }
+
+@media (max-width: 600px) {
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .input {
+    font-size: 1rem;
+  }
+
+  .updateButton, .signoutButton, .deleteAccountButton {
+    width: 150px;
+  }
+}
