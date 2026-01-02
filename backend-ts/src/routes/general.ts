@@ -1,5 +1,6 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
+import authQuery from "../db/authQuery.js";
 import passport from "passport";
 import {type User as PrismaUser} from '@prisma/client'
 
@@ -143,5 +144,7 @@ router.get('/current-user',
     return res.json({currentUser});
   }
 );
+
+router.put('/current-user')
 
 export default router;

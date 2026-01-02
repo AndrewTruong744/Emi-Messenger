@@ -13,14 +13,14 @@ interface Props {
 function Messages({otherUserId} : Props) {
   console.log(otherUserId);
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
-  const messages = useSocket(state => state.conversationsAndMessages?.[otherUserId]) || [];
+  const messages = useSocket(state => state.conversationsAndMessages?.[otherUserId]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [userNotFound, setUserNotFound] = useState(false);
 
   useEffect(() => {
     async function getMessages() {
-      if (isLoading) {
+      if (!messages || messages.length == 0) {
         try {
           const axiosRes = await api.get(`/general/messages/${otherUserId}`);
           const messagesObj = axiosRes.data;
@@ -33,10 +33,12 @@ function Messages({otherUserId} : Props) {
           setUserNotFound(true);
         }
       }
+      else
+        setIsLoading(false);
     }
 
     getMessages();
-  }, [otherUserId]);
+  }, [otherUserId]); // only fetch messages when user id changes
 
   console.log(messages);
   console.log(userNotFound);
@@ -44,7 +46,7 @@ function Messages({otherUserId} : Props) {
   return (
     (isLoading) ? <Loading /> : 
       <div className={styles.texts}>
-        {messages.map(message => {
+        {messages && messages.map(message => {
           const formattedTimeStamp = format(message.sent, 'HH:mm MM/dd/yyyy');
           const className = (message.from === "sender") ? "textRight" : "textLeft";
 

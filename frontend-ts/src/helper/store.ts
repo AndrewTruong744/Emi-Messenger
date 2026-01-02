@@ -4,6 +4,8 @@ import {io, Socket} from 'socket.io-client';
 interface User {
   id: string,
   username: string,
+  email: string,
+  sub: string,
 };
 
 interface Message {
@@ -102,23 +104,23 @@ const useSocket = create<UserSocket>()((set, get) => ({
   },
   setConversationsAndMessages: (conversations : User[]) => {
     set((state) => {
-    const newUuidToUsername = { ...state.uuidToUsername };
-    const updatedCache = { ...state.conversationsAndMessages };
+      const newUuidToUsername = { ...state.uuidToUsername };
+      const updatedCache = { ...state.conversationsAndMessages };
 
-    conversations.forEach((user) => {
-      newUuidToUsername[user.id] = user.username;
-      
-      // ONLY set to empty array if it doesn't already have messages
-      if (!updatedCache[user.id]) {
-        updatedCache[user.id] = [];
-      }
+      conversations.forEach((user) => {
+        newUuidToUsername[user.id] = user.username;
+        
+        // ONLY set to empty array if it doesn't already have messages
+        if (!updatedCache[user.id]) {
+          updatedCache[user.id] = [];
+        }
+      });
+
+      return {
+        uuidToUsername: newUuidToUsername,
+        conversationsAndMessages: updatedCache,
+      };
     });
-
-    return {
-      uuidToUsername: newUuidToUsername,
-      conversationsAndMessages: updatedCache,
-    };
-  });
   },
   updateConversationsAndMessages: (id, messages) => {
     const newMessages = messages || [];

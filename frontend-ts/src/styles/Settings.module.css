@@ -1,0 +1,66 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  justify-content: end;
+  gap: 40px;
+}
+
+.title {
+  text-align: center;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 1fr 1fr 1fr 60px;
+  gap: 20px;
+}
+
+.profileImage {
+  grid-row: 1 / 4;
+  height: 200px;
+  border-radius: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: bisque;
+  place-self: center;
+}
+
+.labelAndInput {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input {
+  background-color: rgb(60,60,60);
+  border: none;
+  padding: 10px 15px 10px 15px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  caret-color: white;
+  color: white;
+}
+
+.updateButton {
+  grid-column: 2;
+  width: 200px;
+  place-self: end;
+}
+
+.divider {
+  height: 1px;
+  background-color: white;
+}
+
+.signoutButton {
+  background-color: rgb(202, 211, 74);
+  place-self: end;
+  width: 200px;
+}
+
+.deleteAccountButton {
+  background-color: rgb(218, 100, 100);
+  place-self: end;
+  width: 200px;
+}
