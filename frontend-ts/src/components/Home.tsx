@@ -5,12 +5,15 @@ import api from '../helper/axios';
 import { useSocket } from '../helper/store';
 import ConversationList from './sub-components/ConversationList';
 import ProfileCard from './sub-components/ProfileCard';
+import GreetingBox from './sub-components/GreetingBox';
+import useIsMobile from '../helper/mobile';
 
 function Home() { 
   const setCurrentUser = useSocket(state => state.setCurrentUser);
   const connect = useSocket(state => state.connect);
   const disconnect = useSocket(state => state.disconnect);
   const setConversationsAndMessages = useSocket(state => state.setConversationsAndMessages);
+  const [atHome, isMobile] = useIsMobile();
 
   // holds uuid of person you are chatting with
   const [activeMessage, setActiveMessage] = useState<string | null | undefined>(null);
@@ -45,23 +48,27 @@ function Home() {
     };
   }, [connect, disconnect, setConversationsAndMessages, setCurrentUser]);
 
+  console.log(atHome);
+  console.log(isMobile);
+
   return ( 
     <div className={styles.home}>
-      <div className={styles.title}>
-        <h1>Emi Messenger</h1>
-        <h2>Welcome User!</h2>
-      </div>
-      <div className={styles.main}>
-        <Outlet 
-          context={{
-            onSetActiveMessage: setActiveMessage, 
-          }}
-        />
-      </div>
-      <div className={styles.sidebar}>
-        <ConversationList activeMessage={activeMessage} onSetActiveMessage={setActiveMessage}/>
-        <ProfileCard />
-      </div>
+      {(isMobile && !atHome) ? null : <GreetingBox />}
+      {(isMobile && atHome) ? null :
+        <div className={styles.main}>
+          <Outlet 
+            context={{
+              onSetActiveMessage: setActiveMessage, 
+            }}
+          />
+        </div>
+      }
+      {(isMobile && !atHome) ? null : 
+        <div className={styles.sidebar}>
+          <ConversationList activeMessage={activeMessage} onSetActiveMessage={setActiveMessage}/>
+          <ProfileCard />
+        </div>
+      }
     </div>
   );
 }
