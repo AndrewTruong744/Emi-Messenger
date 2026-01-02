@@ -16,6 +16,19 @@ async function getDatabaseId(username : string) {
   return userIdObj?.id;
 }
 
+async function getUsername(uuid : string) {
+  const usernameObj = await prisma.user.findUnique({
+    where: {
+      id : uuid
+    },
+    select: {
+      username: true
+    }
+  });
+
+  return usernameObj?.username;
+}
+
 async function getUsers(username : string) {
   const users = await prisma.user.findMany({
     where: {
@@ -200,6 +213,7 @@ async function addMessage(userAId : string, userBId : string, message : string) 
 
 export default {
   getDatabaseId,
+  getUsername,
   getUsers,
   getCurrentUser,
   getConversations,

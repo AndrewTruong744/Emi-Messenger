@@ -5,17 +5,20 @@ import Messages from './sub-components/Messages';
 import MessageBox from './sub-components/MessageBox';
 import { useEffect } from "react";
 import { type Context } from "../types/Context";
+import { useSocket } from "../helper/store";
 
 function Conversation() {
   const params = useParams();
-  const otherUser = (params.user) ? params.user : "";
+  const uuidToUsername = useSocket(state => state.uuidToUsername);
+  const otherUserId = (params.user) ? params.user : "";
+  const otherUsername = uuidToUsername?.[otherUserId] ?? "Loading";
 
   const context = useOutletContext<Context>();
   const {onSetActiveMessage} = context;
 
   useEffect(() => {
-    onSetActiveMessage(otherUser);
-  }, [otherUser, onSetActiveMessage]);
+    onSetActiveMessage(otherUserId);
+  }, [otherUserId, onSetActiveMessage]);
 
   useEffect(() => {
     return () => {
@@ -25,9 +28,9 @@ function Conversation() {
 
   return (
     <main className={styles.conversation}>
-      <MessageHeader otherUser={otherUser}/>
-      <Messages otherUser={otherUser}/>
-      <MessageBox otherUser={otherUser}/>
+      <MessageHeader otherUsername={otherUsername}/>
+      <Messages otherUserId={otherUserId}/>
+      <MessageBox otherUserId={otherUserId}/>
     </main>
   );
 }

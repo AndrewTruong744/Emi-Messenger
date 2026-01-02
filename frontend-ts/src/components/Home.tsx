@@ -16,6 +16,7 @@ function Home() {
   const [activeMessage, setActiveMessage] = useState<string | null | undefined>(null);
 
   useEffect(() => {
+
     async function getCurrentUser() {
       const axiosRes = await api.get('/general/current-user');
       const currentUserObj = axiosRes.data;
@@ -39,7 +40,9 @@ function Home() {
     }
 
     initialize();
-    return () => disconnect();
+    return () => {
+      disconnect();
+    };
   }, [connect, disconnect, setConversationsAndMessages, setCurrentUser]);
 
   return ( 

@@ -15,6 +15,10 @@ interface Message {
   from?: string
 }
 
+interface UuidToUsername {
+  [key : string] : string
+}
+
 interface ConversationsAndMessages {
   [key : string]: Message[]
 }
@@ -22,6 +26,7 @@ interface ConversationsAndMessages {
 interface UserSocket {
   currentUser: User | null,
   socket: Socket | null,
+  uuidToUsername : UuidToUsername | null, 
   conversationsAndMessages: ConversationsAndMessages | null,
   setCurrentUser: (currentUser : User) => void,
   connect: () => void,
@@ -33,6 +38,7 @@ interface UserSocket {
 const useSocket = create<UserSocket>()((set, get) => ({
   currentUser: null,
   socket: null,
+  uuidToUsername: null,
   conversationsAndMessages: null,
   setCurrentUser: (currentUser) => {
     set({currentUser});
@@ -75,9 +81,13 @@ const useSocket = create<UserSocket>()((set, get) => ({
       const userToAdd = ((get().currentUser as User).id === userA) ? userB : userA;
 
       set((state) => ({
+        uuidToUsername: {
+          ...state.uuidToUsername,
+          [userToAdd.id]: userToAdd.username,
+        },
         conversationsAndMessages: {
           ...state.conversationsAndMessages,
-          [userToAdd]: [],
+          [userToAdd.id]: [],
         }
       }));
     });
@@ -91,16 +101,24 @@ const useSocket = create<UserSocket>()((set, get) => ({
     });
   },
   setConversationsAndMessages: (conversations : User[]) => {
-    if (Object.keys((get().conversationsAndMessages ?? {})).length > 0)
-      return;
+    set((state) => {
+    const newUuidToUsername = { ...state.uuidToUsername };
+    const updatedCache = { ...state.conversationsAndMessages };
 
-    const initialCache = conversations.reduce((acc : ConversationsAndMessages, conversation : User) => {
-      const key = conversation.id;
-      acc[key] = [];
-      return acc;
-    }, {});
+    conversations.forEach((user) => {
+      newUuidToUsername[user.id] = user.username;
+      
+      // ONLY set to empty array if it doesn't already have messages
+      if (!updatedCache[user.id]) {
+        updatedCache[user.id] = [];
+      }
+    });
 
-    set({conversationsAndMessages: initialCache});
+    return {
+      uuidToUsername: newUuidToUsername,
+      conversationsAndMessages: updatedCache,
+    };
+  });
   },
   updateConversationsAndMessages: (id, messages) => {
     const newMessages = messages || [];

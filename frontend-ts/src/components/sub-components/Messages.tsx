@@ -7,36 +7,39 @@ import Loading from "./Loading";
 import { useState } from "react";
 
 interface Props {
-  otherUser: string
+  otherUserId: string
 }
 
-function Messages({otherUser} : Props) {
+function Messages({otherUserId} : Props) {
+  console.log(otherUserId);
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
-  const messages = useSocket(state => state.conversationsAndMessages?.[otherUser]) || [];
+  const messages = useSocket(state => state.conversationsAndMessages?.[otherUserId]) || [];
 
   const [isLoading, setIsLoading] = useState(true);
+  const [userNotFound, setUserNotFound] = useState(false);
 
   useEffect(() => {
     async function getMessages() {
-      const currentMsgs = useSocket.getState().conversationsAndMessages?.[otherUser] || [];
-      if (currentMsgs.length > 0) {
-        setIsLoading(false);
-        return;
-      }
+      if (isLoading) {
+        try {
+          const axiosRes = await api.get(`/general/messages/${otherUserId}`);
+          const messagesObj = axiosRes.data;
 
-      try {
-        const axiosRes = await api.get(`/general/messages/${otherUser}`);
-        const messagesObj = axiosRes.data;
-        updateConversationsAndMessages(otherUser, messagesObj.messages);
-        setIsLoading(false);
-        console.log(axiosRes);
-      } catch (err) {
-        console.log(err);
+          updateConversationsAndMessages(otherUserId, messagesObj.messages);
+          setIsLoading(false);
+          console.log(axiosRes);
+        } catch (err) {
+          console.log(err);
+          setUserNotFound(true);
+        }
       }
     }
 
     getMessages();
-  }, [otherUser]);
+  }, [otherUserId]);
+
+  console.log(messages);
+  console.log(userNotFound);
 
   return (
     (isLoading) ? <Loading /> : 

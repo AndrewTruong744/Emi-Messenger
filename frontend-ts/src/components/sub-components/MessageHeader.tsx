@@ -1,16 +1,16 @@
 import styles from "../../styles/MessageHeader.module.css";
 
 interface Props {
-  otherUser: string
+  otherUsername: string
 }
 
-function MessageHeader({otherUser} : Props) {
+function MessageHeader({otherUsername} : Props) {
 
   return (
     <header className={styles.header}>
       <div className={styles.profile}>
         <div className={styles.profileImage}></div>
-        <h2>{otherUser}</h2>
+        <h2>{otherUsername}</h2>
       </div>
       <div className={styles.buttons}>
         <button className={styles.button}>

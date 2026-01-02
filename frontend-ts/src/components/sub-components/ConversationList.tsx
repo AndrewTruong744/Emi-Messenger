@@ -4,16 +4,16 @@ import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 
 interface Props {
-  activeMessage: string,
+  activeMessage: string | null | undefined,
   onSetActiveMessage: React.Dispatch<React.SetStateAction<string | null | undefined>>
 }
 
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
-  const conversationsAndMessages = useSocket(state => state.conversationsAndMessages);
-  const socket = useSocket(state => state.socket);
+  const uuidToUsername = useSocket(state => state.uuidToUsername);
 
-  const isLoading = (socket) ? false : true;
+  const isLoading = (uuidToUsername) ? false : true;
+  console.log(uuidToUsername);
 
   function handleFindPeople() {
     navigate('find-people');
@@ -39,7 +39,8 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
       {(isLoading) ? <Loading /> : 
         <ul className={styles.conversationList}>
           {
-            Object.keys(conversationsAndMessages ?? {}).map(id => {
+            Object.keys(uuidToUsername ?? {}).map(id => {
+              const username = uuidToUsername![id];
               return (
                 <li 
                   key={id} 
@@ -49,7 +50,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
                 >
                   {/* change to image when implemented */}
                   <div className={styles.profileImage}></div>
-                  <h3 className={styles.name}>{id}</h3>
+                  <h3 className={styles.name}>{username}</h3>
                   <p className={styles.recentMessage}>Most Recent Text Message</p>
                   <p className={styles.recentMessageTime}>2min</p>
                 </li>

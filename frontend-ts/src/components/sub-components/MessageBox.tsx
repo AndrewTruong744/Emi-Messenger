@@ -3,16 +3,16 @@ import { useState } from "react";
 import api from "../../helper/axios";
 
 interface Props {
-  otherUser: string
+  otherUserId: string
 }
 
-function MessageBox({otherUser} : Props) {
+function MessageBox({otherUserId} : Props) {
   const [message, setMessage] = useState("");
 
   async function submitMessage(e : React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       try {
-        const axiosRes = await api.post(`/general/message/${otherUser}`, {message: message});
+        const axiosRes = await api.post(`/general/message/${otherUserId}`, {message: message});
         setMessage("");
         console.log(axiosRes.data.message);
       } catch (err) {

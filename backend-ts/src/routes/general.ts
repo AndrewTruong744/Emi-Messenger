@@ -67,7 +67,13 @@ router.put('/conversation/:id',
         await io.in(`user-${userId}`).socketsJoin(`room-${roomId}`);
         await io.in(`user-${otherUserId}`).socketsJoin(`room-${roomId}`);
 
-        io.to(`room-${roomId}`).emit('addContact', {userA: userId, userB: otherUserId});
+        const userAUsername = await generalQuery.getUsername(userId);
+        const userBUsername = await generalQuery.getUsername(otherUserId);
+
+        io.to(`room-${roomId}`).emit('addContact', {
+          userA: {id: userId, username: userAUsername}, 
+          userB: {id: otherUserId, username: userBUsername},
+        });
       }
 
       return res.json({message: "success!"});
@@ -80,15 +86,17 @@ router.put('/conversation/:id',
   }
 );
 
-router.get('/messages/:username',
+router.get('/messages/:id',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const otherUserId = await generalQuery.getDatabaseId(req.params.username);
+      const otherUserId = req.params.id;
 
-      if (otherUserId) {
-        return res.status(503).json({
+      const otherUsername = await generalQuery.getUsername(otherUserId);
+
+      if (!otherUsername) {
+        return res.status(404).json({
         error: true,
         message: 'User not found'
       });
