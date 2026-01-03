@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 import {io, Socket} from 'socket.io-client';
+import { type NavigateFunction } from 'react-router-dom';
 
 interface User {
   id: string,
@@ -31,10 +32,10 @@ interface UserSocket {
   uuidToUsername : UuidToUsername | null, 
   conversationsAndMessages: ConversationsAndMessages | null,
   setCurrentUser: (currentUser : User) => void,
-  connect: () => void,
+  connect: (navigate : NavigateFunction) => void,
   disconnect: () => void,
   setConversationsAndMessages: (conversations : []) => void,
-  updateConversationsAndMessages: (id : string, messages : [] | null) => void
+  updateConversationsAndMessages: (id : string, messages : [] | null) => void,
 }
 
 const useSocket = create<UserSocket>()((set, get) => ({
@@ -45,7 +46,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
   setCurrentUser: (currentUser) => {
     set({currentUser});
   },
-  connect: () => {
+  connect: (navigate) => {
     if (get().socket != null)
       return;
 
@@ -91,6 +92,17 @@ const useSocket = create<UserSocket>()((set, get) => ({
           ...state.conversationsAndMessages,
           [userToAdd.id]: [],
         }
+      }));
+    });
+
+    socket.on("signout", () => {
+      sessionStorage.removeItem("accessToken");
+      navigate('/login');
+      set((state) => ({
+        currentUser: null,
+        socket: null,
+        uuidToUsername: null,
+        conversationsAndMessages: null,
       }));
     });
 

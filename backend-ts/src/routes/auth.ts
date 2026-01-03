@@ -3,7 +3,7 @@ import authQuery from '../db/authQuery.js';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import passport from "passport";
 import generateJwt from "../authentication/jwt.js";
-import type { User } from "@prisma/client";
+import type { User as PrismaUser } from "@prisma/client";
 
 const router = express.Router();
 const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET']!;
@@ -85,7 +85,7 @@ router.get('/oauth2/redirect/google', (req, res, next) => {
   })(req, res, next);
 });
 
-router.post('/logout', async (req, res, next) => {
+router.post('/signout', async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (refreshToken) {
@@ -93,6 +93,9 @@ router.post('/logout', async (req, res, next) => {
       const decoded = jwt.verify(refreshToken, REFRESH_SECRET) as JwtPayload;
 
       const message = await authQuery.deleteRefreshToken(decoded['id'], refreshToken);
+
+      const io = req.io;
+      io.to(`user-${decoded["id"]}`).emit('signout');
       console.log(message);
     } catch (err) {
       console.log("Token invalid during logout, proceeding to clear cookies");

@@ -19,8 +19,13 @@ function Auth() {
 
     validateAccessToken();
     
+    return () => {
+      console.log('exiting');
+    }
   }, [])
   
+  console.log(valid);
+
   if (valid === null) {
     return (
       <div className={styles.auth}>
@@ -32,7 +37,7 @@ function Auth() {
   else if (valid === true)
     return <Outlet />;
   else
-    return <Navigate to="/login" replace/>;
+    return <Navigate to="/login" />;
 }
 
 export default Auth;

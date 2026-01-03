@@ -33,6 +33,12 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
 
+    // prevents a refresh call from awaiting another refresh call
+    if (originalRequest.url === '/auth/refresh') {
+      isRefreshing = null;
+      return Promise.reject(err);
+    }
+
     if (err.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 

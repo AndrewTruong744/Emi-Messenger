@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import {Outlet} from 'react-router-dom'
 import styles from "../styles/Home.module.css";
 import api from '../helper/axios';
+import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../helper/store';
 import ConversationList from './sub-components/ConversationList';
 import ProfileCard from './sub-components/ProfileCard';
@@ -9,6 +10,7 @@ import GreetingBox from './sub-components/GreetingBox';
 import useIsMobile from '../helper/mobile';
 
 function Home() { 
+  const navigate = useNavigate();
   const setCurrentUser = useSocket(state => state.setCurrentUser);
   const connect = useSocket(state => state.connect);
   const disconnect = useSocket(state => state.disconnect);
@@ -36,7 +38,7 @@ function Home() {
       try {
         await getCurrentUser();
         await getConversations();
-        connect();
+        connect(navigate);
       } catch (err) {
         console.log(err);
       }

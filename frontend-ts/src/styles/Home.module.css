@@ -9,6 +9,7 @@
   background-color: rgb(40,40,40);
   color: white;
   gap: 20px;
+  min-width: 320px;
 }
 
 .sidebar {

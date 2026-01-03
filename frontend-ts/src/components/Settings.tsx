@@ -2,6 +2,7 @@ import {useState, useEffect, use} from 'react';
 import styles from "../styles/Settings.module.css";
 import { useSocket } from '../helper/store';
 import Loading from './sub-components/Loading';
+import api from '../helper/axios';
 
 function Settings() {
   const currentUser = useSocket(state => state.currentUser);
@@ -17,8 +18,15 @@ function Settings() {
 
   }
 
-  function handleSignout() {
-
+  async function handleSignout() {
+    try {
+      await api.post("/auth/signout");
+      console.log("success!!!")
+    }
+    catch (err) {
+      console.log(err);
+    }
+    
   }
 
   function handleDeleteAccount() {
@@ -67,9 +75,10 @@ function Settings() {
               id='newPassword'
               name='newPassword'
               value={newPassword}
+              placeholder={(!currentUser.sub) ? "Disabled" : ""}
               onChange={(e) => setNewEmail(e.target.value)}
               type='password'
-              disabled={!currentUser}
+              disabled={!currentUser || !currentUser.sub}
               required
             />
           </div>
@@ -78,7 +87,7 @@ function Settings() {
         </form>
 
         <div className={styles.divider}></div>
-        <button className={styles.signoutButton}>Sign Out</button>
+        <button className={styles.signoutButton} onClick={handleSignout}>Sign Out</button>
 
         <div className={styles.divider}></div>
         <button className={styles.deleteAccountButton}>Delete Account</button>
