@@ -145,6 +145,13 @@ router.get('/current-user',
   }
 );
 
-// router.put('/current-user')
+router.delete('/current-user',
+  passport.authenticate('access-token', {session: false}),
+  async (req, res) => {
+    const userId = (req.user as PrismaUser).id;
+    
+    
+  }
+);
 
 export default router;

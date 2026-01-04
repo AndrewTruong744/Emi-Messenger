@@ -48,7 +48,7 @@ function Home() {
     return () => {
       disconnect();
     };
-  }, [connect, disconnect, setConversationsAndMessages, setCurrentUser]);
+  }, [connect, disconnect, setConversationsAndMessages, setCurrentUser, navigate]);
 
   console.log(atHome);
   console.log(isMobile);

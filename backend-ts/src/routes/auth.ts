@@ -30,7 +30,7 @@ router.post('/signup', async (req, res, next) => {
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {session: false}, 
-    async (err : any, user : User, info : object | undefined) => {
+    async (err : any, user : PrismaUser, info : object | undefined) => {
       if (err || !user) {
         return res.status(401).json({
           message: 'Authentication failed',
@@ -69,7 +69,7 @@ router.get('/oauth2/redirect/google', (req, res, next) => {
 
     const accessToken = await generateJwt(user, req.cookies.refreshToken, res, true);
     const finalRedirectUrl = `${process.env['ORIGIN']}/login-complete#accessToken=${accessToken}`;
-    res.send(`
+    return res.send(`
       <html>
         <head>
           <title>Authentication Complete</title>

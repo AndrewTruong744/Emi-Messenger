@@ -5,9 +5,11 @@ import api from '../helper/axios.js';
 import Emi from '../assets/Emi6.jpg';
 import Loading from './sub-components/Loading.js';
 import { isAxiosError } from 'axios';
+import { useSocket } from '../helper/store.js';
 
 function Login() {
   const navigate = useNavigate();
+  const clearStore = useSocket((state) => state.clearStore);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +40,7 @@ function Login() {
       console.log('Login successful!', res.data);
       sessionStorage.setItem("accessToken", accessToken);
       
+      clearStore();
       navigate('/home');
     } catch (err) {
       if (isAxiosError(err)) {

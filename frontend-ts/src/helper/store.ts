@@ -36,6 +36,7 @@ interface UserSocket {
   disconnect: () => void,
   setConversationsAndMessages: (conversations : []) => void,
   updateConversationsAndMessages: (id : string, messages : [] | null) => void,
+  clearStore: () => void,
 }
 
 const useSocket = create<UserSocket>()((set, get) => ({
@@ -144,6 +145,14 @@ const useSocket = create<UserSocket>()((set, get) => ({
       }
     }));
   },
+  clearStore: () => {
+    set({
+      currentUser: null,
+      socket: null,
+      uuidToUsername: null,
+      conversationsAndMessages: null,
+    });
+  }
 }));
 
 export {useSocket};
