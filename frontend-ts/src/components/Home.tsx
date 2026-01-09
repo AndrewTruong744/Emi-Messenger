@@ -50,9 +50,6 @@ function Home() {
     };
   }, [connect, disconnect, setConversationsAndMessages, setCurrentUser, navigate]);
 
-  console.log(atHome);
-  console.log(isMobile);
-
   return ( 
     <div className={styles.home}>
       {(isMobile && !atHome) ? null : <GreetingBox />}

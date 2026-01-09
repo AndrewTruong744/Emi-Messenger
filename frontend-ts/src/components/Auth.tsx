@@ -18,10 +18,6 @@ function Auth() {
     }
 
     validateAccessToken();
-    
-    return () => {
-      console.log('exiting');
-    }
   }, [])
   
   console.log(valid);

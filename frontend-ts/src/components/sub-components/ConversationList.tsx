@@ -11,6 +11,7 @@ interface Props {
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
   const uuidToUsername = useSocket(state => state.uuidToUsername);
+  const uuidToOnlineStatus = useSocket(state => state.uuidToOnlineStatus);
 
   const isLoading = (uuidToUsername) ? false : true;
   console.log(uuidToUsername);
@@ -28,8 +29,6 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
       navigate(`conversation/${id}`);
   }
 
-  console.log(activeMessage);
-
   return (
     <div className={styles.conversations}>
       <div className={styles.search}>
@@ -41,6 +40,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
           {
             Object.keys(uuidToUsername ?? {}).map(id => {
               const username = uuidToUsername![id];
+              console.log(uuidToOnlineStatus?.[id]);
               return (
                 <li 
                   key={id} 
@@ -49,6 +49,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
                   onClick={() => handleConversationSelected(id)}
                 >
                   {/* change to image when implemented */}
+                  <div className={`${(uuidToOnlineStatus?.[id]) ? styles.onlineIndicator : ""}`}></div>
                   <div className={styles.profileImage}></div>
                   <h3 className={styles.name}>{username}</h3>
                   <p className={styles.recentMessage}>Most Recent Text Message</p>

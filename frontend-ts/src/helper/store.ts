@@ -1,9 +1,12 @@
 import {create} from 'zustand';
 import {io, Socket} from 'socket.io-client';
 import { type NavigateFunction } from 'react-router-dom';
+import useLogin from './loginStore';
+import useClear from './clearStore';
 
 interface User {
   id: string,
+  online: boolean,
   username: string,
   email: string,
   sub: string,
@@ -22,6 +25,10 @@ interface UuidToUsername {
   [key : string] : string
 }
 
+interface UuidToOnlineStatus {
+  [key : string] : boolean
+}
+
 interface ConversationsAndMessages {
   [key : string]: Message[]
 }
@@ -29,13 +36,15 @@ interface ConversationsAndMessages {
 interface UserSocket {
   currentUser: User | null,
   socket: Socket | null,
-  uuidToUsername : UuidToUsername | null, 
+  uuidToUsername : UuidToUsername | null,
+  uuidToOnlineStatus : UuidToOnlineStatus | null,
   conversationsAndMessages: ConversationsAndMessages | null,
   setCurrentUser: (currentUser : User) => void,
   connect: (navigate : NavigateFunction) => void,
   disconnect: () => void,
   setConversationsAndMessages: (conversations : []) => void,
   updateConversationsAndMessages: (id : string, messages : [] | null) => void,
+  updateOnlineStatuses: (id : string, status : boolean) => void,
   clearStore: () => void,
 }
 
@@ -43,6 +52,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
   currentUser: null,
   socket: null,
   uuidToUsername: null,
+  uuidToOnlineStatus : null,
   conversationsAndMessages: null,
   setCurrentUser: (currentUser) => {
     set({currentUser});
@@ -52,6 +62,25 @@ const useSocket = create<UserSocket>()((set, get) => ({
       return;
 
     const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
+
+    socket.on('userOnline', (otherUserId) => {
+      console.log('online!');
+      set((state) => ({
+        uuidToOnlineStatus: {
+          ...state.uuidToOnlineStatus,
+          [otherUserId]: true
+        }
+      }));
+    });
+
+    socket.on('userOffline', (otherUserId) => {
+      set((state) => ({
+        uuidToOnlineStatus: {
+          ...state.uuidToOnlineStatus,
+          [otherUserId]: false
+        }
+      }))
+    })
 
     socket.on("sentMessage", (sentMessage) => {
       const senderId = sentMessage.sender.id;
@@ -89,6 +118,10 @@ const useSocket = create<UserSocket>()((set, get) => ({
           ...state.uuidToUsername,
           [userToAdd.id]: userToAdd.username,
         },
+        uuidToOnlineStatus: {
+          ...state.uuidToOnlineStatus,
+          [userToAdd.id]: userToAdd.online,
+        },
         conversationsAndMessages: {
           ...state.conversationsAndMessages,
           [userToAdd.id]: [],
@@ -97,32 +130,57 @@ const useSocket = create<UserSocket>()((set, get) => ({
     });
 
     socket.on("signout", () => {
-      sessionStorage.removeItem("accessToken");
+      const setLoginMessage = useLogin.getState().setLoginMessage;
+      setLoginMessage('Signed Out');
       navigate('/login');
-      set((state) => ({
-        currentUser: null,
-        socket: null,
-        uuidToUsername: null,
-        conversationsAndMessages: null,
-      }));
+      
+      useClear.getState().clearStore();
+    });
+
+    socket.on("userDeleted", (otherUserId : string) => {
+      if (window.location.href.includes(otherUserId))
+        navigate('/home');
+
+      set((state) => {
+        const {[otherUserId]: removedUuidUsername, ...newUuidToUsername} = state.uuidToUsername || {};
+        const {[otherUserId]: removedUuidStatus, ...newUuidToOnlineStatus} = state.uuidToOnlineStatus || {};
+        const {[otherUserId]: removedConversationAndMessage, ...newConversationAndMessages} 
+          = state.conversationsAndMessages || {};
+
+        return {
+          uuidToUsername: newUuidToUsername,
+          uuidToOnlineStatus: newUuidToOnlineStatus,
+          conversationsAndMessages: newConversationAndMessages
+        };
+      });
+    });
+
+    socket.on("accountDeleted", () => {
+      const setLoginMessage = useLogin.getState().setLoginMessage;
+      setLoginMessage('Account Deleted');
+      navigate('/login');
+
+      useClear.getState().clearStore();
     });
 
     set({socket});
   },
   disconnect: () => {
-    set((state) => {
-      state.socket?.disconnect();
-      return { socket: null };
-    });
+    const socket = get().socket;
+    if (socket)
+      socket.disconnect();
+    useClear.getState().clearStore();
   },
   setConversationsAndMessages: (conversations : User[]) => {
     set((state) => {
       const newUuidToUsername = { ...state.uuidToUsername };
       const updatedCache = { ...state.conversationsAndMessages };
+      const newUuidToOnlineStatus = {...state.uuidToOnlineStatus};
 
       conversations.forEach((user) => {
+        console.log(user);
         newUuidToUsername[user.id] = user.username;
-        
+        newUuidToOnlineStatus[user.id] = user.online;
         // ONLY set to empty array if it doesn't already have messages
         if (!updatedCache[user.id]) {
           updatedCache[user.id] = [];
@@ -131,6 +189,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
 
       return {
         uuidToUsername: newUuidToUsername,
+        uuidToOnlineStatus: newUuidToOnlineStatus,
         conversationsAndMessages: updatedCache,
       };
     });
@@ -142,6 +201,14 @@ const useSocket = create<UserSocket>()((set, get) => ({
       conversationsAndMessages: {
         ...state.conversationsAndMessages,
         [id]: newMessages,
+      }
+    }));
+  },
+  updateOnlineStatuses: (id, status) => {
+    set((state) => ({
+      uuidToOnlineStatus: {
+        ...state.uuidToOnlineStatus,
+        [id]: status,
       }
     }));
   },

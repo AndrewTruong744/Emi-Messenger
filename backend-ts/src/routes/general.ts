@@ -1,8 +1,8 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
-import authQuery from "../db/authQuery.js";
 import passport from "passport";
 import {type User as PrismaUser} from '@prisma/client'
+import redis from "../cache/redisClient.js";
 
 const router = express.Router();
 
@@ -71,9 +71,12 @@ router.put('/conversation/:id',
         const userAUsername = await generalQuery.getUsername(userId);
         const userBUsername = await generalQuery.getUsername(otherUserId);
 
+        const userAOnline = await redis.exists(`user-${userId}-online`);
+        const userBOnline = await redis.exists(`user-${otherUserId}-online`);
+
         io.to(`room-${roomId}`).emit('addContact', {
-          userA: {id: userId, username: userAUsername}, 
-          userB: {id: otherUserId, username: userBUsername},
+          userA: {id: userId, username: userAUsername, online: userAOnline}, 
+          userB: {id: otherUserId, username: userBUsername, online: userBOnline},
         });
       }
 
@@ -86,6 +89,20 @@ router.put('/conversation/:id',
     }
   }
 );
+
+// router.delete('/conversation/:id', 
+//   passport.authenticate('access-token', {session: false}),
+//   async (req, res) => {
+//     try {
+    
+//     } catch (err) {
+//       return res.status(503).json({
+//         error: true,
+//         message: 'Database is currently unreachable: ' + err
+//       });
+//     }
+//   }
+// );
 
 router.get('/messages/:id',
   passport.authenticate('access-token', {session: false}),
@@ -139,18 +156,46 @@ router.post('/message/:username',
 router.get('/current-user', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
-    const userId = (req.user as PrismaUser).id;
-    const currentUser = await generalQuery.getCurrentUser(userId);
-    return res.json({currentUser});
+    try {
+      const userId = (req.user as PrismaUser).id;
+      const currentUser = await generalQuery.getCurrentUser(userId);
+      return res.json({currentUser});
+    }
+    catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
   }
 );
 
 router.delete('/current-user',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
-    const userId = (req.user as PrismaUser).id;
-    
-    
+    try {
+      const userId = (req.user as PrismaUser).id;
+      const conversations = await generalQuery.getConversations(userId);
+      await generalQuery.deleteUserData(userId);
+
+      const io = req.io;
+
+      // tells this user's contacts to remove this user
+      for (const conversation of conversations) {
+        io.to(`user-${conversation.id}`).emit('userDeleted', userId);
+      }
+
+      // tells the user's tabs that their account was deleted
+      io.to(`user-${userId}`).emit('accountDeleted');
+
+      return res.json({message: "success!"});
+    }
+    catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
   }
 );
 

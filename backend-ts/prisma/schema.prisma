@@ -29,9 +29,8 @@ model User {
   sentMessages Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
-  settingsId String? @unique
-  settings Settings? @relation(fields: [settingsId], references: [id])
-
+  settings Settings?
+  
   tokens Token[]
 }
 
@@ -39,8 +38,8 @@ model Contact {
   userAId String
   userBId String
 
-  userA User @relation("ContactInitiator", fields: [userAId], references: [id])
-  userB User @relation("ContactReceiver", fields: [userBId], references: [id])
+  userA User @relation("ContactInitiator", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("ContactReceiver", fields: [userBId], references: [id], onDelete: Cascade)
 
   @@id([userAId, userBId])
 }
@@ -51,15 +50,17 @@ model Message {
   content String
 
   senderId String
-  sender User @relation("SentMessages", fields: [senderId], references: [id])
+  sender User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   receiverId String
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 }
 
 model Settings {
   id String @id @default(uuid())
-  user User?
+
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Token {
@@ -68,5 +69,5 @@ model Token {
   expiresBy DateTime
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

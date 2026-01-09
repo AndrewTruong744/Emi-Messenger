@@ -1,4 +1,5 @@
 import {PrismaClient} from '@prisma/client';
+import redis from '../cache/redisClient.js';
 
 const prisma = new PrismaClient();
 
@@ -67,42 +68,40 @@ async function getCurrentUser(userId : string) {
 }
 
 async function getConversations(userId : string) {
-  // returns an array of contact entry objects where userId is
-  // in the first column
-  const usersAddedEntry = await prisma.contact.findMany({
+  const contacts = await prisma.contact.findMany({
     where: {
-      userAId: userId
+      OR: [{userAId: userId}, {userBId: userId}],
     },
     include: {
-      userB: {
-        select: {
-          id: true,
-          username: true,
-        }
-      }
-    }
-  });
-
-  // returns an array of contact entry objects where userId is
-  // in the second column
-  const usersOfEntry = await prisma.contact.findMany({
-    where: {
-      userBId: userId
+      userA: {select: {id: true, username: true}},
+      userB: {select: {id: true, username: true}},
     },
-    include: {
-      userA: {
-        select: {
-          id: true,
-          username: true,
-        }
-      }
-    }
   });
 
-  const usersAdded = usersAddedEntry.map(userAdded => userAdded.userB);
-  const usersOf = usersOfEntry.map(userAdded => userAdded.userA);
+  const conversationList = contacts.map((contact) => {
+    return (contact.userAId === userId) ? contact.userB : contact.userA;
+  });
 
-  return [...usersAdded, ...usersOf];
+  if (conversationList.length === 0) 
+    return [];
+
+  const pipeline = redis.pipeline();
+
+  conversationList.forEach(user => {
+    pipeline.exists(`user-${user.id}-online`);
+  });
+  
+  const pipelineResults = await pipeline.exec();
+
+  return conversationList.map((user, index) => {
+    const isOnline = pipelineResults?.[index]?.[1];
+    console.log(user);
+    console.log(isOnline);
+    return {
+      ...user,
+      online: (isOnline && (isOnline as number) > 0),
+    }
+  });
 }
 
 // add a contact if there isnt an existing relationship between userA and userB
@@ -211,6 +210,15 @@ async function addMessage(userAId : string, userBId : string, message : string) 
   return messageCreated;
 }
 
+async function deleteUserData(userId : string) {
+  await prisma.user.delete({
+    where: {
+      id: userId
+    }
+  });
+}
+
+
 export default {
   getDatabaseId,
   getUsername,
@@ -220,4 +228,5 @@ export default {
   addContact,
   getMessages,
   addMessage,
+  deleteUserData,
 }

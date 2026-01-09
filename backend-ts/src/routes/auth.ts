@@ -111,7 +111,6 @@ router.post('/signout', async (req, res, next) => {
   return res.status(200).json({message: 'Logout successful'});
 });
 
-//make sure to hash the refresh token using bcrypt
 router.post('/refresh', async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 

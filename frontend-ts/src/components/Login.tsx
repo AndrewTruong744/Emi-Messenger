@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import styles from "../styles/Login.module.css";
 import api from '../helper/axios.js';
@@ -6,15 +6,31 @@ import Emi from '../assets/Emi6.jpg';
 import Loading from './sub-components/Loading.js';
 import { isAxiosError } from 'axios';
 import { useSocket } from '../helper/store.js';
+import useLogin from '../helper/loginStore.js';
+import useAuth from '../helper/authStore.js';
 
 function Login() {
   const navigate = useNavigate();
+  const setAccessToken = useAuth((state) => state.setAccessToken);
   const clearStore = useSocket((state) => state.clearStore);
+  const loginMessage = useLogin((state) => state.loginMessage);
+  const setLoginMessage = useLogin((state) => state.setLoginMessage);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    function newMessage() {
+      setMessage(loginMessage);
+      setLoginMessage(null);
+    }
+
+    if (loginMessage != null) {
+      newMessage();
+    }
+  }, [loginMessage, setLoginMessage])
 
   const handleGoogleClick = () => {
     window.location.replace(`${import.meta.env.VITE_API_URL}/auth/login/google`);
@@ -26,7 +42,7 @@ function Login() {
 
   async function handleSubmit(e : React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setErrorMessage(null);
+    setMessage(null);
     setIsLoading(true);
 
     const loginData = {
@@ -38,21 +54,21 @@ function Login() {
       const res = await api.post('/auth/login', loginData);
       const accessToken = res.data.accessToken;
       console.log('Login successful!', res.data);
-      sessionStorage.setItem("accessToken", accessToken);
+      setAccessToken(accessToken);
       
       clearStore();
       navigate('/home');
     } catch (err) {
       if (isAxiosError(err)) {
         if (err.response)
-          setErrorMessage('Username or password is incorrect');
+          setMessage('Username or password is incorrect');
         else if (err.request)
-          setErrorMessage('Network Error');
+          setMessage('Network Error');
         else
-          setErrorMessage('Unknown Error');
+          setMessage('Unknown Error');
       }
       else
-        setErrorMessage('System Error');
+        setMessage('System Error');
     }
 
     setIsLoading(false);
@@ -66,9 +82,9 @@ function Login() {
         <h2>Talk the Talk, Walk the Walk</h2>
       </div>
       <div className={styles.right}>
-        {errorMessage && 
+        {message && 
           <div className={styles.error}>
-            <p>{errorMessage}</p>
+            <p>{message}</p>
           </div>
         }
         <div className={styles.formAndOAuth}>

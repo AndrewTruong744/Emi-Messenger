@@ -6,6 +6,7 @@ import api from '../helper/axios';
 
 function Settings() {
   const currentUser = useSocket(state => state.currentUser);
+  const clearStore = useSocket(state => state.clearStore);
   const username = currentUser?.username;
   const email = currentUser?.email;
 
@@ -15,22 +16,26 @@ function Settings() {
   const [infoChanged, setInfoChanged] = useState(false);
 
   function handleUpdateProfile() {
-
+    // TO DO
   }
 
   async function handleSignout() {
     try {
       await api.post("/auth/signout");
-      console.log("success!!!")
-    }
-    catch (err) {
+      console.log("success!!!");
+    } catch (err) {
       console.log(err);
     }
     
   }
 
-  function handleDeleteAccount() {
-
+  async function handleDeleteAccount() {
+    try {
+      await api.delete("/general/current-user");
+      console.log("success!!!");
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -90,7 +95,7 @@ function Settings() {
         <button className={styles.signoutButton} onClick={handleSignout}>Sign Out</button>
 
         <div className={styles.divider}></div>
-        <button className={styles.deleteAccountButton}>Delete Account</button>
+        <button className={styles.deleteAccountButton} onClick={handleDeleteAccount}>Delete Account</button>
       </div>
   );
 }

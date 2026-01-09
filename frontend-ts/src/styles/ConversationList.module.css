@@ -65,6 +65,16 @@
   grid-template-rows: 30px 30px;
   column-gap: 10px;
   border-bottom: 1px solid white;
+  position: relative
+}
+
+.onlineIndicator {
+  width: 10px;
+  background-color: green;
+  aspect-ratio: 1 / 1;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .conversationHighlight {
