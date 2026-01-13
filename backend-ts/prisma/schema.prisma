@@ -18,30 +18,36 @@ datasource db {
 model User {
   id String @id @default(uuid())
   username String @unique
-  displayName String
   email String @unique
   password String?
   sub String? 
 
-  contactsAdded Contact[] @relation("ContactInitiator")
-  contactsOf Contact[] @relation("ContactReceiver")
-  
-  sentMessages Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  conversations ConversationParticipant[]
+  messages Message[]
 
   settings Settings?
   
   tokens Token[]
 }
 
-model Contact {
-  userAId String
-  userBId String
+model Conversation {
+  id String @id @default(uuid())
+  isGroup Boolean @default(false)
+  messages Message[]
 
-  userA User @relation("ContactInitiator", fields: [userAId], references: [id], onDelete: Cascade)
-  userB User @relation("ContactReceiver", fields: [userBId], references: [id], onDelete: Cascade)
+  participants ConversationParticipant[]
+  createdAt DateTime @default(now())
+}
 
-  @@id([userAId, userBId])
+model ConversationParticipant {
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, conversationId])
+  @@index([conversationId])
 }
 
 model Message {
@@ -50,10 +56,12 @@ model Message {
   content String
 
   senderId String
-  sender User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
-  receiverId String
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, sent(sort: Desc)])
 }
 
 model Settings {
@@ -63,6 +71,7 @@ model Settings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// also implement this in redis as well
 model Token {
   id String @id @default(uuid())
   refreshToken String @unique

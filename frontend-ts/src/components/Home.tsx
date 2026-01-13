@@ -31,7 +31,7 @@ function Home() {
     async function getConversations() {
       const axiosRes = await api.get('/general/conversations');
       const conversationsObj = axiosRes.data;
-      setConversationsAndMessages(conversationsObj.conversations);
+      setConversationsAndMessages(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
     }
 
     async function initialize() {

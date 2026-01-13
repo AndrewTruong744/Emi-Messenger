@@ -1,6 +1,7 @@
 import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt, { type JwtPayload } from "jsonwebtoken";
+import redis from '../cache/redisClient.js';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,6 @@ async function createUser(reqBody : any) {
   const user = await prisma.user.create({
     data: {
       username: reqBody.username,
-      displayName: reqBody.displayName,
       email: reqBody.email,
       password: hashedPassword,
       sub: (reqBody.sub === undefined) ? null : reqBody.sub,
@@ -20,6 +20,8 @@ async function createUser(reqBody : any) {
       }
     }
   });
+
+  await redis.hset("usernames", user.id, user.username);
 
   return user;
 }

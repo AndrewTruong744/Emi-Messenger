@@ -11,10 +11,10 @@ interface Props {
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
   const uuidToUsername = useSocket(state => state.uuidToUsername);
-  const uuidToOnlineStatus = useSocket(state => state.uuidToOnlineStatus);
+  const conversationList = useSocket(state => state.conversationList);
+  const currentUser = useSocket(state => state.currentUser);
 
-  const isLoading = (uuidToUsername) ? false : true;
-  console.log(uuidToUsername);
+  const isLoading = (conversationList) ? false : true;
 
   function handleFindPeople() {
     navigate('find-people');
@@ -38,20 +38,28 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
       {(isLoading) ? <Loading /> : 
         <ul className={styles.conversationList}>
           {
-            Object.keys(uuidToUsername ?? {}).map(id => {
-              const username = uuidToUsername![id];
-              console.log(uuidToOnlineStatus?.[id]);
+            Object.values(conversationList ?? {}).map(conversation => {
+              console.log(currentUser);
+
               return (
                 <li 
-                  key={id} 
-                  className={`${styles.conversation} ${(id === activeMessage) ? styles.conversationHighlight : ""}`} 
-                  id={id} 
-                  onClick={() => handleConversationSelected(id)}
+                  key={conversation.id} 
+                  className={
+                    `${styles.conversation} ${(conversation.id === activeMessage) ? 
+                      styles.conversationHighlight : ""}`
+                  } 
+                  id={conversation.id} 
+                  onClick={() => handleConversationSelected(conversation.id)}
                 >
                   {/* change to image when implemented */}
-                  <div className={`${(uuidToOnlineStatus?.[id]) ? styles.onlineIndicator : ""}`}></div>
-                  <div className={styles.profileImage}></div>
-                  <h3 className={styles.name}>{username}</h3>
+                  <div className={styles.profileImage}>
+                    <div className={
+                      `${styles.indicator} ${(conversation.online) ? 
+                        styles.onlineIndicator : ""}`
+                    }>
+                    </div>
+                  </div>
+                  <h3 className={styles.name}>{conversation.name}</h3>
                   <p className={styles.recentMessage}>Most Recent Text Message</p>
                   <p className={styles.recentMessageTime}>2min</p>
                 </li>

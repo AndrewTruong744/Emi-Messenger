@@ -12,39 +12,47 @@ interface User {
   sub: string,
 };
 
+interface Conversation {
+  isGroup: boolean;
+  online: boolean;
+  recentMessage: Message | null;
+  timeStamp: Date;
+  participants: string[];
+  participantNames?: string[];
+  id: string;
+  name: string;
+}
+
 interface Message {
   id: string,
   sent: Date,
   content: string,
   senderId: string,
-  receiverId: string,
-  from?: string
+  conversationId: string
 }
 
 interface UuidToUsername {
   [key : string] : string
 }
 
-interface UuidToOnlineStatus {
-  [key : string] : boolean
-}
-
 interface ConversationsAndMessages {
-  [key : string]: Message[]
+  [key : string]: Message[] | null
 }
 
 interface UserSocket {
   currentUser: User | null,
   socket: Socket | null,
   uuidToUsername : UuidToUsername | null,
-  uuidToOnlineStatus : UuidToOnlineStatus | null,
+  conversationList : {[conversationId : string]: Conversation} | null,
   conversationsAndMessages: ConversationsAndMessages | null,
   setCurrentUser: (currentUser : User) => void,
   connect: (navigate : NavigateFunction) => void,
   disconnect: () => void,
-  setConversationsAndMessages: (conversations : []) => void,
-  updateConversationsAndMessages: (id : string, messages : [] | null) => void,
-  updateOnlineStatuses: (id : string, status : boolean) => void,
+  setConversationsAndMessages: (
+    conversationList : Conversation[], 
+    userIdToUsernames : Record<string,string>
+  ) => void,
+  updateConversationsAndMessages: (messages : Message[]) => void,
   clearStore: () => void,
 }
 
@@ -52,7 +60,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
   currentUser: null,
   socket: null,
   uuidToUsername: null,
-  uuidToOnlineStatus : null,
+  conversationList : null,
   conversationsAndMessages: null,
   setCurrentUser: (currentUser) => {
     set({currentUser});
@@ -63,68 +71,71 @@ const useSocket = create<UserSocket>()((set, get) => ({
 
     const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
 
-    socket.on('userOnline', (otherUserId) => {
+    socket.on('userOnline', (conversation) => {
       console.log('online!');
-      set((state) => ({
-        uuidToOnlineStatus: {
-          ...state.uuidToOnlineStatus,
-          [otherUserId]: true
-        }
-      }));
+      
+      set((state) => {
+        return {
+          conversationList: {
+            ...state.conversationList,
+            [conversation.id]: {
+              ...state.conversationList![conversation.id],
+              online: true,
+            }
+          }
+        };
+        
+      })
     });
 
-    socket.on('userOffline', (otherUserId) => {
-      set((state) => ({
-        uuidToOnlineStatus: {
-          ...state.uuidToOnlineStatus,
-          [otherUserId]: false
+    socket.on('userOffline', (conversation) => {
+      set((state) => {
+        return {
+          conversationList: {
+            ...state.conversationList,
+            [conversation.id]: {
+              ...state.conversationList![conversation.id],
+              online: false,
+            }
+          }
         }
-      }))
-    })
+      });
+    });
 
-    socket.on("sentMessage", (sentMessage) => {
-      const senderId = sentMessage.sender.id;
-      const receiverId = sentMessage.receiver.id;
-
-      let key = "";
-      if ((get().currentUser as User).id === receiverId) {
-        key = senderId;
-        sentMessage.from = "receiver";
-      }
-      else {
-        key = receiverId;
-        sentMessage.from = "sender";
-      }
+    // add way to save previous messages
+    // make sure to update recentMessages
+    socket.on("sentMessage", (sentMessage : Message) => {
+      const conversationId = sentMessage.conversationId;
 
       set((state) => ({
         conversationsAndMessages: {
           ...state.conversationsAndMessages,
-          [key]: [
-            ...((state.conversationsAndMessages as ConversationsAndMessages)[key] || []),
+          [conversationId]: [
+            ...((state.conversationsAndMessages as ConversationsAndMessages)[conversationId] || []),
             sentMessage
           ]
         }
       }));
     })
 
-    socket.on("addContact", (users) => {
-      const userA = users.userA;
-      const userB = users.userB;
-
-      const userToAdd = ((get().currentUser as User).id === userA) ? userB : userA;
+    socket.on("addConversation", (conversation : Conversation) => {
+      const participants = conversation.participants.reduce((acc, participant, index) => {
+        acc[participant] = conversation.participantNames![index];
+        return acc;
+      }, {} as Record<string,string>);
 
       set((state) => ({
         uuidToUsername: {
           ...state.uuidToUsername,
-          [userToAdd.id]: userToAdd.username,
-        },
-        uuidToOnlineStatus: {
-          ...state.uuidToOnlineStatus,
-          [userToAdd.id]: userToAdd.online,
+          ...participants
         },
         conversationsAndMessages: {
           ...state.conversationsAndMessages,
-          [userToAdd.id]: [],
+          [conversation.id]: [],
+        },
+        conversationList: {
+          ...state.conversationList,
+          [conversation.id]: conversation
         }
       }));
     });
@@ -137,20 +148,20 @@ const useSocket = create<UserSocket>()((set, get) => ({
       useClear.getState().clearStore();
     });
 
-    socket.on("userDeleted", (otherUserId : string) => {
-      if (window.location.href.includes(otherUserId))
+    socket.on("conversationDeleted", (conversationId : string) => {
+      if (window.location.href.includes(conversationId))
         navigate('/home');
 
+      // find a way to cleanly remove the username and id
       set((state) => {
-        const {[otherUserId]: removedUuidUsername, ...newUuidToUsername} = state.uuidToUsername || {};
-        const {[otherUserId]: removedUuidStatus, ...newUuidToOnlineStatus} = state.uuidToOnlineStatus || {};
-        const {[otherUserId]: removedConversationAndMessage, ...newConversationAndMessages} 
+        const {[conversationId]: removedConversationAndMessage, ...newConversationAndMessages} 
           = state.conversationsAndMessages || {};
+        const {[conversationId]: removedConversation, ...newConversationList} 
+          = state.conversationList || {};
 
         return {
-          uuidToUsername: newUuidToUsername,
-          uuidToOnlineStatus: newUuidToOnlineStatus,
-          conversationsAndMessages: newConversationAndMessages
+          conversationsAndMessages: newConversationAndMessages,
+          conversationList: newConversationList
         };
       });
     });
@@ -171,44 +182,45 @@ const useSocket = create<UserSocket>()((set, get) => ({
       socket.disconnect();
     useClear.getState().clearStore();
   },
-  setConversationsAndMessages: (conversations : User[]) => {
+  setConversationsAndMessages: (conversationList : Conversation[], userIdToUsernames : Record<string,string>) => {
     set((state) => {
       const newUuidToUsername = { ...state.uuidToUsername };
       const updatedCache = { ...state.conversationsAndMessages };
-      const newUuidToOnlineStatus = {...state.uuidToOnlineStatus};
+      const newConversationList = {...state.conversationList};
 
-      conversations.forEach((user) => {
-        console.log(user);
-        newUuidToUsername[user.id] = user.username;
-        newUuidToOnlineStatus[user.id] = user.online;
-        // ONLY set to empty array if it doesn't already have messages
-        if (!updatedCache[user.id]) {
-          updatedCache[user.id] = [];
+      const currentUser = get().currentUser!
+
+      conversationList.forEach((conversation) => {
+        console.log(conversation);
+        if (!updatedCache[conversation.id]) {
+          updatedCache[conversation.id] = null;
+          conversation.name = conversation
+            .name
+            .split(',')
+            .map(name => name.trim())
+            .filter(name => name != currentUser.username)
+            .join(', ');
+
+          newConversationList[conversation.id] = conversation;
         }
+      });
+
+      Object.entries(userIdToUsernames).forEach((userIdToUsername) => {
+        newUuidToUsername[userIdToUsername[0]] = userIdToUsername[1];
       });
 
       return {
         uuidToUsername: newUuidToUsername,
-        uuidToOnlineStatus: newUuidToOnlineStatus,
+        conversationList: newConversationList,
         conversationsAndMessages: updatedCache,
       };
     });
   },
-  updateConversationsAndMessages: (id, messages) => {
-    const newMessages = messages || [];
-
+  updateConversationsAndMessages: (messages) => {
     set((state) => ({
       conversationsAndMessages: {
         ...state.conversationsAndMessages,
-        [id]: newMessages,
-      }
-    }));
-  },
-  updateOnlineStatuses: (id, status) => {
-    set((state) => ({
-      uuidToOnlineStatus: {
-        ...state.uuidToOnlineStatus,
-        [id]: status,
+        [messages[0].conversationId]: messages,
       }
     }));
   },
@@ -217,6 +229,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
       currentUser: null,
       socket: null,
       uuidToUsername: null,
+      conversationList: null,
       conversationsAndMessages: null,
     });
   }

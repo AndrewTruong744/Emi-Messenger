@@ -50,13 +50,14 @@ function handleSocketEvents(io : Server) {
       }
     }, 30000);
   
-    const conversations = await generalQuery.getConversations(userId);
-    for (const conversation of conversations) {
-      const roomId = [userId, conversation.id].sort().join("_");
-      socket.join(`room-${roomId}`);
+    const conversationsAndUsernames = await generalQuery.getConversations(userId);
+    for (const conversation of conversationsAndUsernames.conversationList!) {
+      socket.join(`room-${conversation.id}`);
 
-      if (numConnections === 1)
-        socket.to(`room-${roomId}`).emit('userOnline', userId);
+      if (numConnections === 1 && !conversation.isGroup)
+        socket.to(`room-${conversation.id}`).emit('userOnline', { 
+          id : conversation.id
+        });
     }
   
     socket.on("disconnect", async () => {
@@ -68,10 +69,11 @@ function handleSocketEvents(io : Server) {
       if (remainingConnections === 0) {
         await redis.del(`${userRoom}-online`);
 
-        const conversations = await generalQuery.getConversations(userId);
-        for (const conversation of conversations) {
-          const roomId = [userId, conversation.id].sort().join("_");
-          io.to(`room-${roomId}`).emit('userOffline', userId);
+        const conversationsAndUsernames = await generalQuery.getConversations(userId);
+        for (const conversation of conversationsAndUsernames.conversationList!) {
+          io.to(`room-${conversation.id}`).emit('userOffline', {
+          id : conversation.id
+        });
         }
 
         console.log(`User ${userId} is now fully offline.`);

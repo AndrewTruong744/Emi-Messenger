@@ -66,7 +66,6 @@ passport.use('google', new GoogleStrategy({
 
     const userContents = {
       email: profile.emails?.[0]?.value,
-      displayName: profile.displayName,
       sub: googleSub,
       username: crypto.randomUUID(),
     }

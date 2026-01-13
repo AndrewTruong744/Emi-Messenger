@@ -9,16 +9,15 @@ import { useSocket } from "../helper/store";
 
 function Conversation() {
   const params = useParams();
-  const uuidToUsername = useSocket(state => state.uuidToUsername);
-  const otherUserId = (params.user) ? params.user : "";
-  const otherUsername = uuidToUsername?.[otherUserId] ?? "Loading";
+  const conversationId = (params.id) ? params.id : "";
+  const conversationName = useSocket(state => state.conversationList?.[conversationId]?.name ?? "Loading");
 
   const context = useOutletContext<Context>();
   const {onSetActiveMessage} = context;
 
   useEffect(() => {
-    onSetActiveMessage(otherUserId);
-  }, [otherUserId, onSetActiveMessage]);
+    onSetActiveMessage(conversationId);
+  }, [conversationId, onSetActiveMessage]);
 
   useEffect(() => {
     return () => {
@@ -28,9 +27,9 @@ function Conversation() {
 
   return (
     <main className={styles.conversation}>
-      <MessageHeader otherUsername={otherUsername}/>
-      <Messages otherUserId={otherUserId}/>
-      <MessageBox otherUserId={otherUserId}/>
+      <MessageHeader conversationName={conversationName}/>
+      <Messages conversationId={conversationId}/>
+      <MessageBox conversationId={conversationId}/>
     </main>
   );
 }

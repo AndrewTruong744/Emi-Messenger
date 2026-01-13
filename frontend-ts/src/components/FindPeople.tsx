@@ -13,6 +13,7 @@ interface Users {
 function FindPeople() {
   const navigate = useNavigate();
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
+  const currentUser = useSocket(state => state.currentUser);
 
   const context = useOutletContext<Context>();
   const {onSetActiveMessage} = context;
@@ -20,12 +21,21 @@ function FindPeople() {
   const [users, setUsers] = useState<Users[]>([]);
   const [username, setUsername] = useState('');
 
+  const [userIdsSelected, setUserIdsSelected] = useState<string[]>([]);
+  const [usernamesSelected, setUsernamesSelected] = useState<string[]>([]);
+
   useEffect(() => {
     async function getUsers() {
       try {
         const axiosRes = await api.get('/general/users');
         const usersObj = axiosRes.data;
         setUsers(usersObj.users);
+
+        // if (currentUser) {
+        //   setUserIdsSelected([currentUser.id]);
+        //   setUsernamesSelected([currentUser.username]);
+        // }
+
         console.log(usersObj);
       } catch (err) {
         console.log('API fetch failed ' + err);
@@ -34,7 +44,7 @@ function FindPeople() {
     }
 
     getUsers();
-  }, []);
+  }, [currentUser]);
 
   async function handleFindUser(e : React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
@@ -50,7 +60,10 @@ function FindPeople() {
 
   async function handleUserClicked(e : React.MouseEvent<HTMLLIElement>) {
     try {
-      await api.put(`general/conversation/${e.currentTarget.id}`, {});
+      await api.put(`general/conversation/`, {
+        userIds: [currentUser?.id, e.currentTarget.id], 
+        usernames: [currentUser?.username, e.currentTarget.querySelector('h3')!.textContent]
+      });
       updateConversationsAndMessages(e.currentTarget.id, null);
       onSetActiveMessage(e.currentTarget.id);
       navigate(`/home/conversation/${e.currentTarget.id}`);
@@ -72,7 +85,12 @@ function FindPeople() {
       <ul className={styles.peopleList}>
         {users.map(user => {
           return (
-            <li key={user.username} id={user.id} className={styles.person} onClick={handleUserClicked}>
+            <li 
+              key={user.id} 
+              id={user.id}  
+              className={styles.person} 
+              onClick={handleUserClicked}
+            >
               {/* update to get profile pic */}
               <div className={styles.profileImage}></div>
               <h3 className={styles.name}>{user.username}</h3>

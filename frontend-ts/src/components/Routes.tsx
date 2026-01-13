@@ -36,7 +36,7 @@ const routes = [
         element: <Home />,
         children: [
           {
-            path: 'conversation/:user',
+            path: 'conversation/:id',
             element: <Conversation />
           },
           {

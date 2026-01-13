@@ -7,25 +7,27 @@ import Loading from "./Loading";
 import { useState } from "react";
 
 interface Props {
-  otherUserId: string
+  conversationId: string
 }
 
-function Messages({otherUserId} : Props) {
-  console.log(otherUserId);
+function Messages({conversationId} : Props) {
+  console.log(conversationId);
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
-  const messages = useSocket(state => state.conversationsAndMessages?.[otherUserId]);
+  const messages = useSocket(state => state.conversationsAndMessages?.[conversationId]);
+  const currentUser = useSocket(state => state.currentUser);
 
   const [isLoading, setIsLoading] = useState(true);
   const [userNotFound, setUserNotFound] = useState(false);
 
   useEffect(() => {
     async function getMessages() {
-      if (!messages || messages.length == 0) {
+      if (messages === null && isLoading) {
         try {
-          const axiosRes = await api.get(`/general/messages/${otherUserId}`);
+          const axiosRes = await api.get(`/general/messages/${conversationId}`);
           const messagesObj = axiosRes.data;
-
-          updateConversationsAndMessages(otherUserId, messagesObj.messages);
+          console.log(messagesObj);
+          if (messagesObj.messages.length > 0)
+            updateConversationsAndMessages(messagesObj.messages);
           setIsLoading(false);
           console.log(axiosRes);
         } catch (err) {
@@ -33,22 +35,22 @@ function Messages({otherUserId} : Props) {
           setUserNotFound(true);
         }
       }
-      else
+      else if (messages !== undefined) {
         setIsLoading(false);
+      }
     }
 
     getMessages();
-  }, [otherUserId]); // only fetch messages when user id changes
+  }, [conversationId, messages]); // only fetch messages when user id changes
 
   console.log(messages);
-  console.log(userNotFound);
 
   return (
     (isLoading) ? <Loading /> : 
       <div className={styles.texts}>
         {messages && messages.map(message => {
           const formattedTimeStamp = format(message.sent, 'HH:mm MM/dd/yyyy');
-          const className = (message.from === "sender") ? "textRight" : "textLeft";
+          const className = (message.senderId === currentUser?.id) ? "textRight" : "textLeft";
 
           return (
             <div key={message.id} className={styles[className]}>

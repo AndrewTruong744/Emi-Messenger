@@ -12,7 +12,6 @@ function Signup() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,7 +32,6 @@ function Signup() {
       username,
       password,
       email,
-      displayName
     }
 
     try {
@@ -109,19 +107,6 @@ function Signup() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     type='email'
-                    required
-                  />
-                </div>
-
-                <div className={styles.labelAndInput}>
-                  <label htmlFor='displayName'>Display Name:</label>
-                  <input
-                    className={styles.input}
-                    id='displayName'
-                    name='displayName'
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    type='text'
                     required
                   />
                 </div>

@@ -43,8 +43,8 @@ router.get('/conversations',
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const conversations = await generalQuery.getConversations(userId);
-      return res.json({conversations});
+      const conversationsAndUsernames = await generalQuery.getConversations(userId);
+      return res.json(conversationsAndUsernames);
     } catch (err) {
       return res.status(503).json({
         error: true,
@@ -54,29 +54,38 @@ router.get('/conversations',
   }
 );
 
-router.put('/conversation/:id', 
+// add your own userId to userIds
+router.put('/conversation', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const io = req.io;
-      const userId = (req.user as PrismaUser).id;
-      const otherUserId = req.params.id;
-      const addedContact = await generalQuery.addContact(userId, otherUserId);
+      const userIds = req.body.userIds;
+      const usernames = req.body.usernames;
+      const addedConversation = await generalQuery.addConversation(userIds as string[]);
       
-      if (addedContact) {
-        const roomId = [userId, otherUserId].sort().join("_");
-        await io.in(`user-${userId}`).socketsJoin(`room-${roomId}`);
-        await io.in(`user-${otherUserId}`).socketsJoin(`room-${roomId}`);
+      if (addedConversation) {
+        userIds.forEach(async (otherUserId : string) => {
+          await io.in(`user-${otherUserId}`).socketsJoin(`room-${addedConversation.id}`);
+        });
 
-        const userAUsername = await generalQuery.getUsername(userId);
-        const userBUsername = await generalQuery.getUsername(otherUserId);
+        let online = null;
+        if (userIds.length < 3) {
+          const userAOnline = await redis.exists(`user-${userIds[0]}-online`);
+          const userBOnline = await redis.exists(`user-${userIds[1]}-online`);
+          online = {[userIds[0] as string]: userAOnline === 1, [userIds[1] as string]: userBOnline === 1}; 
+        }
 
-        const userAOnline = await redis.exists(`user-${userId}-online`);
-        const userBOnline = await redis.exists(`user-${otherUserId}-online`);
-
-        io.to(`room-${roomId}`).emit('addContact', {
-          userA: {id: userId, username: userAUsername, online: userAOnline}, 
-          userB: {id: otherUserId, username: userBUsername, online: userBOnline},
+        // we let frontend handle parsing the name
+        io.to(`room-${addedConversation.id}`).emit('addConversation', {
+          id: addedConversation.id,
+          name: addedConversation.name,
+          isGroup: userIds.length > 2,
+          recentMessage: null,
+          online: online, // always false for group chats
+          timeStamp: new Date(),
+          participants: userIds,
+          participantNames: usernames
         });
       }
 
@@ -90,39 +99,46 @@ router.put('/conversation/:id',
   }
 );
 
-// router.delete('/conversation/:id', 
-//   passport.authenticate('access-token', {session: false}),
-//   async (req, res) => {
-//     try {
-    
-//     } catch (err) {
-//       return res.status(503).json({
-//         error: true,
-//         message: 'Database is currently unreachable: ' + err
-//       });
-//     }
-//   }
-// );
+// make sure user is in conversation before deleting
+router.delete('/conversation/:id', 
+  passport.authenticate('access-token', {session: false}),
+  async (req, res) => {
+    try {
+      const io = req.io;
+      const conversationId = req.params.id;
+      await generalQuery.deleteConversation(conversationId);
+      await io.in(`room-${conversationId}`).emit('conversationDeleted');
+      await io.in(`room-${conversationId}`).socketsLeave(`room-${conversationId}`);
+      return res.json({message: "success!!"});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable: ' + err
+      });
+    }
+  }
+);
 
-router.get('/messages/:id',
+// make sure user is in conversation before getting messages
+router.get('/messages/:conversationid',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const otherUserId = req.params.id;
+      const conversationId = req.params.conversationid;
+      const previousMessageId = req.query['previousMessageId'] as string;
 
-      const otherUsername = await generalQuery.getUsername(otherUserId);
-
-      if (!otherUsername) {
+      const messages = await generalQuery.getMessages(conversationId, previousMessageId);
+      if (!messages){
         return res.status(404).json({
-        error: true,
-        message: 'User not found'
-      });
+          error: true,
+          message: 'Conversation not found'
+        });
       }
 
-      const messages = await generalQuery.getMessages(userId, otherUserId!);
       return res.json({messages});
     } catch (err) {
+      console.log(err);
       return res.status(503).json({
         error: true,
         message: 'Database is currently unreachable'
@@ -131,17 +147,17 @@ router.get('/messages/:id',
   }
 );
 
-router.post('/message/:username',
+// make sure user is in conversation before posting a message
+router.post('/message/:conversationId',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const io = req.io;
       const userId = (req.user as PrismaUser).id;
-      const otherUserId = req.params.username;
+      const conversationId = req.params.conversationId;
 
-      const messageCreated = await generalQuery.addMessage(userId, otherUserId, req.body.message);
-      const roomId = [userId, otherUserId].sort().join("_");
-      io.to(`room-${roomId}`).emit('sentMessage', messageCreated);
+      const messageCreated = await generalQuery.addMessage(conversationId, userId, req.body.message);
+      io.to(`room-${conversationId}`).emit('sentMessage', messageCreated);
 
       return res.status(201).json({message: "success!"});
     } catch (err) {
@@ -175,14 +191,16 @@ router.delete('/current-user',
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const conversations = await generalQuery.getConversations(userId);
+      const conversationsAndUsernames = await generalQuery.getConversations(userId);
       await generalQuery.deleteUserData(userId);
 
       const io = req.io;
 
-      // tells this user's contacts to remove this user
-      for (const conversation of conversations) {
-        io.to(`user-${conversation.id}`).emit('userDeleted', userId);
+      // tells users in this user's conversations that this user was deleted.
+      // delete all conversations that have this user
+      for (const conversation of conversationsAndUsernames.conversationList!) {
+        await io.in(`room-${conversation.id}`).emit('conversationDeleted', conversation.id);
+        await io.in(`room-${conversation.id}`).socketsLeave(`room-${conversation.id}`);
       }
 
       // tells the user's tabs that their account was deleted
