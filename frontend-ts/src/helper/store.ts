@@ -124,6 +124,14 @@ const useSocket = create<UserSocket>()((set, get) => ({
         return acc;
       }, {} as Record<string,string>);
 
+      const currentUser = get().currentUser!
+      conversation.name = conversation
+            .name
+            .split(',')
+            .map(name => name.trim())
+            .filter(name => name != currentUser.username)
+            .join(', ');
+
       set((state) => ({
         uuidToUsername: {
           ...state.uuidToUsername,

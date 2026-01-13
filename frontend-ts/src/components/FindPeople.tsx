@@ -10,9 +10,11 @@ interface Users {
   username: string
 }
 
+// make sure to make it case insensitive
+// get rid of chats to yourself for now
+// add refresh button
 function FindPeople() {
   const navigate = useNavigate();
-  const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
   const currentUser = useSocket(state => state.currentUser);
 
   const context = useOutletContext<Context>();
@@ -31,10 +33,11 @@ function FindPeople() {
         const usersObj = axiosRes.data;
         setUsers(usersObj.users);
 
-        // if (currentUser) {
-        //   setUserIdsSelected([currentUser.id]);
-        //   setUsernamesSelected([currentUser.username]);
-        // }
+        if (currentUser) {
+          console.log(currentUser);
+          setUserIdsSelected([currentUser.id]);
+          setUsernamesSelected([currentUser.username]);
+        }
 
         console.log(usersObj);
       } catch (err) {
@@ -58,15 +61,33 @@ function FindPeople() {
     }
   }
 
-  async function handleUserClicked(e : React.MouseEvent<HTMLLIElement>) {
+  async function handleUserSelected(e : React.MouseEvent<HTMLLIElement>) {
+    const targetId = e.currentTarget.id;
+    const targetUsername = e.currentTarget.querySelector('h3')!.textContent;
+
+    if (userIdsSelected.includes(targetId)) {
+      const newUserIdsSelected = [...userIdsSelected].filter(userId => userId != targetId);
+      const newUsernamessSelected = [...usernamesSelected].filter(username => username != targetUsername);
+      setUserIdsSelected(newUserIdsSelected);
+      setUsernamesSelected(newUsernamessSelected);
+    }
+    else {
+      setUserIdsSelected([...userIdsSelected, targetId]);
+      setUsernamesSelected([...usernamesSelected, targetUsername]);
+    }
+  }
+
+  async function handleUserClicked(e : React.MouseEvent<HTMLButtonElement>) {
     try {
-      await api.put(`general/conversation/`, {
-        userIds: [currentUser?.id, e.currentTarget.id], 
-        usernames: [currentUser?.username, e.currentTarget.querySelector('h3')!.textContent]
+      const axiosRes = await api.put(`general/conversation/`, {
+        userIds: userIdsSelected, 
+        usernames: usernamesSelected
       });
-      updateConversationsAndMessages(e.currentTarget.id, null);
-      onSetActiveMessage(e.currentTarget.id);
-      navigate(`/home/conversation/${e.currentTarget.id}`);
+      console.log(axiosRes);
+      console.log(userIdsSelected);
+      console.log(usernamesSelected);
+      onSetActiveMessage(axiosRes.data.conversationId);
+      navigate(`/home/conversation/${axiosRes.data.conversationId}`);
     } catch (err) {
       console.log(err);
     }
@@ -88,8 +109,12 @@ function FindPeople() {
             <li 
               key={user.id} 
               id={user.id}  
-              className={styles.person} 
-              onClick={handleUserClicked}
+              className={
+                `${styles.person} 
+                ${(userIdsSelected.filter(userId => userId != currentUser?.id).includes(user.id) 
+                  ? styles.personHighlight : "")}`
+              } 
+              onClick={handleUserSelected}
             >
               {/* update to get profile pic */}
               <div className={styles.profileImage}></div>
@@ -98,6 +123,18 @@ function FindPeople() {
           );
         })}
       </ul>
+      <div className={styles.displaySelected} hidden={userIdsSelected.length < 2}>
+        <p>
+          Users Selected: {" "}
+          {usernamesSelected.map((username, index) => {
+            if (index === 0)
+              return null;
+
+            return <span key={username}>{(index === 1) ? username : ', ' + username}</span>
+          })}
+        </p>
+        <button onClick={handleUserClicked}>Create Conversation</button>
+      </div>
     </main>
   );
 }

@@ -64,7 +64,7 @@ router.put('/conversation',
       const usernames = req.body.usernames;
       const addedConversation = await generalQuery.addConversation(userIds as string[]);
       
-      if (addedConversation) {
+      if (addedConversation && addedConversation.created) {
         userIds.forEach(async (otherUserId : string) => {
           await io.in(`user-${otherUserId}`).socketsJoin(`room-${addedConversation.id}`);
         });
@@ -89,8 +89,9 @@ router.put('/conversation',
         });
       }
 
-      return res.json({message: "success!"});
+      return res.json({conversationId: addedConversation!.id});
     } catch (err) {
+      console.log(err);
       return res.status(503).json({
         error: true,
         message: 'Database is currently unreachable: ' + err

@@ -270,7 +270,14 @@ async function addConversation(userIds : string[]) {
 
   let conversationId = indexFound !== -1 ? conversationIds[indexFound] : null; 
 
-  if (!conversationId) {
+  if (conversationId) {
+    return {
+      id: conversationId,
+      name: conversationIdsObject[conversationId],
+      created: false
+    }
+  }
+  else {
     const conversationEntry = await prisma.conversation.findFirst({
       where: {
         AND: [
@@ -341,7 +348,8 @@ async function addConversation(userIds : string[]) {
 
     return {
       id: createdConversation.id,
-      name: conversationName, 
+      name: conversationName,
+      created: true,
     };
   }
 

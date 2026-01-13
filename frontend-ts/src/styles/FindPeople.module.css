@@ -54,6 +54,10 @@
   border-bottom: 1px solid white;
 }
 
+.personHighlight {
+  background-color: rgb(75,75,75);
+}
+
 .profileImage {
   height: 75px;
   aspect-ratio: 1 / 1;

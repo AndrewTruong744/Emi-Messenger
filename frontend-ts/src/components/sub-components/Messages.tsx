@@ -10,6 +10,7 @@ interface Props {
   conversationId: string
 }
 
+// for group chats, show who sent what
 function Messages({conversationId} : Props) {
   console.log(conversationId);
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
