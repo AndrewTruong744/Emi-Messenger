@@ -66,6 +66,7 @@ async function getCurrentUser(userId : string) {
   return user;
 }
 
+// create a shared user-conversations and stringify metadata
 async function getConversations(userId : string) {
   const redisConversations = await redis.hgetall(`user-${userId}-conversations`);
   let conversationList = Object.entries(redisConversations).map(([id, name]) => {

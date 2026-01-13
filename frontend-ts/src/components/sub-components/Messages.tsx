@@ -11,6 +11,8 @@ interface Props {
 }
 
 // for group chats, show who sent what
+// make sure to display Send a message when no messages have been sent
+// increase font size of messages with width is large
 function Messages({conversationId} : Props) {
   console.log(conversationId);
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
@@ -21,12 +23,14 @@ function Messages({conversationId} : Props) {
   const [userNotFound, setUserNotFound] = useState(false);
 
   useEffect(() => {
+
     async function getMessages() {
-      if (messages === null && isLoading) {
+      if (messages === null) {
         try {
           const axiosRes = await api.get(`/general/messages/${conversationId}`);
           const messagesObj = axiosRes.data;
           console.log(messagesObj);
+
           if (messagesObj.messages.length > 0)
             updateConversationsAndMessages(messagesObj.messages);
           setIsLoading(false);

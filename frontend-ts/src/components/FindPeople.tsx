@@ -10,8 +10,7 @@ interface Users {
   username: string
 }
 
-// make sure to make it case insensitive
-// get rid of chats to yourself for now
+// make sure to make it case insensitive => database query
 // add refresh button
 function FindPeople() {
   const navigate = useNavigate();
@@ -105,6 +104,9 @@ function FindPeople() {
       />
       <ul className={styles.peopleList}>
         {users.map(user => {
+          if (user.id === currentUser?.id)
+            return null;
+
           return (
             <li 
               key={user.id} 
@@ -123,9 +125,9 @@ function FindPeople() {
           );
         })}
       </ul>
-      <div className={styles.displaySelected} hidden={userIdsSelected.length < 2}>
+      <div className={`${(userIdsSelected.length >= 2) ? styles.displaySelected : styles.displaySelectedHidden}`}>
         <p>
-          Users Selected: {" "}
+          <span className={styles.usersSelectedTitle}>Users Selected: {" "}</span>
           {usernamesSelected.map((username, index) => {
             if (index === 0)
               return null;
@@ -133,7 +135,7 @@ function FindPeople() {
             return <span key={username}>{(index === 1) ? username : ', ' + username}</span>
           })}
         </p>
-        <button onClick={handleUserClicked}>Create Conversation</button>
+        <button onClick={handleUserClicked} className={styles.createConversation}>Create Conversation</button>
       </div>
     </main>
   );

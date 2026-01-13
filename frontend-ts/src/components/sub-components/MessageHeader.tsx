@@ -4,6 +4,9 @@ interface Props {
   conversationName: string
 }
 
+// implement function to delete a conversation
+// implement popup that shows users in conversation
+// implement overflow control with conversation name
 function MessageHeader({conversationName} : Props) {
 
   return (

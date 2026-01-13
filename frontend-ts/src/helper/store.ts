@@ -15,8 +15,8 @@ interface User {
 interface Conversation {
   isGroup: boolean;
   online: boolean;
-  recentMessage: Message | null;
-  timeStamp: Date;
+  recentMessage: string | null;
+  timeStamp: string;
   participants: string[];
   participantNames?: string[];
   id: string;
@@ -25,7 +25,7 @@ interface Conversation {
 
 interface Message {
   id: string,
-  sent: Date,
+  sent: string,
   content: string,
   senderId: string,
   conversationId: string
@@ -114,6 +114,14 @@ const useSocket = create<UserSocket>()((set, get) => ({
             ...((state.conversationsAndMessages as ConversationsAndMessages)[conversationId] || []),
             sentMessage
           ]
+        },
+        conversationList: {
+          ...state.conversationList,
+          [conversationId]: {
+            ...state.conversationList![conversationId],
+            recentMessage: sentMessage.content,
+            timeStamp: sentMessage.sent
+          }
         }
       }));
     })

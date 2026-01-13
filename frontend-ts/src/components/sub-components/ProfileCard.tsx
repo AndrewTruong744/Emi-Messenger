@@ -2,6 +2,7 @@ import styles from "../../styles/ProfileCard.module.css";
 import { useSocket } from "../../helper/store";
 import { useNavigate } from "react-router-dom";
 
+// add ability to navigate away from settings when clicking it again
 function ProfileCard() {
   const navigate = useNavigate();
   const currentUser = useSocket(state => state.currentUser);

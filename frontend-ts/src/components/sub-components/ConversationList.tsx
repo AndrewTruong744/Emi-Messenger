@@ -2,6 +2,7 @@ import styles from "../../styles/ConversationList.module.css";
 import { useSocket } from "../../helper/store";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
+import { formatDistanceToNow } from "date-fns";
 
 interface Props {
   activeMessage: string | null | undefined,
@@ -10,11 +11,28 @@ interface Props {
 
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
-  const uuidToUsername = useSocket(state => state.uuidToUsername);
   const conversationList = useSocket(state => state.conversationList);
   const currentUser = useSocket(state => state.currentUser);
 
   const isLoading = (conversationList) ? false : true;
+
+  function formatTimeShort(date : string) {
+    const formattedTime = formatDistanceToNow(new Date(date));
+
+    return formattedTime
+    .replace('about ', '')
+    .replace('less than a minute', '1m')
+    .replace(' minutes', 'm')
+    .replace(' minute', 'm')
+    .replace(' hours', 'h')
+    .replace(' hour', 'h')
+    .replace(' days', 'd')
+    .replace(' day', 'd')
+    .replace(' months', 'mo')
+    .replace(' month', 'mo')
+    .replace(' years', 'y')
+    .replace(' year', 'y');
+  }
 
   function handleFindPeople() {
     navigate('find-people');
@@ -39,7 +57,8 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
         <ul className={styles.conversationList}>
           {
             Object.values(conversationList ?? {}).map(conversation => {
-              console.log(currentUser);
+              console.log(conversation);
+              console.log(conversation.timeStamp);
 
               return (
                 <li 
@@ -54,14 +73,18 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
                   {/* change to image when implemented */}
                   <div className={styles.profileImage}>
                     <div className={
-                      `${styles.indicator} ${(conversation.online) ? 
+                      `${(conversation.isGroup) ? "" : styles.indicator} ${(conversation.online) ? 
                         styles.onlineIndicator : ""}`
                     }>
                     </div>
                   </div>
                   <h3 className={styles.name}>{conversation.name}</h3>
-                  <p className={styles.recentMessage}>Most Recent Text Message</p>
-                  <p className={styles.recentMessageTime}>2min</p>
+                  <p className={styles.recentMessage}>
+                    {(conversation.recentMessage) ? conversation.recentMessage : ""}
+                  </p>
+                  <p className={styles.recentMessageTime}>
+                    {(conversation.timeStamp) ? formatTimeShort(conversation.timeStamp) : '--'}
+                  </p>
                 </li>
               );
             })
