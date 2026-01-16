@@ -1,5 +1,5 @@
 import styles from "../../styles/ConversationList.module.css";
-import { useSocket } from "../../helper/store";
+import { useSocket, type Conversation } from "../../helper/store";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import { formatDistanceToNow } from "date-fns";
@@ -9,15 +9,23 @@ interface Props {
   onSetActiveMessage: React.Dispatch<React.SetStateAction<string | null | undefined>>
 }
 
+// bring most recent conversations on top, sort by timestamp (update redis caching first)
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
-  const conversationList = useSocket(state => state.conversationList);
-  const currentUser = useSocket(state => state.currentUser);
+  const conversationListObj = useSocket(state => state.conversationList);
+  const isLoading = (conversationListObj) ? false : true;
+  const currentUser = useSocket((state) => state.currentUser);
 
-  const isLoading = (conversationList) ? false : true;
+  let sortedConversationList : Conversation[] = [];
+  if (conversationListObj) {
+    sortedConversationList = Object.values(conversationListObj);
+    sortedConversationList.sort((a,b) => {
+      return new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime();
+    })
+  }
 
-  function formatTimeShort(date : string) {
-    const formattedTime = formatDistanceToNow(new Date(date));
+  function formatTimeShort(date : string | number) {
+    const formattedTime = formatDistanceToNow(new Date(Number(date)));
 
     return formattedTime
     .replace('about ', '')
@@ -56,7 +64,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
       {(isLoading) ? <Loading /> : 
         <ul className={styles.conversationList}>
           {
-            Object.values(conversationList ?? {}).map(conversation => {
+            sortedConversationList.map(conversation => {
               console.log(conversation);
               console.log(conversation.timeStamp);
 

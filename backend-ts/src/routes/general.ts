@@ -38,23 +38,26 @@ router.get('/users/:username',
   }
 );
 
+// implement pagination
 router.get('/conversations',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const conversationsAndUsernames = await generalQuery.getConversations(userId);
+      const conversationsAndUsernames = await generalQuery.getConversations(userId, null);
       return res.json(conversationsAndUsernames);
     } catch (err) {
+      console.log(err);
       return res.status(503).json({
         error: true,
-        message: 'Database is currently unreachable'
+        message: 'Database is currently unreachable' + err
       });
     }
   }
 );
 
 // add your own userId to userIds
+// make sure to limit each user to 500 conversations
 router.put('/conversation', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
@@ -62,34 +65,44 @@ router.put('/conversation',
       const io = req.io;
       const userIds = req.body.userIds;
       const usernames = req.body.usernames;
-      const addedConversation = await generalQuery.addConversation(userIds as string[]);
+      const addedConversation = await generalQuery.addConversation(userIds as string[], usernames as string[]);
       
       if (addedConversation && addedConversation.created) {
-        userIds.forEach(async (otherUserId : string) => {
-          await io.in(`user-${otherUserId}`).socketsJoin(`room-${addedConversation.id}`);
-        });
+        const conversation = addedConversation.conversation;
 
-        let online = null;
+        for (const userId of userIds) {
+          await io.in(`user-${userId}`).socketsJoin(`room-${conversation.id}`);
+        }
+
         if (userIds.length < 3) {
           const userAOnline = await redis.exists(`user-${userIds[0]}-online`);
           const userBOnline = await redis.exists(`user-${userIds[1]}-online`);
-          online = {[userIds[0] as string]: userAOnline === 1, [userIds[1] as string]: userBOnline === 1}; 
-        }
 
-        // we let frontend handle parsing the name
-        io.to(`room-${addedConversation.id}`).emit('addConversation', {
-          id: addedConversation.id,
-          name: addedConversation.name,
-          isGroup: userIds.length > 2,
-          recentMessage: null,
-          online: online, // always false for group chats
-          timeStamp: new Date(),
-          participants: userIds,
-          participantNames: usernames
-        });
+          io.to(`user-${userIds[0]}`).emit('addConversation', {
+            ...conversation,
+            online: userBOnline === 1 ? true : false,
+            participants: userIds,
+            participantNames: usernames
+          });
+
+          io.to(`user-${userIds[1]}`).emit('addConversation', {
+            ...conversation,
+            online: userAOnline === 1 ? true : false,
+            participants: userIds,
+            participantNames: usernames
+          });
+        }
+        else {
+          io.to(`room-${conversation.id}`).emit('addConversation', {
+            ...conversation,
+            online: false, // always false for group chats
+            participants: userIds,
+            participantNames: usernames
+          });
+        }
       }
 
-      return res.json({conversationId: addedConversation!.id});
+      return res.json({conversationId: addedConversation!.conversation.id});
     } catch (err) {
       console.log(err);
       return res.status(503).json({
@@ -99,6 +112,9 @@ router.put('/conversation',
     }
   }
 );
+
+// updating a conversation name
+// router.put('/conversation/:id',)
 
 // make sure user is in conversation before deleting
 router.delete('/conversation/:id', 
@@ -136,7 +152,7 @@ router.get('/messages/:conversationid',
           message: 'Conversation not found'
         });
       }
-
+      
       return res.json({messages});
     } catch (err) {
       console.log(err);
@@ -187,21 +203,22 @@ router.get('/current-user',
   }
 );
 
+// update
 router.delete('/current-user',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
       const userId = (req.user as PrismaUser).id;
-      const conversationsAndUsernames = await generalQuery.getConversations(userId);
+      const conversationIds = await generalQuery.getAllConversationIds(userId);
       await generalQuery.deleteUserData(userId);
 
       const io = req.io;
 
       // tells users in this user's conversations that this user was deleted.
       // delete all conversations that have this user
-      for (const conversation of conversationsAndUsernames.conversationList!) {
-        await io.in(`room-${conversation.id}`).emit('conversationDeleted', conversation.id);
-        await io.in(`room-${conversation.id}`).socketsLeave(`room-${conversation.id}`);
+      for (const conversationId of conversationIds) {
+        await io.in(`room-${conversationId}`).emit('conversationDeleted', conversationId);
+        await io.in(`room-${conversationId}`).socketsLeave(`room-${conversationId}`);
       }
 
       // tells the user's tabs that their account was deleted

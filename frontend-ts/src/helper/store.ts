@@ -71,39 +71,49 @@ const useSocket = create<UserSocket>()((set, get) => ({
 
     const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
 
-    socket.on('userOnline', (conversation) => {
+    socket.on('userOnline', (conversationId) => {
       console.log('online!');
       
       set((state) => {
-        return {
-          conversationList: {
-            ...state.conversationList,
-            [conversation.id]: {
-              ...state.conversationList![conversation.id],
-              online: true,
+        const currConversation = state.conversationList?.[conversationId];
+        if (currConversation && !currConversation.isGroup) {
+          return {
+            conversationList: {
+              ...state.conversationList,
+              [conversationId]: {
+                ...state.conversationList![conversationId],
+                online: true,
+              }
             }
-          }
-        };
-        
+          };
+        }
+        else {
+          return {};
+        }
       })
     });
 
-    socket.on('userOffline', (conversation) => {
+    socket.on('userOffline', (conversationId) => {
       set((state) => {
-        return {
-          conversationList: {
-            ...state.conversationList,
-            [conversation.id]: {
-              ...state.conversationList![conversation.id],
-              online: false,
+        const currConversation = state.conversationList?.[conversationId];
+        if (currConversation && !currConversation.isGroup) {
+          return {
+            conversationList: {
+              ...state.conversationList,
+              [conversationId]: {
+                ...state.conversationList![conversationId],
+                online: true,
+              }
             }
-          }
+          };
+        }
+        else {
+          return {};
         }
       });
     });
 
-    // add way to save previous messages
-    // make sure to update recentMessages
+    // convert to array and sort based on timeStamp in ConversationList.tsx
     socket.on("sentMessage", (sentMessage : Message) => {
       const conversationId = sentMessage.conversationId;
 
@@ -131,14 +141,6 @@ const useSocket = create<UserSocket>()((set, get) => ({
         acc[participant] = conversation.participantNames![index];
         return acc;
       }, {} as Record<string,string>);
-
-      const currentUser = get().currentUser!
-      conversation.name = conversation
-            .name
-            .split(',')
-            .map(name => name.trim())
-            .filter(name => name != currentUser.username)
-            .join(', ');
 
       set((state) => ({
         uuidToUsername: {
@@ -204,19 +206,10 @@ const useSocket = create<UserSocket>()((set, get) => ({
       const updatedCache = { ...state.conversationsAndMessages };
       const newConversationList = {...state.conversationList};
 
-      const currentUser = get().currentUser!
-
       conversationList.forEach((conversation) => {
         console.log(conversation);
         if (!updatedCache[conversation.id]) {
           updatedCache[conversation.id] = null;
-          conversation.name = conversation
-            .name
-            .split(',')
-            .map(name => name.trim())
-            .filter(name => name != currentUser.username)
-            .join(', ');
-
           newConversationList[conversation.id] = conversation;
         }
       });
@@ -251,4 +244,4 @@ const useSocket = create<UserSocket>()((set, get) => ({
   }
 }));
 
-export {useSocket};
+export {useSocket, type Conversation};

@@ -30,6 +30,8 @@ async function getUsername(uuid : string) {
   return usernameObj?.username ?? null;
 }
 
+// implement pagination
+// prevent currentUser from showing up
 async function getUsers(username : string) {
   const users = await prisma.user.findMany({
     where: {
@@ -67,248 +69,303 @@ async function getCurrentUser(userId : string) {
 }
 
 // create a shared user-conversations and stringify metadata
-async function getConversations(userId : string) {
-  const redisConversations = await redis.hgetall(`user-${userId}-conversations`);
-  let conversationList = Object.entries(redisConversations).map(([id, name]) => {
-    return {
-      id,
-      name
-    }
-  });
+// implement pagination
+/*
+  user-${userId} (HSET):
+  id: string
+  username: string
+  picture: (implement later)
 
-  let userIdList = await redis.smembers(`user-${userId}-users`);
-  let usernames : (string | null)[];
-  let userIdToUsernames = new Map<string, string>();
-  if (userIdList.length > 0) {
-    usernames = await redis.hmget('usernames', ...userIdList);
-    userIdList.forEach((otherUserId, index) => {
-      userIdToUsernames.set(otherUserId, usernames[index]!);
-    });
-  }
+  user-${userId}-conversations (ZSET):
+  {conversationId: timeStamp} 
 
-  const p4 = redis.pipeline();
-  conversationList.forEach((conversation) => {
-    p4.smembers(`conversation-${conversation.id}-participants`);
-  });
-  const participantsResults = await p4.exec();
+  conversation-${conversationId} (HSET):
+  id: string,
+  name: string,
+  isGroup: bool
+  participants: string[] of userIds, JSON.stringify
+  recentMessage: Message JSON.stringify
+  timestamp: string
+  picture: (implement later)
 
-  let conversationParticipants: Record<string, string[]> = Object.fromEntries(
-    conversationList.map((conversation, index) => [
-      conversation.id, 
-      (participantsResults?.[index]?.[1] ?? []) as string[]
-    ])
-  );
+  conversation-${conversationId}-messages (KEY VAL): Message[] JSON.stringify
+  ttl: 7d
+*/
 
-  if (conversationList.length === 0) {
-    const conversations = await prisma.conversationParticipant.findMany({
-      where: { userId: userId },
-      include: {
-        user: {
-          select: {
-            username: true
-          }
-        },
-        conversation: {
-          include : {
-            participants: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    username: true,
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-    });
-
-    conversationList = conversations.map((conversation) => {
-      return {
-        id: conversation.conversationId,
-        name: conversation.conversation.participants.reduce((acc, person, index) => {
-          return (index === 0) ? person.user.username : acc + ", " + person.user.username;
-        }, "")
-      }
-    }) ?? [];
-
-    userIdList = [];
-    usernames = [];
-    for (const conversation of conversations) {
-      const participants = [] as string[]
-      conversation.conversation.participants.forEach((participant) => {
-        participants.push(participant.userId);
-        userIdList.push(participant.userId);
-        usernames.push(participant.user.username);
-      });
-      conversationParticipants[conversation.conversationId] = participants;
-    }
-
-    if (conversationList.length !== 0) {
-      const dataObject = conversationList.reduce((acc, conversation) => {
-        acc[conversation.id] = conversation.name;
-        return acc;
-      }, {} as Record<string, string>);
-
-      userIdList = [...new Set(userIdList)];
-      usernames = [...new Set(usernames)];
-
-      const userMap = new Map<string, string>();
-      for (const conversation of conversations) {
-        conversation.conversation.participants.forEach(participant => {
-         userMap.set(participant.userId, participant.user.username);
-        });
-      }
-
-      userIdToUsernames = userMap;
-
-      const p5 = redis.pipeline();
-
-      p5.hset(`user-${userId}-conversations`, dataObject);
-      if (userIdList.length > 0)
-        p5.sadd(`user-${userId}-users`, ...(userIdList.filter((otherUserId) => otherUserId != userId)));
-      p5.hset('usernames', Object.fromEntries(userMap));
-      Object.entries(conversationParticipants).forEach((conversationParticipant) => {
-        p5.sadd(`conversation-${conversationParticipant[0]}-participants`, ...conversationParticipant[1]);
-      });
-      await p5.exec();
-    }
-  }
-
-  if (conversationList.length === 0) 
-    return {
-    conversationList: [],
-    userIdToUsernames: {}
-  };
-
-  const p1 = redis.pipeline();
-  userIdList.forEach(otherUserId => {
-    p1.exists(`user-${otherUserId}-online`);
-  });
-  const onlineResults = await p1.exec();
-
-  const p2 = redis.pipeline();
-  conversationList.forEach(conversation => {
-    p2.get(`conversation-${conversation.id}-recentMessage`);
-  })
-  const recentMessageResults = await p2.exec();
-
-  const userOnlineListObject = {} as Record<string, boolean>
-  userIdList.forEach((otherUserId, index) => {
-    userOnlineListObject[otherUserId] = onlineResults?.[index]?.[1] === 1;
-  })
-
-  const queryRecentMessages = {} as Record<string, number>;
-  const updatedConversationList = conversationList.map((conversation, index) => {
-    const participants = conversationParticipants[conversation.id] || [];
-    const partnerId = (participants.length == 2) ? participants.find(id => id !== userId) : null;
-    const isOnline = (partnerId && userOnlineListObject[partnerId] === true) ? true : false;
-    const recentMessage = 
-      (recentMessageResults?.[index]?.[1]) ? JSON.parse(recentMessageResults?.[index]?.[1] as string) : null;
-    
-    if (!recentMessage)
-      queryRecentMessages[conversation.id] = index;
-
-    return {
-      ...conversation,
-      isGroup: participants.length >= 3,
-      online: isOnline,
-      recentMessage: recentMessage?.content ?? null,
-      timeStamp: recentMessage?.sent,
-      participants: participants
-    }
-  });
-
-  if (Object.keys(queryRecentMessages).length > 0) {
-    const queryIds = Object.keys(queryRecentMessages);
-    const dbMessages = await prisma.message.findMany({
-      where: {conversationId: {in: queryIds as string[]}},
-      orderBy: {sent: 'desc'},
-      distinct: ['conversationId']
-    });
-
-    for (const dbMessage of dbMessages) {
-      const index = queryRecentMessages[dbMessage.conversationId];
-      updatedConversationList[index!]!.recentMessage = dbMessage.content;
-      updatedConversationList[index!]!.timeStamp = dbMessage.sent;
-    }
-
-    const p3 = redis.pipeline();
-    for (const messageEntry of dbMessages) {
-      p3.set(`conversation-${messageEntry.conversationId}-recentMessage`, JSON.stringify(messageEntry));
-    }
-
-    await p3.exec();
-  }
-
-  return {
-    conversationList: updatedConversationList,
-    userIdToUsernames: Object.fromEntries(userIdToUsernames)
-  };
+interface ConversationList {
+  id: string,
+  name: string,
+  isGroup: boolean | string,
+  participants: string[] | string
+  recentMessage: string,
+  timeStamp: string,
+  online?: boolean
 }
 
-async function addConversation(userIds : string[]) {
-  const conversationIdsObject = await redis.hgetall(`user-${userIds[0]}-conversations`);
-  const conversationIds = Object.keys(conversationIdsObject);
+async function getAllConversationIds(userId : string) {
+  const conversationIds = await redis.zrange(`user-${userId}-conversations`, 0, -1);
+
+  if (conversationIds.length > 0)
+    return conversationIds;
+  else {
+    const query = await prisma.conversationParticipant.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        conversation: true
+      }
+    });
+
+    const setUserConversationCache : (number | string)[] = [];
+    query.forEach((queryEntry) => {
+      conversationIds.push(queryEntry.conversationId);
+      setUserConversationCache.push(queryEntry.conversation.timeStamp.getTime());
+      setUserConversationCache.push(queryEntry.conversationId);
+    });
+
+    if (setUserConversationCache.length > 0)
+      await redis.zadd(`user-${userId}-conversations`, ...setUserConversationCache);
+
+    return query.map(queryEntry => queryEntry.conversationId);
+  }
+}
+
+async function getConversations(userId : string, lastConversationTimeStamp : string | null) {
+  const getRedis = (lastConversationTimeStamp) ? redis.zrevrangebyscore(
+    `user-${userId}-conversations`,
+    `(${lastConversationTimeStamp}`,
+    '-inf',
+    'LIMIT', 0, 20
+  ) : redis.zrevrange(`user-${userId}-conversations`, 0, 19);
+
+  let conversationIds = await getRedis;
+
+  if (conversationIds.length == 0) {
+    const query = await prisma.conversationParticipant.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        conversation: true
+      }
+    });
+
+    const setUserConversationCache : (number | string)[] = [];
+    query.forEach((queryEntry) => {
+      conversationIds.push(queryEntry.conversationId);
+      setUserConversationCache.push(queryEntry.conversation.timeStamp.getTime());
+      setUserConversationCache.push(queryEntry.conversationId);
+    });
+
+    if (setUserConversationCache.length > 0)
+      await redis.zadd(`user-${userId}-conversations`, ...setUserConversationCache);
+  }
+
+  if (conversationIds.length == 0) {
+    return {
+      conversationList: [],
+      lastConversationTimestamp: null,
+      userIdToUsernames: {},
+    }
+  }
 
   const p1 = redis.pipeline();
   conversationIds.forEach((conversationId) => {
-    p1.smembers(`conversation-${conversationId}-participants`);
-  })
-  const participantsResults = await p1.exec();
-  const conversationsParticipants = participantsResults?.map((participantsResult) => {
-    return participantsResult[1] as string[];
-  }) ?? [];
-
-  const indexFound = conversationsParticipants.findIndex((conversationParticipants) => {
-    if (conversationParticipants.length != userIds.length)
-      return false;
-
-    return userIds.every(userId => conversationParticipants.includes(userId)); 
+    p1.hgetall(`conversation-${conversationId}`);
   });
 
-  let conversationId = indexFound !== -1 ? conversationIds[indexFound] : null; 
+  const p1Result = (await p1.exec())!;
+  let conversationList : ConversationList[] = [];
+  const queryConversations : [string, number][] = [];
+  const notGroupChatIds : string[] = [];
 
-  if (conversationId) {
-    return {
-      id: conversationId,
-      name: conversationIdsObject[conversationId],
-      created: false
+  p1Result!.forEach((result, index) => {
+    const redisResult = result[1] as ConversationList
+    console.log(redisResult);
+    if (!result[1] || Object.keys(redisResult).length === 0)
+      queryConversations.push([conversationIds[index]!, index]);
+    else {
+      const participants : string[] = JSON.parse(redisResult.participants as string);
+      if (!redisResult.isGroup && participants.length == 2) {
+        const otherUserId = participants.filter(participant => participant != userId)[0];
+
+        if (otherUserId)
+          notGroupChatIds.push(otherUserId);
+      }
+      const conversation = {
+        id: redisResult.id,
+        name: redisResult.name,
+        isGroup: redisResult.isGroup === "true" ? true : false,
+        participants: participants,
+        recentMessage: redisResult.recentMessage,
+        timeStamp: redisResult.timeStamp,
+        online: false
+      }
+      conversationList[index] = conversation;
     }
-  }
-  else {
-    const conversationEntry = await prisma.conversation.findFirst({
+  });
+
+  if (queryConversations.length > 0) {
+    const queryConversationIds = queryConversations.map((queryConversation) => queryConversation[0]);
+    const query = await prisma.conversation.findMany({
       where: {
-        AND: [
-          {
-            participants: {
-              every: {userId: {in: userIds}} 
-            },
-          },
-          ...userIds.map(userId => ({
-            participants: {
-              some: {userId: userId}
-            }
-          }))
-        ]
+        id: {in: queryConversationIds}
       },
       include: {
-        participants: {
-          select: {
-            userId: true
-          }
-        }
+        participants: true
       }
     });
 
-    conversationId = (conversationEntry) ? conversationEntry.id : null;
+    const conversationsObj = query.reduce((acc, queryEntry) => {
+      const participants : string[] = queryEntry.participants.map((participant) => participant.userId);
+      if (!queryEntry.isGroup && participants.length == 2) {
+        const otherUserId = participants.filter(participant => participant != userId)[0];
+
+        if (otherUserId)
+          notGroupChatIds.push(otherUserId);
+      }
+
+      acc[queryEntry.id] = {
+        id: queryEntry.id,
+        name: queryEntry.name,
+        isGroup: queryEntry.isGroup,
+        participants: queryEntry.participants.map((participant) => participant.userId),
+        recentMessage: queryEntry.recentMessage,
+        timeStamp: String(queryEntry.timeStamp.getTime()),
+        online: false
+      }
+      return acc;
+    }, {} as Record<string, ConversationList>);
+
+    const p2 = redis.pipeline();
+    queryConversations.forEach((queryConversation) => {
+      conversationList[queryConversation[1]] = conversationsObj[queryConversation[0]] as ConversationList;
+      const redisConversation = {...conversationsObj[queryConversation[0]]};
+      redisConversation.participants = JSON.stringify(redisConversation.participants);
+      p2.hset(`conversation-${queryConversation[0]}`,  redisConversation);
+    });
+    p2.exec();
   }
 
-  if (!conversationId) {
+  if (conversationList.length == 0) {
+    return {
+      conversationList: [],
+      lastConversationTimestamp: null,
+      userIdToUsernames: {},
+    }
+  }
+
+  let userIdList : string[] = [];
+  conversationList.forEach((conversation) => {
+    (conversation.participants as string[]).forEach((participant) => {
+      userIdList.push(participant);
+    });
+  });
+  userIdList = [...new Set(userIdList)];
+
+  // get usernames
+  let userIdToUsernames : Record<string,string> = {};
+  const queryUsernames : string[] = [];
+  const p3 = redis.pipeline();
+  userIdList.forEach((otherUserId) => {
+    p3.hget(`user-${otherUserId}`, 'username');
+  })
+  const p3Result = await p3.exec();
+  p3Result?.forEach((result, index) => {
+    if (result[1])
+      userIdToUsernames[userIdList[index]!] = result[1] as string;
+    else
+      queryUsernames.push(userIdList[index]!);
+  });
+
+  if (queryUsernames.length > 0) {
+    const usernamesQuery = await prisma.user.findMany({
+      where: {
+        id: {in: queryUsernames}
+      },
+      select: {
+        id: true,
+        username: true
+      }
+    });
+
+    const p5 = redis.pipeline();
+    usernamesQuery.forEach((queryEntry) => {
+      userIdToUsernames[queryEntry.id] = queryEntry.username;
+      p5.hset(`user-${queryEntry.id}`, queryEntry);
+    })
+  }
+
+  const p4 = redis.pipeline();
+  notGroupChatIds.forEach(id => {
+    p4.exists(`user-${id}-online`);
+  });
+
+  const p4Result = await p4.exec();
+
+  // contains userIds
+  const onlineResult = p4Result?.reduce((acc, result, index) => {
+    if (result[1] === 1)
+      acc.add(notGroupChatIds[index]!);
+
+    return acc;
+  }, new Set())
+
+  conversationList = conversationList.map(conversation => {
+    if (!conversation.isGroup) {
+      const otherUserId = (conversation.participants as string[]).filter(participant => participant != userId)[0];
+      if (otherUserId && onlineResult?.has(otherUserId))
+        conversation.online = true;
+    }
+    
+    return conversation;
+  });
+
+  // gets rid of holes
+  conversationList = conversationList.filter(Boolean);
+
+  return {
+    conversationList: conversationList,
+    lastConversationTimestamp: conversationList[conversationList.length - 1]!.timeStamp,
+    userIdToUsernames: userIdToUsernames
+  }
+}
+
+async function addConversation(userIds : string[], usernames : string[]) {
+  if (userIds.length < 2)
+    return null;
+
+ const conversationEntry = await prisma.conversation.findFirst({
+    where: {
+      AND: [
+        {
+          participants: {
+            every: {userId: {in: userIds}} 
+          },
+        },
+        ...userIds.map(userId => ({
+          participants: {
+            some: {userId: userId}
+          }
+        }))
+      ]
+    },
+  });
+
+ 
+  if (conversationEntry) {
+    return {
+      conversation: conversationEntry,
+      created: false
+    };
+  }
+  else {
     const createdConversation = await prisma.conversation.create({
       data: {
+        name: usernames
+                .map(username => username.trim())
+                .join(', '),
         isGroup: userIds.length >= 3,
         participants: {
           create: userIds.map((userId) => ({
@@ -318,54 +375,52 @@ async function addConversation(userIds : string[]) {
       }
     });
 
-    let usernames = await redis.hmget('usernames', ...userIds);
-    if (usernames.some(username => username === null)) {
-      const usersQuery = await prisma.user.findMany({
-        where: {id: {in: userIds}},
-        select: {
-          id: true,
-          username: true
-        }        
-      });
+    console.log(createdConversation);
+    const p1 = redis.pipeline();
 
-      usernames = usersQuery.map(userQuery => userQuery.username);
-      const usernamesObj = usersQuery.reduce((acc, user)  => {
-        acc[user.id] = user.username;
-        return acc;
-      }, {} as Record<string,string>)
-      await redis.hset('usernames', usernamesObj)
-    }
-    const conversationName = usernames.reduce((acc, username, index) => {
-      return (index === 0) ? username : acc + ', ' + username;
-    }, "") ?? "";
+    p1.hset(`conversation-${createdConversation.id}`, {
+      id: createdConversation.id,
+      name: usernames
+                .map(username => username.trim())
+                .join(', '),
+      isGroup: userIds.length >= 3,
+      participants: JSON.stringify(userIds),
+      recentMessage: "",
+      timeStamp: createdConversation.timeStamp.getTime()
+    });
 
-    const p2 = redis.pipeline();
     userIds.forEach((userId) => {
-      p2.hset(`user-${userId}-conversations`, createdConversation.id, conversationName);
-    })
-    p2.sadd(`conversation-${createdConversation.id}-participants`, ...userIds);
+      p1.zadd(`user-${userId}-conversations`, 
+        String(createdConversation.timeStamp.getTime()), createdConversation.id
+      );
+    });
 
-    await p2.exec();
+    await p1.exec();
 
     return {
-      id: createdConversation.id,
-      name: conversationName,
+      conversation: {
+        ...createdConversation,
+        timeStamp: createdConversation.timeStamp.getTime(),
+      },
       created: true,
     };
   }
-
-  return null;
 }
 
-// offset for pagination
 async function getMessages(conversationId : string, prevMessageId : string | null) {
-  const redisMessages = (!prevMessageId) ? await redis.get(`conversation-${conversationId}-messages`) : null;
+  const redisMessages = (!prevMessageId) ? 
+    await redis.lrange(`conversation-${conversationId}-messages`, 0, 49) : [];
   
   let messages;
-  if (redisMessages)
-    return JSON.parse(redisMessages);
+  if (redisMessages.length > 0) {
+    messages = redisMessages
+      .map((message) => JSON.parse(message))
+      .reverse();
+    return messages;
+  }
+    
   
-  if (!redisMessages) {
+  if (redisMessages.length === 0) {
     const prismaQuery : Prisma.MessageFindManyArgs = {
       where: {
         conversationId: conversationId
@@ -383,46 +438,71 @@ async function getMessages(conversationId : string, prevMessageId : string | nul
     }
 
     messages = await prisma.message.findMany(prismaQuery);
-    messages.reverse();
-
+    console.log(messages);
     if (messages.length === 0)
       return [];
 
     if (!prevMessageId) {
       const p1 = redis.pipeline();
-      p1.set(`conversation-${conversationId}-messages`, JSON.stringify(messages));
+      messages.forEach((message) => {
+        p1.rpush(`conversation-${conversationId}-messages`, JSON.stringify(message));
+      })
       p1.expire(`conversation-${conversationId}-messages`, 60 * 60 * 24);
       await p1.exec();
     }
   }
 
-  return messages;
+  return messages?.reverse();
 }
 
 async function addMessage(conversationId : string, senderId : string, message : string) {
-  const messageCreated = await prisma.message.create({
-    data: {
-      content: message,
-      senderId: senderId,
-      conversationId: conversationId
-    },
+  const timeStamp = new Date();
+  const [messageCreated, updatedConversation] = await prisma.$transaction([
+    prisma.message.create({
+      data: {
+        content: message,
+        senderId: senderId,
+        conversationId: conversationId
+      }
+    }),
+    prisma.conversation.update({
+      where: {
+        id: conversationId
+      },
+      data: {
+        recentMessage: message,
+        timeStamp: timeStamp
+      },
+      include: {
+        participants: true
+      }
+    })
+  ]);
+
+  const p1 = redis.pipeline();
+
+  updatedConversation.participants.forEach((participant) => {
+    p1.zadd(`user-${participant.userId}-conversations`, timeStamp.getTime(), conversationId);
   });
 
-  const redisResult = await redis.get(`conversation-${conversationId}-messages`);
-  await redis.set(`conversation-${conversationId}-recentMessage`, JSON.stringify(messageCreated));
+  p1.hset(`conversation-${conversationId}`, {
+    recentMessage: message,
+    timeStamp: timeStamp.getTime()
+  });
 
-  if (redisResult) {
-    const messages = JSON.parse(redisResult);
-    if (messages.length >= 50)
-      messages.shift();
-    messages.push(messageCreated);
-    await redis.set(`conversation-${conversationId}-messages`, JSON.stringify(messages));
-    await redis.expire(`conversation-${conversationId}-messages`, 60 * 60 * 24);
-  }
+  p1.lpush(`conversation-${conversationId}-messages`, JSON.stringify(messageCreated));
+  p1.ltrim(`conversation-${conversationId}-messages`, 0, 49);
+  p1.expire(`conversation-${conversationId}-messages`, 60*60*24*7);
 
-  return messageCreated;
+  await p1.exec();
+
+  return {
+    ...messageCreated,
+    sent: timeStamp.getTime(),
+  };
 }
 
+// implement redis caching
 async function deleteConversation(conversationId : string) {
   const conversationEntry = await prisma.conversation.findFirst({
     where: {
@@ -430,13 +510,8 @@ async function deleteConversation(conversationId : string) {
     },
     include : {
       participants: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-            }
-          }
+        select: {
+          userId: true
         }
       }
     }
@@ -453,11 +528,10 @@ async function deleteConversation(conversationId : string) {
 
   const p1 = redis.pipeline();
   p1.del(`conversation-${conversationId}-messages`);
-  p1.del(`conversation-${conversationId}-recentMessage`);
-  p1.del(`conversation-${conversationId}-participants`);
+  p1.del(`conversation-${conversationId}`);
   if (conversationEntry) {
     conversationEntry.participants.forEach((participant) => {
-      p1.hdel(`user-${participant.userId}-conversations`, conversationId);
+      p1.zrem(`user-${participant.userId}-conversations`, conversationId);
     });
   }
 
@@ -465,6 +539,7 @@ async function deleteConversation(conversationId : string) {
 }
 
 // purges all data from user and all chats the user is involved in
+// update
 async function deleteUserData(userId : string) {
   const user = await prisma.user.findUnique({
     where: {
@@ -478,13 +553,8 @@ async function deleteUserData(userId : string) {
           conversation: {
             include: {
               participants : {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      username: true
-                    }
-                  }
+                select: {
+                  userId: true
                 }
               }
             }
@@ -512,16 +582,14 @@ async function deleteUserData(userId : string) {
 
   const p1 = redis.pipeline();
   p1.del(`user-${userId}-conversations`);
-  p1.del(`user-${userId}-users`);
-  p1.hdel('usernames', userId);
+  p1.del(`user-${userId}`);
   user?.conversations.forEach((conversationParticipant) => {
     conversationParticipant.conversation.participants.forEach((participant) => {
-      p1.hdel(`user-${participant.userId}-conversations`, conversationParticipant.conversationId);
+      p1.zrem(`user-${participant.userId}-conversations`, conversationParticipant.conversationId);
     });
 
     p1.del(`conversation-${conversationParticipant.conversationId}-messages`);
-    p1.del(`conversation-${conversationParticipant.conversationId}-recentMessage`);
-    p1.del(`conversation-${conversationParticipant.conversationId}-participants`);
+    p1.del(`conversation-${conversationParticipant.conversationId}`);
   });
 
   await p1.exec();
@@ -533,6 +601,7 @@ export default {
   getUsername,
   getUsers,
   getCurrentUser,
+  getAllConversationIds,
   getConversations,
   addConversation,
   getMessages,
