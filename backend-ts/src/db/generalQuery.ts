@@ -182,14 +182,12 @@ async function getConversations(userId : string, lastConversationTimeStamp : str
 
   p1Result!.forEach((result, index) => {
     const redisResult = result[1] as ConversationList
-    console.log(redisResult);
     if (!result[1] || Object.keys(redisResult).length === 0)
       queryConversations.push([conversationIds[index]!, index]);
     else {
       const participants : string[] = JSON.parse(redisResult.participants as string);
-      if (!redisResult.isGroup && participants.length == 2) {
-        const otherUserId = participants.filter(participant => participant != userId)[0];
-
+      if (participants.length == 2) {
+        const otherUserId = participants.filter(participant => participant.trim() != userId.trim())[0];
         if (otherUserId)
           notGroupChatIds.push(otherUserId);
       }
@@ -219,8 +217,8 @@ async function getConversations(userId : string, lastConversationTimeStamp : str
 
     const conversationsObj = query.reduce((acc, queryEntry) => {
       const participants : string[] = queryEntry.participants.map((participant) => participant.userId);
-      if (!queryEntry.isGroup && participants.length == 2) {
-        const otherUserId = participants.filter(participant => participant != userId)[0];
+      if (participants.length == 2) {
+        const otherUserId = participants.filter(participant => participant.trim() != userId.trim())[0];
 
         if (otherUserId)
           notGroupChatIds.push(otherUserId);
@@ -375,7 +373,6 @@ async function addConversation(userIds : string[], usernames : string[]) {
       }
     });
 
-    console.log(createdConversation);
     const p1 = redis.pipeline();
 
     p1.hset(`conversation-${createdConversation.id}`, {
@@ -405,6 +402,10 @@ async function addConversation(userIds : string[], usernames : string[]) {
       created: true,
     };
   }
+}
+
+async function updateConversationName(conversationId : string, name : string) {
+  
 }
 
 async function getMessages(conversationId : string, prevMessageId : string | null) {
@@ -438,7 +439,6 @@ async function getMessages(conversationId : string, prevMessageId : string | nul
     }
 
     messages = await prisma.message.findMany(prismaQuery);
-    console.log(messages);
     if (messages.length === 0)
       return [];
 

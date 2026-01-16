@@ -20,7 +20,6 @@ function Auth() {
     validateAccessToken();
   }, [])
   
-  console.log(valid);
 
   if (valid === null) {
     return (

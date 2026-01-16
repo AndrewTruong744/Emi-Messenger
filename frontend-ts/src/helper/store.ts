@@ -52,7 +52,7 @@ interface UserSocket {
     conversationList : Conversation[], 
     userIdToUsernames : Record<string,string>
   ) => void,
-  updateConversationsAndMessages: (messages : Message[]) => void,
+  updateConversationsAndMessages: (messages : Message[], conversationId : string) => void,
   clearStore: () => void,
 }
 
@@ -72,11 +72,11 @@ const useSocket = create<UserSocket>()((set, get) => ({
     const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
 
     socket.on('userOnline', (conversationId) => {
-      console.log('online!');
       
       set((state) => {
         const currConversation = state.conversationList?.[conversationId];
-        if (currConversation && !currConversation.isGroup) {
+        // issue with isGroup saving
+        if (currConversation && currConversation.participants.length === 2) {
           return {
             conversationList: {
               ...state.conversationList,
@@ -96,13 +96,13 @@ const useSocket = create<UserSocket>()((set, get) => ({
     socket.on('userOffline', (conversationId) => {
       set((state) => {
         const currConversation = state.conversationList?.[conversationId];
-        if (currConversation && !currConversation.isGroup) {
+        if (currConversation && currConversation.participants.length === 2) {
           return {
             conversationList: {
               ...state.conversationList,
               [conversationId]: {
                 ...state.conversationList![conversationId],
-                online: true,
+                online: false,
               }
             }
           };
@@ -203,16 +203,13 @@ const useSocket = create<UserSocket>()((set, get) => ({
   setConversationsAndMessages: (conversationList : Conversation[], userIdToUsernames : Record<string,string>) => {
     set((state) => {
       const newUuidToUsername = { ...state.uuidToUsername };
-      const updatedCache = { ...state.conversationsAndMessages };
       const newConversationList = {...state.conversationList};
 
+      console.log(conversationList);
       conversationList.forEach((conversation) => {
-        console.log(conversation);
-        if (!updatedCache[conversation.id]) {
-          updatedCache[conversation.id] = null;
-          newConversationList[conversation.id] = conversation;
-        }
+        newConversationList[conversation.id] = conversation;
       });
+      console.log(newConversationList);
 
       Object.entries(userIdToUsernames).forEach((userIdToUsername) => {
         newUuidToUsername[userIdToUsername[0]] = userIdToUsername[1];
@@ -221,17 +218,35 @@ const useSocket = create<UserSocket>()((set, get) => ({
       return {
         uuidToUsername: newUuidToUsername,
         conversationList: newConversationList,
-        conversationsAndMessages: updatedCache,
       };
     });
   },
-  updateConversationsAndMessages: (messages) => {
-    set((state) => ({
-      conversationsAndMessages: {
-        ...state.conversationsAndMessages,
-        [messages[0].conversationId]: messages,
+  updateConversationsAndMessages: (messages, conversationId) => {
+    set((state) => {
+      if (messages.length === 0) {
+        return {
+          conversationsAndMessages: {
+          ...state.conversationsAndMessages,
+          [conversationId]: [],
+        }
+        }
       }
-    }));
+
+      let updatedMessages = messages;
+      const currentMessages = state.conversationsAndMessages?.[messages[0].conversationId]
+      if (currentMessages) {
+        const currentIds = new Set(currentMessages.map(message => message.id));
+        updatedMessages = updatedMessages.filter(message => !currentIds.has(message.id));
+        updatedMessages = [...updatedMessages, ...currentMessages];
+      }
+
+      return {
+        conversationsAndMessages: {
+          ...state.conversationsAndMessages,
+          [conversationId]: updatedMessages,
+        }
+      };
+    });
   },
   clearStore: () => {
     set({

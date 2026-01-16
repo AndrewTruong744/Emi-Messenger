@@ -32,6 +32,7 @@ function Home() {
       const axiosRes = await api.get('/general/conversations');
       const conversationsObj = axiosRes.data;
       setConversationsAndMessages(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
+      console.log(conversationsObj);
     }
 
     async function initialize() {

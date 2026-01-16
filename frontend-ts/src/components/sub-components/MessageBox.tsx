@@ -8,14 +8,17 @@ interface Props {
 
 function MessageBox({conversationId} : Props) {
   const [message, setMessage] = useState("");
+  const [disableSendMessage, setDisableSendMessage] = useState(false);
 
   async function submitMessage(e : React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && message.length > 0) {
       try {
+        setDisableSendMessage(true);
         const axiosRes = await api.post(`/general/message/${conversationId}`, {message: message});
         setMessage("");
-        console.log(axiosRes.data.message);
+        setDisableSendMessage(false);
       } catch (err) {
+        setDisableSendMessage(false);
         console.log(err);
       }
     }
@@ -30,6 +33,7 @@ function MessageBox({conversationId} : Props) {
           className={styles.input} 
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={submitMessage}
+          readOnly={disableSendMessage}
         >
         </textarea>
         <button className={styles.button}>

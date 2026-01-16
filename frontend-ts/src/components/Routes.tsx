@@ -37,7 +37,7 @@ const routes = [
         children: [
           {
             path: 'conversation/:id',
-            element: <Conversation />
+            element: <Conversation/>
           },
           {
             path: 'find-people',

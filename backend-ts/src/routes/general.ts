@@ -143,16 +143,16 @@ router.get('/messages/:conversationid',
     try {
       const userId = (req.user as PrismaUser).id;
       const conversationId = req.params.conversationid;
-      const previousMessageId = req.query['previousMessageId'] as string;
-
-      const messages = await generalQuery.getMessages(conversationId, previousMessageId);
+      const prevMessageId = req.query['prevMessageId'] as string | null;
+      console.log("prev: " + prevMessageId);
+      const messages = await generalQuery.getMessages(conversationId, prevMessageId);
       if (!messages){
         return res.status(404).json({
           error: true,
           message: 'Conversation not found'
         });
       }
-      
+
       return res.json({messages});
     } catch (err) {
       console.log(err);

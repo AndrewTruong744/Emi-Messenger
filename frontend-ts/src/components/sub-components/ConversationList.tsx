@@ -22,6 +22,8 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
     sortedConversationList.sort((a,b) => {
       return new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime();
     })
+
+    console.log(sortedConversationList);
   }
 
   function formatTimeShort(date : string | number) {
@@ -65,8 +67,6 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
         <ul className={styles.conversationList}>
           {
             sortedConversationList.map(conversation => {
-              console.log(conversation);
-              console.log(conversation.timeStamp);
 
               return (
                 <li 
