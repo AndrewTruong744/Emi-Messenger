@@ -10,13 +10,14 @@ router.get('/users',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
-      const users = await generalQuery.getUsers('');
+      const userId = (req.user as PrismaUser).id;
+      const users = await generalQuery.getUsers('', userId);
       return res.json({users});
     } catch (err) {
       return res.status(503).json({
         error: true,
         message: 'Database is currently unreachable'
-      })
+      });
     }
   }
 );
@@ -25,8 +26,9 @@ router.get('/users/:username',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
     try {
+      const userId = (req.user as PrismaUser).id;
       const username = (req.params.username) ? req.params.username : '?';
-      const users = await generalQuery.getUsers(username);
+      const users = await generalQuery.getUsers(username, userId);
 
       return res.json({users});
     } catch (err) {
@@ -123,8 +125,17 @@ router.delete('/conversation/:id',
     try {
       const io = req.io;
       const conversationId = req.params.id;
-      await generalQuery.deleteConversation(conversationId);
-      await io.in(`room-${conversationId}`).emit('conversationDeleted');
+      const userId = (req.user as PrismaUser).id;
+      const result = await generalQuery.deleteConversation(conversationId, userId);
+
+      if (result === "invalid") {
+        return res.status(404).json({
+          error: true,
+          message: 'Operation not authorized'
+        });
+      }
+
+      await io.in(`room-${conversationId}`).emit('conversationDeleted', conversationId);
       await io.in(`room-${conversationId}`).socketsLeave(`room-${conversationId}`);
       return res.json({message: "success!!"});
     } catch (err) {
@@ -145,11 +156,11 @@ router.get('/messages/:conversationid',
       const conversationId = req.params.conversationid;
       const prevMessageId = req.query['prevMessageId'] as string | null;
       console.log("prev: " + prevMessageId);
-      const messages = await generalQuery.getMessages(conversationId, prevMessageId);
+      const messages = await generalQuery.getMessages(conversationId, prevMessageId, userId);
       if (!messages){
         return res.status(404).json({
           error: true,
-          message: 'Conversation not found'
+          message: 'Operation not authorized'
         });
       }
 
@@ -203,7 +214,6 @@ router.get('/current-user',
   }
 );
 
-// update
 router.delete('/current-user',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {

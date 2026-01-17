@@ -136,7 +136,9 @@ const useSocket = create<UserSocket>()((set, get) => ({
       }));
     })
 
+    //change group naming
     socket.on("addConversation", (conversation : Conversation) => {
+      console.log(conversation);
       const participants = conversation.participants.reduce((acc, participant, index) => {
         acc[participant] = conversation.participantNames![index];
         return acc;
@@ -169,7 +171,8 @@ const useSocket = create<UserSocket>()((set, get) => ({
     socket.on("conversationDeleted", (conversationId : string) => {
       if (window.location.href.includes(conversationId))
         navigate('/home');
-
+      console.log(conversationId);
+      console.log(window.location.href);
       // find a way to cleanly remove the username and id
       set((state) => {
         const {[conversationId]: removedConversationAndMessage, ...newConversationAndMessages} 
@@ -200,6 +203,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
       socket.disconnect();
     useClear.getState().clearStore();
   },
+  //change group naming
   setConversationsAndMessages: (conversationList : Conversation[], userIdToUsernames : Record<string,string>) => {
     set((state) => {
       const newUuidToUsername = { ...state.uuidToUsername };

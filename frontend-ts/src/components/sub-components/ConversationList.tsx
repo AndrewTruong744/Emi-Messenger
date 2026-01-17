@@ -3,6 +3,7 @@ import { useSocket, type Conversation } from "../../helper/store";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
 
 interface Props {
   activeMessage: string | null | undefined,
@@ -16,10 +17,14 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const isLoading = (conversationListObj) ? false : true;
   const currentUser = useSocket((state) => state.currentUser);
 
+  const [findConversation, setFindConversation] = useState("");
+
   let sortedConversationList : Conversation[] = [];
   if (conversationListObj) {
     sortedConversationList = Object.values(conversationListObj);
-    sortedConversationList.sort((a,b) => {
+    sortedConversationList = sortedConversationList.filter(conversation => {
+      return conversation.name.toLowerCase().includes(findConversation.toLowerCase());
+    }).sort((a,b) => {
       return new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime();
     })
 
@@ -60,14 +65,18 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   return (
     <div className={styles.conversations}>
       <div className={styles.search}>
-        <input placeholder="Find Conversation" type="text" className={styles.input}/>
+        <input 
+          placeholder="Find Conversation" 
+          type="text" 
+          className={styles.input}
+          onChange={(e) => setFindConversation(e.currentTarget.value)}
+        />
         <button className={styles.button} aria-label='find people' onClick={handleFindPeople}>＋</button>
       </div>
       {(isLoading) ? <Loading /> : 
         <ul className={styles.conversationList}>
           {
             sortedConversationList.map(conversation => {
-
               return (
                 <li 
                   key={conversation.id} 

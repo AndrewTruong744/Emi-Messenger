@@ -21,7 +21,7 @@ async function createUser(reqBody : any) {
     }
   });
 
-  await redis.hset("usernames", user.id, user.username);
+  await redis.hset(`user-${user.id}`, {id: user.id, username: user.username});
 
   return user;
 }

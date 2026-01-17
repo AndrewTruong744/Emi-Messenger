@@ -1,13 +1,23 @@
+import api from "../../helper/axios";
 import styles from "../../styles/MessageHeader.module.css";
 
 interface Props {
   conversationName: string
+  conversationId: string
 }
 
 // implement function to delete a conversation
 // implement popup that shows users in conversation
 // implement overflow control with conversation name
-function MessageHeader({conversationName} : Props) {
+function MessageHeader({conversationName, conversationId} : Props) {
+
+  async function handleDeleteConversation() {
+    try {
+      await api.delete(`general/conversation/${conversationId}`);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   return (
     <header className={styles.header}>
@@ -16,7 +26,7 @@ function MessageHeader({conversationName} : Props) {
         <h2 className={styles.username}>{conversationName}</h2>
       </div>
       <div className={styles.buttons}>
-        <button className={styles.button}>
+        <button className={styles.button} onClick={handleDeleteConversation}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={styles.icon}>
             <title>trash-can</title>
             <path d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M9,8H11V17H9V8M13,8H15V17H13V8Z" />

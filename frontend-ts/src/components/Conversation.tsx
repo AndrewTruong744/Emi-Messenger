@@ -27,7 +27,7 @@ function Conversation() {
 
   return (
     <main className={styles.conversation}>
-      <MessageHeader conversationName={conversationName}/>
+      <MessageHeader conversationName={conversationName} conversationId={conversationId}/>
       <Messages conversationId={conversationId}/>
       <MessageBox conversationId={conversationId}/>
     </main>

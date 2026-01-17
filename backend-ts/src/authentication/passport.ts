@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import authQuery from '../db/authQuery.js';
 import { Strategy as JwtStrategy, ExtractJwt, type VerifiedCallback } from 'passport-jwt';
 import {Strategy as GoogleStrategy, type Profile } from 'passport-google-oauth20';
+import { customAlphabet } from 'nanoid';
+import generalQuery from '../db/generalQuery.js';
 
 interface JwtPayload {
   id: string,
@@ -64,10 +66,21 @@ passport.use('google', new GoogleStrategy({
   async (accessToken, refreshToken, profile, done) => {
     const googleSub = profile.id;
 
+    const nanoid = customAlphabet('23456789BCDFGHJKLMNPQRSTVWXYZ', 16);
+    let username = nanoid().match(/.{1,4}/g)!.join('-');
+    while (true) {
+      const users = await generalQuery.getUsers(username, null);
+
+      if (users.length === 0)
+        break;
+      else
+        username = nanoid().match(/.{1,4}/g)!.join('-');
+    }
+
     const userContents = {
       email: profile.emails?.[0]?.value,
       sub: googleSub,
-      username: crypto.randomUUID(),
+      username: username,
     }
 
     try {

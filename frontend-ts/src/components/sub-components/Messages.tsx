@@ -20,15 +20,14 @@ function Messages({conversationId} : Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
   const [userNotFound, setUserNotFound] = useState(false);
-  const currMessageId = useRef<string | null>(null);
+  const lastScrollHeight = useRef(0);
   const prevMessageId = useRef<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const isFetching = useRef(false);
 
-  async function getMessages() {
-    if ((!messages || (messages && !noMoreMessages)) && !isFetching.current) {
+  async function getMessages(scrolledToTop=false) {
+    if ((!messages || (scrolledToTop))) {
       try {
-        isFetching.current = true;
+        lastScrollHeight.current = messagesRef.current?.scrollHeight || 0;
         setIsLoading(true);
         console.log('prevMessage!!! ' + prevMessageId.current);
         const axiosRes = await api.get(`/general/messages/${conversationId}`, 
@@ -39,7 +38,6 @@ function Messages({conversationId} : Props) {
         const length = messagesObj.messages.length;
         if (length > 0) {
           updateConversationsAndMessages(messagesObj.messages, conversationId);
-          currMessageId.current = prevMessageId.current;
           prevMessageId.current = messagesObj.messages[0].id;
         }
 
@@ -47,11 +45,9 @@ function Messages({conversationId} : Props) {
           setNoMoreMessages(true);
 
         setIsLoading(false);
-        isFetching.current = false;
       } catch (err) {
         console.log(err);
         setUserNotFound(true);
-        isFetching.current = false;
       }
     }
   }
@@ -61,32 +57,29 @@ function Messages({conversationId} : Props) {
       return;
 
     if (messagesRef.current.scrollTop === 0) {
-      getMessages();
+      console.log('entered!!!');
+      getMessages(true);
     }
   }
 
   useLayoutEffect(() => {
     if (messagesRef.current && messages) {
-      const scrollPosition = messagesRef.current.scrollTop + messagesRef.current.clientHeight;
-      const threshold = messagesRef.current.scrollHeight - 5;
-      if (scrollPosition >= threshold)
+      if (lastScrollHeight.current === 0)
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      else if (currMessageId.current) {
-        const message = document.getElementById(currMessageId.current);
-        message?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest"
-        });
+      else {
+        const heightDifference = messagesRef.current.scrollHeight - lastScrollHeight.current;
+        messagesRef.current.scrollTop = heightDifference;
+        lastScrollHeight.current = 0;
       }
-      else
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [conversationId, messages, currentUser]);
 
   useEffect(() => {
-    prevMessageId.current = (messages) ? messages[0].id : null;
-    currMessageId.current = null;
+    prevMessageId.current = (messages) ? messages[0]?.id : null;
     async function execute() {
+      if (messages)
+        setIsLoading(false);
+      setNoMoreMessages(false);
       await getMessages();
     } 
 

@@ -30,20 +30,38 @@ async function getUsername(uuid : string) {
   return usernameObj?.username ?? null;
 }
 
-// implement pagination
-// prevent currentUser from showing up
-async function getUsers(username : string) {
-  const users = await prisma.user.findMany({
+async function updateUsername(userId : string, newUsername: string) {
+
+} 
+
+async function getUsers(username : string, currUserId : string | null) {
+  const prismaQuery : Prisma.UserFindManyArgs = {
+    take: 50,
     where: {
       username: {
-        startsWith: username
-      }
+        startsWith: username,
+        mode: 'insensitive'
+      },
     },
     select: {
       id: true,
       username: true,
+    },
+    orderBy: {
+      username: 'asc'
     }
-  });
+  };
+
+  if (currUserId) {
+    prismaQuery.where = {
+      ...prismaQuery.where,
+      NOT: {
+        id: currUserId
+      }
+    }
+  }
+
+  const users = await prisma.user.findMany(prismaQuery);
 
   return users;
 }
@@ -131,13 +149,14 @@ async function getAllConversationIds(userId : string) {
   }
 }
 
+// add pagination soon
 async function getConversations(userId : string, lastConversationTimeStamp : string | null) {
   const getRedis = (lastConversationTimeStamp) ? redis.zrevrangebyscore(
     `user-${userId}-conversations`,
     `(${lastConversationTimeStamp}`,
     '-inf',
-    'LIMIT', 0, 20
-  ) : redis.zrevrange(`user-${userId}-conversations`, 0, 19);
+    'LIMIT', 0, 500
+  ) : redis.zrevrange(`user-${userId}-conversations`, 0, 499);
 
   let conversationIds = await getRedis;
 
@@ -405,10 +424,16 @@ async function addConversation(userIds : string[], usernames : string[]) {
 }
 
 async function updateConversationName(conversationId : string, name : string) {
-  
+
 }
 
-async function getMessages(conversationId : string, prevMessageId : string | null) {
+async function getMessages(conversationId : string, prevMessageId : string | null, userId : string) {
+  const conversation = await redis.hgetall(`conversation-${conversationId}`);
+
+  if (Object.keys(conversation).length === 0) {
+
+  }
+
   const redisMessages = (!prevMessageId) ? 
     await redis.lrange(`conversation-${conversationId}-messages`, 0, 49) : [];
   
@@ -503,7 +528,7 @@ async function addMessage(conversationId : string, senderId : string, message : 
 }
 
 // implement redis caching
-async function deleteConversation(conversationId : string) {
+async function deleteConversation(conversationId : string, userId : string) {
   const conversationEntry = await prisma.conversation.findFirst({
     where: {
       id: conversationId
@@ -517,8 +542,9 @@ async function deleteConversation(conversationId : string) {
     }
   });
 
-  if (!conversationEntry) 
-    return;
+  const participants = conversationEntry?.participants.map(participant => participant.userId);
+  if (!conversationEntry || !participants?.includes(userId)) 
+    return "invalid";
 
   await prisma.conversation.delete({
     where: {
@@ -536,6 +562,8 @@ async function deleteConversation(conversationId : string) {
   }
 
   await p1.exec();
+
+  return "success";
 }
 
 // purges all data from user and all chats the user is involved in

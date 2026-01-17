@@ -65,10 +65,10 @@ function Settings() {
               className={styles.input}
               id='newEmail'
               name='newEmail'
-              value={(newEmail) ? newEmail : email}
+              placeholder={(newEmail) ? newEmail : email}
               onChange={(e) => setNewEmail(e.target.value)}
               type='email'
-              disabled={!currentUser}
+              disabled={true}
               required
             />
           </div>
