@@ -13,14 +13,14 @@ interface User {
 };
 
 interface Conversation {
-  isGroup: boolean;
-  online: boolean;
-  recentMessage: string | null;
-  timeStamp: string;
-  participants: string[];
-  participantNames?: string[];
-  id: string;
-  name: string;
+  isGroup: boolean,
+  online: boolean,
+  recentMessage: string | null,
+  timeStamp: string,
+  participants: string[],
+  participantNames?: string[],
+  id: string,
+  name: string,
 }
 
 interface Message {
@@ -113,6 +113,32 @@ const useSocket = create<UserSocket>()((set, get) => ({
       });
     });
 
+    socket.on('usernameChange', (data) => {
+      const currentUser = get().currentUser;
+      if (currentUser && data.userId === currentUser.id) {
+        set(state => ({
+          currentUser: {
+            ...state.currentUser!,
+            username: data.username
+          }
+        }));
+      }
+      else {
+        set(state => {
+          if (state.uuidToUsername !== null) {
+            return {
+              uuidToUsername: {
+                ...state.uuidToUsername,
+                [data.userId]: data.username
+              }
+            }
+          }
+          else
+            return state;
+        });
+      }
+    });
+
     // convert to array and sort based on timeStamp in ConversationList.tsx
     socket.on("sentMessage", (sentMessage : Message) => {
       const conversationId = sentMessage.conversationId;
@@ -121,7 +147,7 @@ const useSocket = create<UserSocket>()((set, get) => ({
         conversationsAndMessages: {
           ...state.conversationsAndMessages,
           [conversationId]: [
-            ...((state.conversationsAndMessages as ConversationsAndMessages)[conversationId] || []),
+            ...((state.conversationsAndMessages as ConversationsAndMessages)[conversationId] ?? []),
             sentMessage
           ]
         },
@@ -136,7 +162,6 @@ const useSocket = create<UserSocket>()((set, get) => ({
       }));
     })
 
-    //change group naming
     socket.on("addConversation", (conversation : Conversation) => {
       console.log(conversation);
       const participants = conversation.participants.reduce((acc, participant, index) => {
@@ -158,6 +183,27 @@ const useSocket = create<UserSocket>()((set, get) => ({
           [conversation.id]: conversation
         }
       }));
+    });
+
+    socket.on("conversationNameChange", (data : {
+      conversationId : string,
+      name: string
+    }) => {
+      console.log("newConversationData!!!: " + data)
+      set(state => {
+        if (!state.conversationList?.[data.conversationId])
+          return state;
+
+        return {
+          conversationList: {
+            ...state.conversationList,
+            [data.conversationId]: {
+              ...state.conversationList[data.conversationId],
+              name: data.name
+            }
+          }
+        }
+      })
     });
 
     socket.on("signout", () => {

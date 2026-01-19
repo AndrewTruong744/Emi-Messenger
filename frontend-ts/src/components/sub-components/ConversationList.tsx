@@ -14,8 +14,9 @@ interface Props {
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
   const conversationListObj = useSocket(state => state.conversationList);
+  const uuidToUsername = useSocket(state => state.uuidToUsername);
+  const currentUser = useSocket(state => state.currentUser);
   const isLoading = (conversationListObj) ? false : true;
-  const currentUser = useSocket((state) => state.currentUser);
 
   const [findConversation, setFindConversation] = useState("");
 
@@ -77,6 +78,14 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
         <ul className={styles.conversationList}>
           {
             sortedConversationList.map(conversation => {
+              let conversationName = conversation?.name ?? "Loading";
+              if (conversationName === "" && conversation && uuidToUsername && currentUser) {
+                conversationName = conversation.participants
+                  .filter(participantId => participantId != currentUser.id)
+                  .map(participantId => uuidToUsername[participantId])
+                  .join(', ');
+              }
+
               return (
                 <li 
                   key={conversation.id} 
@@ -95,7 +104,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
                     }>
                     </div>
                   </div>
-                  <h3 className={styles.name}>{conversation.name}</h3>
+                  <h3 className={styles.name}>{conversationName}</h3>
                   <p className={styles.recentMessage}>
                     {(conversation.recentMessage) ? conversation.recentMessage : ""}
                   </p>

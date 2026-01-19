@@ -35,10 +35,15 @@
   display: flex;
   flex-direction: column;
   align-items: end;
-  /* text-align: end; */
   background-color: rgb(59, 100, 71);
   padding: 5px 10px;
   border-radius: 10px;
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .time {
@@ -58,7 +63,7 @@
   }
 
   .textRight:hover .time,
-.textLeft:hover .time {
-  font-size: 0.7rem;
-}
+  .textLeft:hover .time {
+    font-size: 0.7rem;
+  }
 }

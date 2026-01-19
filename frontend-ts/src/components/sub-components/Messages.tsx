@@ -1,5 +1,5 @@
 import styles from "../../styles/Messages.module.css";
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useRef, useLayoutEffect, Fragment } from "react";
 import { useSocket } from "../../helper/store";
 import {format} from "date-fns";
 import api from "../../helper/axios";
@@ -14,7 +14,9 @@ interface Props {
 // increase font size of messages with width is large
 function Messages({conversationId} : Props) {
   const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
+  const conversation = useSocket(state => state.conversationList?.[conversationId]);
   const messages = useSocket(state => state.conversationsAndMessages?.[conversationId]);
+  const uuidToUsername = useSocket(state => state.uuidToUsername);
   const currentUser = useSocket(state => state.currentUser);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -87,16 +89,25 @@ function Messages({conversationId} : Props) {
   }, [conversationId]); // only fetch messages when user id changes
 
   return (
-    (isLoading || !currentUser) ? <Loading /> : 
+    (isLoading || !currentUser || !conversation) ? <Loading /> : 
       <div className={styles.texts} ref={messagesRef} onScroll={handleScroll}>
-        {messages && messages.map(message => {
+        {messages && messages.map((message, index) => {
           const formattedTimeStamp = format(message.sent, 'HH:mm MM/dd/yyyy');
           const className = (message.senderId === currentUser?.id) ? "textRight" : "textLeft";
+          const prevMessage = messages[index - 1];
+
+          const showUsername = 
+            conversation.isGroup && message.senderId != currentUser.id && prevMessage?.senderId !== message.senderId;
 
           return (
-            <div key={message.id} className={styles[className]}>
-              <p>{message.content}</p>
-              <p className={styles.time}>{formattedTimeStamp}</p>
+            <div key={message.id} className={styles.textContent}>
+              {(showUsername) ?
+                <p>{uuidToUsername?.[message.senderId] ?? "Loading"}</p> : null
+              }
+              <div className={styles[className]}>
+                <p>{message.content}</p>
+                <p className={styles.time}>{formattedTimeStamp}</p>
+              </div>
             </div>
           );
         })}

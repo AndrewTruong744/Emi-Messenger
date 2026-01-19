@@ -6,17 +6,27 @@ import api from '../helper/axios';
 
 function Settings() {
   const currentUser = useSocket(state => state.currentUser);
-  const clearStore = useSocket(state => state.clearStore);
   const username = currentUser?.username;
   const email = currentUser?.email;
 
   const [newUsername, setNewUsername] = useState<string | null>(null);
+
+  // implement changing passwords and emails when implementing email verification
   const [newEmail, setNewEmail] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  
   const [infoChanged, setInfoChanged] = useState(false);
 
-  function handleUpdateProfile() {
-    // TO DO
+  async function handleUpdateProfile(e: React.FormEvent) {
+    e.preventDefault();
+    if (currentUser?.username !== newUsername && newUsername && newUsername.length > 0) {
+      try {
+        await api.put("general/current-user", {username: newUsername});
+      } catch (err) {
+        console.log(err);
+        setNewUsername(null);
+      }
+    }
   }
 
   async function handleSignout() {

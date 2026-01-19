@@ -5,12 +5,10 @@ import Messages from './sub-components/Messages';
 import MessageBox from './sub-components/MessageBox';
 import { useEffect } from "react";
 import { type Context } from "../types/Context";
-import { useSocket } from "../helper/store";
 
 function Conversation() {
   const params = useParams();
   const conversationId = (params.id) ? params.id : "";
-  const conversationName = useSocket(state => state.conversationList?.[conversationId]?.name ?? "Loading");
 
   const context = useOutletContext<Context>();
   const {onSetActiveMessage} = context;
@@ -27,7 +25,7 @@ function Conversation() {
 
   return (
     <main className={styles.conversation}>
-      <MessageHeader conversationName={conversationName} conversationId={conversationId}/>
+      <MessageHeader conversationId={conversationId}/>
       <Messages conversationId={conversationId}/>
       <MessageBox conversationId={conversationId}/>
     </main>

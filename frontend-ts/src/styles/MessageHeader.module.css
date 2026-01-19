@@ -4,6 +4,7 @@
   align-items: center;
   background-color: rgb(60,60,60);
   padding: 10px 15px;
+  position: relative;
 }
 
 .profile {
@@ -20,9 +21,14 @@
   border-radius: 50%;
 }
 
-.username {
-  overflow: hidden;
+.conversationName {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.7rem;
+  font-weight: bold;
   text-overflow: ellipsis;
+  width: 100%;
 }
 
 .buttons {
@@ -41,14 +47,59 @@
   fill: white;
 }
 
+.participants {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background-color: inherit;
+  right: 0;
+  top: 80px;
+  border-top: 2px solid white;
+}
+
+.participantTitle {
+  font-size: 1.6rem;
+  text-align: center;
+  border-bottom: 1px solid white;
+  padding: 10px;
+}
+
+.participant {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid white;
+}
+
+.participantName {
+  text-overflow: ellipsis;
+  font-size: 1.5rem;
+}
+
+.participantImage {
+
+}
+
 @media (max-width: 768px) {
+  .participants {
+    top: 70px;
+  }
+
   .profileImage {
     height: 50px;
   }
 
-  .username {
+  .conversationName {
     font-size: 1.5rem;
     min-width: 100px;
+  }
+
+  .participantTitle {
+    font-size: 1.4rem;
+  }
+
+  .participantName {
+    font-size: 1.3rem;
   }
 
   .button {
@@ -65,8 +116,16 @@
     height: 40px;
   }
 
-  .username {
+  .conversationName {
     font-size: 1.3rem;
+  }
+
+  .participantTitle {
+    font-size: 1.1rem;
+  }
+
+  .participantName {
+    font-size: 1rem;
   }
 
   .button {

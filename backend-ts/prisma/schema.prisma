@@ -34,6 +34,7 @@ model Conversation {
   id String @id @default(uuid())
   isGroup Boolean @default(false)
   messages Message[]
+
   name String @default("")
 
   participants ConversationParticipant[]

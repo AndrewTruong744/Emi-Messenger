@@ -116,7 +116,37 @@ router.put('/conversation',
 );
 
 // updating a conversation name
-// router.put('/conversation/:id',)
+router.put('/conversation/:id', 
+  passport.authenticate('access-token', {session: false}),
+  async (req, res) => {
+    try {
+      const io = req.io;
+      const userId = (req.user as PrismaUser).id;
+      const conversationId = req.params.id;
+      const newName = req.body.name;
+      const result = await generalQuery.updateConversationName(conversationId, userId, newName);
+
+      if (result === 'invalid') {
+        return res.status(404).json({
+          error: true,
+          message: 'Operation not authorized'
+        });
+      }
+
+      io.in(`room-${conversationId}`).emit('conversationNameChange', {
+        conversationId: conversationId,
+        name: newName
+      });
+
+      return res.json({message: "success"});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable: ' + err
+      });
+    }
+  }
+);
 
 // make sure user is in conversation before deleting
 router.delete('/conversation/:id', 
@@ -213,6 +243,40 @@ router.get('/current-user',
     }
   }
 );
+
+// updating a user's username
+router.put('/current-user',
+  passport.authenticate('access-token', {session: false}),
+  async (req, res) => {
+    try {
+      const io = req.io;
+      const userId = (req.user as PrismaUser).id;
+      const newUsername = req.body.username;
+      const result = await generalQuery.updateUsername(userId, newUsername);
+
+      if (result === 'invalid') {
+        return res.status(404).json({
+          error: true,
+          message: 'Operation not authorized'
+        })
+      }
+
+      for (const conversationId of result) {
+        io.in(`room-${conversationId}`).emit('usernameChange', {
+          userId: userId,
+          username: newUsername
+        });
+      }
+
+      return res.json({message: "success"});
+    } catch (err) {
+      return res.status(503).json({
+        error: true,
+        message: 'Database is currently unreachable'
+      });
+    }
+  }
+)
 
 router.delete('/current-user',
   passport.authenticate('access-token', {session: false}),

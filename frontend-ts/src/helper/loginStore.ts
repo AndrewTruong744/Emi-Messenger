@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 
+// CHANGE THIS TO LIKE SYSTEM MESSAGE STORE
 interface UserLogin {
   loginMessage: string | null
   setLoginMessage: (loginMessage: string | null) => void

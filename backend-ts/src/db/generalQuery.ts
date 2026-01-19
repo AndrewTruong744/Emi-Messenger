@@ -31,7 +31,22 @@ async function getUsername(uuid : string) {
 }
 
 async function updateUsername(userId : string, newUsername: string) {
+  const user = await prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      username: newUsername
+    }
+  });
 
+  if (!user)
+    return "invalid";
+
+  await redis.hset(`user-${userId}`, "username", newUsername);
+  
+  const conversationIds = await getAllConversationIds(userId);
+  return conversationIds;
 } 
 
 async function getUsers(username : string, currUserId : string | null) {
@@ -100,7 +115,8 @@ async function getCurrentUser(userId : string) {
   conversation-${conversationId} (HSET):
   id: string,
   name: string,
-  isGroup: bool
+  isCustomName: bool,
+  isGroup: bool,
   participants: string[] of userIds, JSON.stringify
   recentMessage: Message JSON.stringify
   timestamp: string
@@ -149,7 +165,7 @@ async function getAllConversationIds(userId : string) {
   }
 }
 
-// add pagination soon
+// add pagination later
 async function getConversations(userId : string, lastConversationTimeStamp : string | null) {
   const getRedis = (lastConversationTimeStamp) ? redis.zrevrangebyscore(
     `user-${userId}-conversations`,
@@ -380,9 +396,6 @@ async function addConversation(userIds : string[], usernames : string[]) {
   else {
     const createdConversation = await prisma.conversation.create({
       data: {
-        name: usernames
-                .map(username => username.trim())
-                .join(', '),
         isGroup: userIds.length >= 3,
         participants: {
           create: userIds.map((userId) => ({
@@ -396,9 +409,7 @@ async function addConversation(userIds : string[], usernames : string[]) {
 
     p1.hset(`conversation-${createdConversation.id}`, {
       id: createdConversation.id,
-      name: usernames
-                .map(username => username.trim())
-                .join(', '),
+      name: "",
       isGroup: userIds.length >= 3,
       participants: JSON.stringify(userIds),
       recentMessage: "",
@@ -423,8 +434,32 @@ async function addConversation(userIds : string[], usernames : string[]) {
   }
 }
 
-async function updateConversationName(conversationId : string, name : string) {
+async function updateConversationName(conversationId : string, userId : string, name : string) {
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      id: conversationId,
+      isGroup: true, 
+      participants: {
+        some: { userId: userId }
+      }
+    }
+  });
 
+  if (!conversation)
+    return "invalid";
+
+  await prisma.conversation.update({
+    where: {
+      id: conversationId,
+    },
+    data: {
+      name: name,
+    }
+  });
+
+  await redis.hset(`conversation-${conversationId}`, {name: name, isCustomName: true});
+  
+  return "success";
 }
 
 async function getMessages(conversationId : string, prevMessageId : string | null, userId : string) {
@@ -627,11 +662,13 @@ async function deleteUserData(userId : string) {
 export default {
   getDatabaseId,
   getUsername,
+  updateUsername,
   getUsers,
   getCurrentUser,
   getAllConversationIds,
   getConversations,
   addConversation,
+  updateConversationName,
   getMessages,
   addMessage,
   deleteConversation,
