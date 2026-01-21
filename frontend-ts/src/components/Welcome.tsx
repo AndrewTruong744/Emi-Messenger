@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react';
 import styles from "../styles/Home.module.css";
+import NotFound from './NotFound';
 
 function Welcome() {
-  
-  return <h1>Welcome!</h1>;
+  return <NotFound />;
 }
 
 export default Welcome;

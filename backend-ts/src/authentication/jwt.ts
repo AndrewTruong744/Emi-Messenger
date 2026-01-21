@@ -6,7 +6,12 @@ import {type User as PrismaUser} from '@prisma/client'
 const ACCESS_SECRET = process.env['ACCESS_TOKEN_SECRET'];   
 const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET'];
 
-async function generateJwt(user : PrismaUser, refreshTokenCookie : string | undefined, res : Response, isOdic=false) {
+async function generateJwt(
+  user : PrismaUser, 
+  refreshTokenCookie : string | undefined, 
+  res : Response, 
+  isOdic=false
+) {
   const payload = {
     id: user.id,
     username: user.username
@@ -24,10 +29,10 @@ async function generateJwt(user : PrismaUser, refreshTokenCookie : string | unde
     { expiresIn: '7d' }
   );
 
-  const updatedUser = await authQuery.saveRefreshToken(user.id, refreshToken);
+  await authQuery.saveRefreshToken(user.id, refreshToken);
 
   if (refreshTokenCookie) {
-    const deleteCount = await authQuery.deleteRefreshToken(user.id, refreshTokenCookie);
+    await authQuery.deleteRefreshToken(user.id, refreshTokenCookie);
   }
 
   // set domain on prod

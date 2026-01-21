@@ -14,14 +14,12 @@ function Settings() {
   // implement changing passwords and emails when implementing email verification
   const [newEmail, setNewEmail] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
-  
-  const [infoChanged, setInfoChanged] = useState(false);
 
   async function handleUpdateProfile(e: React.FormEvent) {
     e.preventDefault();
     if (currentUser?.username !== newUsername && newUsername && newUsername.length > 0) {
       try {
-        await api.put("general/current-user", {username: newUsername});
+        await api.put("/user/me", {username: newUsername});
       } catch (err) {
         console.log(err);
         setNewUsername(null);

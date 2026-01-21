@@ -5,6 +5,8 @@ import generalQuery from "../db/generalQuery.js";
 import redis from "../cache/redisClient.js";
 
 function handleSocketEvents(io : Server) {
+
+  // provides information stored in the refresh token to the socket handlers
   io.use((socket : Socket, next : (err?: Error) => void) => {
     const headerCookie = socket.handshake.headers.cookie;
   

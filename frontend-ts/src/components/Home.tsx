@@ -23,13 +23,13 @@ function Home() {
   useEffect(() => {
 
     async function getCurrentUser() {
-      const axiosRes = await api.get('/general/current-user');
+      const axiosRes = await api.get('/users/me');
       const currentUserObj = axiosRes.data;
       setCurrentUser(currentUserObj.currentUser);
     }
 
     async function getConversations() {
-      const axiosRes = await api.get('/general/conversations');
+      const axiosRes = await api.get('/conversations');
       const conversationsObj = axiosRes.data;
       setConversationsAndMessages(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
       console.log(conversationsObj);

@@ -5,8 +5,6 @@ import 'dotenv/config';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
-import path from 'node:path';
-import { fileURLToPath } from "node:url";
 
 import { type Request, type Response, type NextFunction } from 'express';
 
@@ -14,9 +12,6 @@ import "./authentication/passport.js";
 import apiRouter from './routes/api.js';
 
 import handleSocketEvents from "./sockets/socket.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
@@ -35,8 +30,6 @@ app.use((req, res, next) => {
   next();
 });
 
-const assetsPath = path.join(__dirname, 'public');
-app.use(express.static(assetsPath));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());

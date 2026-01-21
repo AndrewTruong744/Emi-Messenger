@@ -28,7 +28,7 @@ function FindPeople() {
   useEffect(() => {
     async function getUsers() {
       try {
-        const axiosRes = await api.get('/general/users');
+        const axiosRes = await api.get('/users');
         const usersObj = axiosRes.data;
         setUsers(usersObj.users);
 
@@ -51,7 +51,7 @@ function FindPeople() {
   async function handleFindUser(e : React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       try {
-        const axiosRes = await api.get(`/general/users/${username}`);
+        const axiosRes = await api.get(`/users/${username}`);
         const usersObj = axiosRes.data;
         setUsers(usersObj.users);
       } catch (err) {
@@ -76,9 +76,9 @@ function FindPeople() {
     }
   }
 
-  async function handleUserClicked(e : React.MouseEvent<HTMLButtonElement>) {
+  async function handleUserClicked() {
     try {
-      const axiosRes = await api.put(`general/conversation/`, {
+      const axiosRes = await api.post(`/conversations`, {
         userIds: userIdsSelected, 
         usernames: usernamesSelected
       });

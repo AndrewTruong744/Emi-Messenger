@@ -32,7 +32,7 @@ function Messages({conversationId} : Props) {
         lastScrollHeight.current = messagesRef.current?.scrollHeight || 0;
         setIsLoading(true);
         console.log('prevMessage!!! ' + prevMessageId.current);
-        const axiosRes = await api.get(`/general/messages/${conversationId}`, 
+        const axiosRes = await api.get(`/messages/${conversationId}`, 
           {params: {prevMessageId: prevMessageId.current}});
         const messagesObj = axiosRes.data;
         console.log(messagesObj);

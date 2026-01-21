@@ -45,7 +45,10 @@ router.post('/login', (req, res, next) => {
 
 router.get('/login/google', passport.authenticate('google', {session: false}));
 
-//send a html file with script instead
+/* 
+  - on Google OIDC success: redirect user to /login/complete with access token attached to fragment
+  - TO DO: switch to PKCE flow instead
+*/
 router.get('/oauth2/redirect/google', (req, res, next) => {
   passport.authenticate('google', {
     session: false, 
@@ -141,9 +144,6 @@ router.post('/refresh', async (req, res) => {
 router.get('/authenticate', 
   passport.authenticate('access-token', {session: false}),
   (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-    const authHeader = req.headers.authorization;
-
     return res.json({
       message: 'Authentication successful',
       user: req.user

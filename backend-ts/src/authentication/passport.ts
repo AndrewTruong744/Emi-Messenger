@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
 import authQuery from '../db/authQuery.js';
 import { Strategy as JwtStrategy, ExtractJwt, type VerifiedCallback } from 'passport-jwt';
-import {Strategy as GoogleStrategy, type Profile } from 'passport-google-oauth20';
+import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import { customAlphabet } from 'nanoid';
 import generalQuery from '../db/generalQuery.js';
 

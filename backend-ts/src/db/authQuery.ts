@@ -1,9 +1,7 @@
-import {PrismaClient} from '@prisma/client';
+import {prisma} from './prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import redis from '../cache/redisClient.js';
-
-const prisma = new PrismaClient();
 
 async function createUser(reqBody : any) {
   const hashedPassword = 

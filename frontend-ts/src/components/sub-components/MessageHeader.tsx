@@ -21,7 +21,7 @@ function MessageHeader({conversationId} : Props) {
 
   async function handleDeleteConversation() {
     try {
-      await api.delete(`general/conversation/${conversationId}`);
+      await api.delete(`/conversations/${conversationId}`);
     } catch (err) {
       console.log(err);
     }
@@ -34,7 +34,7 @@ function MessageHeader({conversationId} : Props) {
         newConversationName != conversationName &&
         conversation?.isGroup) {
       try {
-        await api.put(`general/conversation/${conversationId}`, {name: newConversationName});
+        await api.put(`conversations/${conversationId}`, {name: newConversationName});
       } catch (err) {
         console.log(err);
       }
