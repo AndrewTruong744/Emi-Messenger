@@ -1,70 +1,18 @@
-import {create} from 'zustand';
+import { type StateCreator } from 'zustand';
 import {io, Socket} from 'socket.io-client';
 import { type NavigateFunction } from 'react-router-dom';
-import useLogin from './loginStore';
-import useClear from './clearStore';
+import { type FullStore } from './useBoundStore';
+import type { Message, Conversation } from '../types/storeTypes';
+import { type ConversationsAndMessages } from './chatSlice';
 
-interface User {
-  id: string,
-  online: boolean,
-  username: string,
-  email: string,
-  sub: string,
-};
-
-interface Conversation {
-  isGroup: boolean,
-  online: boolean,
-  recentMessage: string | null,
-  timeStamp: string,
-  participants: string[],
-  participantNames?: string[],
-  id: string,
-  name: string,
-}
-
-interface Message {
-  id: string,
-  sent: string,
-  content: string,
-  senderId: string,
-  conversationId: string
-}
-
-interface UuidToUsername {
-  [key : string] : string
-}
-
-interface ConversationsAndMessages {
-  [key : string]: Message[] | null
-}
-
-interface UserSocket {
-  currentUser: User | null,
+export interface SocketSlice {
   socket: Socket | null,
-  uuidToUsername : UuidToUsername | null,
-  conversationList : {[conversationId : string]: Conversation} | null,
-  conversationsAndMessages: ConversationsAndMessages | null,
-  setCurrentUser: (currentUser : User) => void,
   connect: (navigate : NavigateFunction) => void,
   disconnect: () => void,
-  setConversationsAndMessages: (
-    conversationList : Conversation[], 
-    userIdToUsernames : Record<string,string>
-  ) => void,
-  updateConversationsAndMessages: (messages : Message[], conversationId : string) => void,
-  clearStore: () => void,
 }
 
-const useSocket = create<UserSocket>()((set, get) => ({
-  currentUser: null,
+export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = (set, get) => ({
   socket: null,
-  uuidToUsername: null,
-  conversationList : null,
-  conversationsAndMessages: null,
-  setCurrentUser: (currentUser) => {
-    set({currentUser});
-  },
   connect: (navigate) => {
     if (get().socket != null)
       return;
@@ -75,7 +23,6 @@ const useSocket = create<UserSocket>()((set, get) => ({
       
       set((state) => {
         const currConversation = state.conversationList?.[conversationId];
-        // issue with isGroup saving
         if (currConversation && currConversation.participants.length === 2) {
           return {
             conversationList: {
@@ -207,11 +154,11 @@ const useSocket = create<UserSocket>()((set, get) => ({
     });
 
     socket.on("signout", () => {
-      const setLoginMessage = useLogin.getState().setLoginMessage;
+      const setLoginMessage = get().setLoginMessage;
       setLoginMessage('Signed Out');
       navigate('/login');
       
-      useClear.getState().clearStore();
+      get().clearStore();
     });
 
     socket.on("conversationDeleted", (conversationId : string) => {
@@ -219,7 +166,8 @@ const useSocket = create<UserSocket>()((set, get) => ({
         navigate('/home');
       console.log(conversationId);
       console.log(window.location.href);
-      // find a way to cleanly remove the username and id
+
+      // find a way to cleanly remove the username and id of participants
       set((state) => {
         const {[conversationId]: removedConversationAndMessage, ...newConversationAndMessages} 
           = state.conversationsAndMessages || {};
@@ -234,11 +182,11 @@ const useSocket = create<UserSocket>()((set, get) => ({
     });
 
     socket.on("accountDeleted", () => {
-      const setLoginMessage = useLogin.getState().setLoginMessage;
+      const setLoginMessage = get().setLoginMessage;
       setLoginMessage('Account Deleted');
       navigate('/login');
 
-      useClear.getState().clearStore();
+      get().clearStore();
     });
 
     set({socket});
@@ -247,66 +195,9 @@ const useSocket = create<UserSocket>()((set, get) => ({
     const socket = get().socket;
     if (socket)
       socket.disconnect();
-    useClear.getState().clearStore();
-  },
-  //change group naming
-  setConversationsAndMessages: (conversationList : Conversation[], userIdToUsernames : Record<string,string>) => {
-    set((state) => {
-      const newUuidToUsername = { ...state.uuidToUsername };
-      const newConversationList = {...state.conversationList};
-
-      console.log(conversationList);
-      conversationList.forEach((conversation) => {
-        newConversationList[conversation.id] = conversation;
-      });
-      console.log(newConversationList);
-
-      Object.entries(userIdToUsernames).forEach((userIdToUsername) => {
-        newUuidToUsername[userIdToUsername[0]] = userIdToUsername[1];
-      });
-
-      return {
-        uuidToUsername: newUuidToUsername,
-        conversationList: newConversationList,
-      };
-    });
-  },
-  updateConversationsAndMessages: (messages, conversationId) => {
-    set((state) => {
-      if (messages.length === 0) {
-        return {
-          conversationsAndMessages: {
-          ...state.conversationsAndMessages,
-          [conversationId]: [],
-        }
-        }
-      }
-
-      let updatedMessages = messages;
-      const currentMessages = state.conversationsAndMessages?.[messages[0].conversationId]
-      if (currentMessages) {
-        const currentIds = new Set(currentMessages.map(message => message.id));
-        updatedMessages = updatedMessages.filter(message => !currentIds.has(message.id));
-        updatedMessages = [...updatedMessages, ...currentMessages];
-      }
-
-      return {
-        conversationsAndMessages: {
-          ...state.conversationsAndMessages,
-          [conversationId]: updatedMessages,
-        }
-      };
-    });
-  },
-  clearStore: () => {
+    
     set({
-      currentUser: null,
-      socket: null,
-      uuidToUsername: null,
-      conversationList: null,
-      conversationsAndMessages: null,
+      socket: null
     });
-  }
-}));
-
-export {useSocket, type Conversation};
+  },
+});

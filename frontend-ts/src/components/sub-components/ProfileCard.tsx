@@ -1,10 +1,10 @@
 import styles from "../../styles/ProfileCard.module.css";
-import { useSocket } from "../../helper/store";
+import { useBoundStore } from "../../store/useBoundStore";
 import { useNavigate } from "react-router-dom";
 
 function ProfileCard() {
   const navigate = useNavigate();
-  const currentUser = useSocket(state => state.currentUser);
+  const currentUser = useBoundStore(state => state.currentUser);
 
   function handleSettings() {
     if (window.location.pathname === '/home/settings')

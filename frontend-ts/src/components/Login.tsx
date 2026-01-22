@@ -5,16 +5,14 @@ import api from '../helper/axios.js';
 import Emi from '../assets/Emi6.jpg';
 import Loading from './sub-components/Loading.js';
 import { isAxiosError } from 'axios';
-import { useSocket } from '../helper/store.js';
-import useLogin from '../helper/loginStore.js';
-import useAuth from '../helper/authStore.js';
+import { useBoundStore } from "../store/useBoundStore";
 
 function Login() {
   const navigate = useNavigate();
-  const setAccessToken = useAuth((state) => state.setAccessToken);
-  const clearStore = useSocket((state) => state.clearStore);
-  const loginMessage = useLogin((state) => state.loginMessage);
-  const setLoginMessage = useLogin((state) => state.setLoginMessage);
+  const setAccessToken = useBoundStore((state) => state.setAccessToken);
+  const clearStore = useBoundStore((state) => state.clearStore);
+  const loginMessage = useBoundStore((state) => state.loginMessage);
+  const setLoginMessage = useBoundStore((state) => state.setLoginMessage);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

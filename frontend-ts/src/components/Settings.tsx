@@ -1,11 +1,11 @@
-import {useState, useEffect, use} from 'react';
+import {useState} from 'react';
 import styles from "../styles/Settings.module.css";
-import { useSocket } from '../helper/store';
+import { useBoundStore } from "../store/useBoundStore";
 import Loading from './sub-components/Loading';
 import api from '../helper/axios';
 
 function Settings() {
-  const currentUser = useSocket(state => state.currentUser);
+  const currentUser = useBoundStore(state => state.currentUser);
   const username = currentUser?.username;
   const email = currentUser?.email;
 

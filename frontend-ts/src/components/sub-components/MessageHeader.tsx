@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../helper/axios";
 import styles from "../../styles/MessageHeader.module.css";
-import { useSocket } from "../../helper/store";
+import { useBoundStore } from "../../store/useBoundStore";
 import Loading from "./Loading";
 
 interface Props {
@@ -12,9 +12,9 @@ interface Props {
 // implement popup that shows users in conversation
 // implement overflow control with conversation name
 function MessageHeader({conversationId} : Props) {
-  const conversation = useSocket((state) => state.conversationList?.[conversationId]);
-  const uuidToUsername = useSocket((state) => state.uuidToUsername);
-  const currentUser = useSocket((state) => state.currentUser);
+  const conversation = useBoundStore((state) => state.conversationList?.[conversationId]);
+  const uuidToUsername = useBoundStore((state) => state.uuidToUsername);
+  const currentUser = useBoundStore((state) => state.currentUser);
 
   const [newConversationName, setNewConversationName] = useState<string | null>(null);
   const [showParticipants, setShowParticipants] = useState(false);

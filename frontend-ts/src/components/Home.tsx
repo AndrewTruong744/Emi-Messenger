@@ -3,7 +3,7 @@ import {Outlet} from 'react-router-dom'
 import styles from "../styles/Home.module.css";
 import api from '../helper/axios';
 import { useNavigate } from 'react-router-dom';
-import { useSocket } from '../helper/store';
+import { useBoundStore } from "../store/useBoundStore";
 import ConversationList from './sub-components/ConversationList';
 import ProfileCard from './sub-components/ProfileCard';
 import GreetingBox from './sub-components/GreetingBox';
@@ -11,10 +11,10 @@ import useIsMobile from '../helper/mobile';
 
 function Home() { 
   const navigate = useNavigate();
-  const setCurrentUser = useSocket(state => state.setCurrentUser);
-  const connect = useSocket(state => state.connect);
-  const disconnect = useSocket(state => state.disconnect);
-  const setConversationsAndMessages = useSocket(state => state.setConversationsAndMessages);
+  const setCurrentUser = useBoundStore(state => state.setCurrentUser);
+  const connect = useBoundStore(state => state.connect);
+  const disconnect = useBoundStore(state => state.disconnect);
+  const setConversations = useBoundStore(state => state.setConversations);
   const [atHome, isMobile] = useIsMobile();
 
   // holds uuid of person you are chatting with
@@ -31,7 +31,7 @@ function Home() {
     async function getConversations() {
       const axiosRes = await api.get('/conversations');
       const conversationsObj = axiosRes.data;
-      setConversationsAndMessages(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
+      setConversations(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
       console.log(conversationsObj);
     }
 
@@ -49,7 +49,7 @@ function Home() {
     return () => {
       disconnect();
     };
-  }, [connect, disconnect, setConversationsAndMessages, setCurrentUser, navigate]);
+  }, [connect, disconnect, setConversations, setCurrentUser, navigate]);
 
   return ( 
     <div className={styles.home}>

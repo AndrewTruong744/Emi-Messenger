@@ -1,14 +1,15 @@
-import {create} from 'zustand';
+import {type StateCreator} from 'zustand';
+import { type FullStore } from './useBoundStore';
 
-interface UserAuth {
+export interface AuthSlice {
   accessToken: string | null,
   csrfToken: string | null,
   setAccessToken: (accessToken: string | null) => void,
   setCsrfToken: (csrfToken: string | null) => void,
-  clearStore: () => void
+  clearAuthSlice: () => void
 }
 
-const useAuth = create<UserAuth>()((set) => ({
+export const createAuthSlice : StateCreator<FullStore, [], [], AuthSlice> = (set) => ({
   accessToken: null,
   csrfToken: null,
   setAccessToken: (accessToken) => {
@@ -17,12 +18,10 @@ const useAuth = create<UserAuth>()((set) => ({
   setCsrfToken: (csrfToken) => {
     set({csrfToken});
   },
-  clearStore: () => {
+  clearAuthSlice: () => {
     set({
       accessToken: null,
       csrfToken: null
     })
   }
-}));
-
-export default useAuth;
+});

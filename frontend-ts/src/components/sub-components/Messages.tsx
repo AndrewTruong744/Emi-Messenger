@@ -1,6 +1,6 @@
 import styles from "../../styles/Messages.module.css";
-import { useEffect, useState, useRef, useLayoutEffect, Fragment } from "react";
-import { useSocket } from "../../helper/store";
+import { useEffect, useState, useRef, useLayoutEffect} from "react";
+import { useBoundStore } from "../../store/useBoundStore";
 import {format} from "date-fns";
 import api from "../../helper/axios";
 import Loading from "./Loading";
@@ -13,11 +13,11 @@ interface Props {
 // make sure to display Send a message when no messages have been sent
 // increase font size of messages with width is large
 function Messages({conversationId} : Props) {
-  const updateConversationsAndMessages = useSocket(state => state.updateConversationsAndMessages);
-  const conversation = useSocket(state => state.conversationList?.[conversationId]);
-  const messages = useSocket(state => state.conversationsAndMessages?.[conversationId]);
-  const uuidToUsername = useSocket(state => state.uuidToUsername);
-  const currentUser = useSocket(state => state.currentUser);
+  const updateConversationsAndMessages = useBoundStore(state => state.updateConversationsAndMessages);
+  const conversation = useBoundStore(state => state.conversationList?.[conversationId]);
+  const messages = useBoundStore(state => state.conversationsAndMessages?.[conversationId]);
+  const uuidToUsername = useBoundStore(state => state.uuidToUsername);
+  const currentUser = useBoundStore(state => state.currentUser);
 
   const [isLoading, setIsLoading] = useState(true);
   const [noMoreMessages, setNoMoreMessages] = useState(false);

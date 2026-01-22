@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import styles from "../styles/FindPeople.module.css";
 import api from '../helper/axios';
-import { useSocket } from '../helper/store';
+import { useBoundStore } from "../store/useBoundStore";
 import { type Context } from "../types/Context";
 
 interface Users {
@@ -14,7 +14,7 @@ interface Users {
 // add refresh button
 function FindPeople() {
   const navigate = useNavigate();
-  const currentUser = useSocket(state => state.currentUser);
+  const currentUser = useBoundStore(state => state.currentUser);
 
   const context = useOutletContext<Context>();
   const {onSetActiveMessage} = context;

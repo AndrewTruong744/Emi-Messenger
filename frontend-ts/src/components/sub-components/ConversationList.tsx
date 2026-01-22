@@ -1,5 +1,6 @@
 import styles from "../../styles/ConversationList.module.css";
-import { useSocket, type Conversation } from "../../helper/store";
+import { useBoundStore } from "../../store/useBoundStore";
+import { type Conversation } from "../../types/storeTypes";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import { formatDistanceToNow } from "date-fns";
@@ -13,9 +14,9 @@ interface Props {
 // bring most recent conversations on top, sort by timestamp (update redis caching first)
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
-  const conversationListObj = useSocket(state => state.conversationList);
-  const uuidToUsername = useSocket(state => state.uuidToUsername);
-  const currentUser = useSocket(state => state.currentUser);
+  const conversationListObj = useBoundStore(state => state.conversationList);
+  const uuidToUsername = useBoundStore(state => state.uuidToUsername);
+  const currentUser = useBoundStore(state => state.currentUser);
   const isLoading = (conversationListObj) ? false : true;
 
   const [findConversation, setFindConversation] = useState("");

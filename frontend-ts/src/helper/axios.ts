@@ -2,7 +2,7 @@ import axios, {
   type InternalAxiosRequestConfig, 
   type AxiosResponse, 
 } from 'axios';
-import useAuth from './authStore';
+import { useBoundStore } from "../store/useBoundStore";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 let isRefreshing : Promise<AxiosResponse> | null = null;
@@ -17,7 +17,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config : InternalAxiosRequestConfig) => {
-    const accessToken = useAuth.getState().accessToken;
+    const accessToken = useBoundStore.getState().accessToken;
 
     if (accessToken)
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -53,13 +53,13 @@ api.interceptors.response.use(
 
         isRefreshing = null;
 
-        useAuth.getState().setAccessToken(newAccessToken);
+        useBoundStore.getState().setAccessToken(newAccessToken);
         
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         
         return api(originalRequest);
       } catch(err) {
-        useAuth.getState().setAccessToken(null);
+        useBoundStore.getState().setAccessToken(null);
         console.error("Refresh failed, logging user out");
 
         isRefreshing = null;
