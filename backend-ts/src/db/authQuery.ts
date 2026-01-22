@@ -4,8 +4,10 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import redis from '../cache/redisClient.js';
 
 async function createUser(reqBody : any) {
+  // if using login and password route, hash the password provided
   const hashedPassword = 
     (reqBody.password === undefined) ? null : await bcrypt.hash(reqBody.password, 10);
+
   const user = await prisma.user.create({
     data: {
       username: reqBody.username,
@@ -64,7 +66,11 @@ async function saveRefreshToken(userId : string, token : string) {
   const hashedToken = await bcrypt.hash(token, 10);
 
   const decodedRefreshToken = jwt.decode(token) as JwtPayload;
-  const expiresBy = decodedRefreshToken.exp! * 1000;
+  /*
+    multiply by 1000 since TypeScript stores dates in milliseconds while the token
+    stores dates in seconds
+  */
+  const expiresBy = decodedRefreshToken.exp! * 1000; 
 
   const user = await prisma.user.update({
     where: {
@@ -101,6 +107,7 @@ async function checkRefreshTokenWithUserId(userId : string, token : string) {
 
   const tokenEntries = user.tokens;
   for (const tokenEntry of tokenEntries) {
+    // hash the password user entered and compare with hashed password stored in database
     const found = await bcrypt.compare(token, tokenEntry.refreshToken);
     if (found)
       return user;

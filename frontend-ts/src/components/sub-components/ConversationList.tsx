@@ -11,7 +11,6 @@ interface Props {
   onSetActiveMessage: React.Dispatch<React.SetStateAction<string | null | undefined>>
 }
 
-// bring most recent conversations on top, sort by timestamp (update redis caching first)
 function ConversationList({activeMessage, onSetActiveMessage} : Props) {
   const navigate = useNavigate();
   const conversationListObj = useBoundStore(state => state.conversationList);

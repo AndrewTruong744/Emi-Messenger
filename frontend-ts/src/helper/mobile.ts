@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
+// used for responsive design (supports mobile >= 320px, tablet, and PC)
 function useIsMobile() {
   const location = useLocation();
   const [atHome, setAtHome] = useState(false);

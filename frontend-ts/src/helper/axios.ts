@@ -15,6 +15,7 @@ const api = axios.create({
   },
 });
 
+// on every request, add the access token to the request header
 api.interceptors.request.use(
   (config : InternalAxiosRequestConfig) => {
     const accessToken = useBoundStore.getState().accessToken;
@@ -34,12 +35,13 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
 
-    // prevents a refresh call from awaiting another refresh call
+    // prevents a refresh call from awaiting another refresh call (cyclic halting)
     if (originalRequest.url === '/auth/refresh') {
       isRefreshing = null;
       return Promise.reject(err);
     }
 
+    // if access token was invald, use refresh token to get a new one and retry request
     if (err.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 

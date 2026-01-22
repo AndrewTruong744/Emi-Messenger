@@ -23,12 +23,13 @@ function Messages({conversationId} : Props) {
   const [noMoreMessages, setNoMoreMessages] = useState(false);
   const [userNotFound, setUserNotFound] = useState(false);
   const lastScrollHeight = useRef(0);
-  const prevMessageId = useRef<string | null>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const prevMessageId = useRef<string | null>(null); // used for cursor pagination
+  const messagesRef = useRef<HTMLDivElement>(null); 
 
   async function getMessages(scrolledToTop=false) {
     if ((!messages || (scrolledToTop))) {
       try {
+        // get current scroll height to be able to correctly position scrollbar when new messages come in
         lastScrollHeight.current = messagesRef.current?.scrollHeight || 0;
         setIsLoading(true);
         console.log('prevMessage!!! ' + prevMessageId.current);
@@ -43,6 +44,7 @@ function Messages({conversationId} : Props) {
           prevMessageId.current = messagesObj.messages[0].id;
         }
 
+        // we have gotten all messages of this conversation from the database
         if (length < 50)
           setNoMoreMessages(true);
 
@@ -58,12 +60,17 @@ function Messages({conversationId} : Props) {
     if (!messagesRef.current || isLoading || noMoreMessages)
       return;
 
+    // if scrollbar is at the top, request for more older messages
     if (messagesRef.current.scrollTop === 0) {
       console.log('entered!!!');
       getMessages(true);
     }
   }
 
+  /* 
+    positions scrollbar at the bottom when entering a new conversation and positions it near the
+    previously loaded message when more messages are loaded
+  */
   useLayoutEffect(() => {
     if (messagesRef.current && messages) {
       if (lastScrollHeight.current === 0)
@@ -76,6 +83,10 @@ function Messages({conversationId} : Props) {
     }
   }, [conversationId, messages, currentUser]);
 
+  /*
+    reset state when switching to a new conversation since component does not unmount when
+    switching to a different conversation
+  */
   useEffect(() => {
     prevMessageId.current = (messages) ? messages[0]?.id : null;
     async function execute() {

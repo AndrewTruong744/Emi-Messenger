@@ -5,6 +5,10 @@ import passport from "passport";
 import generateJwt from "../authentication/jwt.js";
 import type { User as PrismaUser } from "@prisma/client";
 
+/*
+  TO DO: make error codes more accurate
+*/
+
 const router = express.Router();
 const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET']!;
 
@@ -29,6 +33,7 @@ router.post('/signup', async (req, res, next) => {
 });
 
 router.post('/login', (req, res, next) => {
+  // authenticate user with login and password strategy
   passport.authenticate('local', {session: false}, 
     async (err : any, user : PrismaUser, info : object | undefined) => {
       if (err || !user) {
@@ -46,7 +51,9 @@ router.post('/login', (req, res, next) => {
 router.get('/login/google', passport.authenticate('google', {session: false}));
 
 /* 
-  - on Google OIDC success: redirect user to /login/complete with access token attached to fragment
+  - on Google OIDC success: redirect user to /login/complete on frontend
+    with access token attached to fragment
+  - on Google OIDC fail: redirect user to /login/complete on frontend without access token
   - TO DO: switch to PKCE flow instead
 */
 router.get('/oauth2/redirect/google', (req, res, next) => {
@@ -70,6 +77,7 @@ router.get('/oauth2/redirect/google', (req, res, next) => {
       `);
     }
 
+    // generates the HTTPOnly refresh token and frontend store access token
     const accessToken = await generateJwt(user, req.cookies.refreshToken, res, true);
     const finalRedirectUrl = `${process.env['ORIGIN']}/login-complete#accessToken=${accessToken}`;
     return res.send(`

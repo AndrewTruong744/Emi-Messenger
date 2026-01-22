@@ -8,9 +8,6 @@ interface Props {
   conversationId: string
 }
 
-// implement function to delete a conversation
-// implement popup that shows users in conversation
-// implement overflow control with conversation name
 function MessageHeader({conversationId} : Props) {
   const conversation = useBoundStore((state) => state.conversationList?.[conversationId]);
   const uuidToUsername = useBoundStore((state) => state.uuidToUsername);
@@ -41,6 +38,11 @@ function MessageHeader({conversationId} : Props) {
     }
   }
 
+  /*
+    since component does not unmount when switching from conversation to conversation,
+    make sure to clear any custom conversation name that was inputted in previous conversation
+    and not sent to be updated
+  */
   useEffect(() => {
     function resetState() {
       setNewConversationName(null);

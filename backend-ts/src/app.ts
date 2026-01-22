@@ -8,6 +8,7 @@ import passport from 'passport';
 
 import { type Request, type Response, type NextFunction } from 'express';
 
+// import and activate all authentication strategies
 import "./authentication/passport.js";
 import apiRouter from './routes/api.js';
 
@@ -41,6 +42,7 @@ app.use(passport.initialize());
 
 app.use('/api', apiRouter);
 
+// global error handler
 app.use((err : any, req : Request, res : Response, next : NextFunction) => {
   console.error(err.stack);
 

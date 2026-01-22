@@ -3,6 +3,10 @@ import generalQuery from "../db/generalQuery.js";
 import {type User as PrismaUser, Prisma} from '@prisma/client'
 import passport from "passport";
 
+/*
+  TO DO: make error codes more accurate
+*/
+
 const router = express.Router();
 
 // gets information related to the user initiating the request
@@ -89,6 +93,7 @@ router.delete('/me',
   }
 );
 
+// get a list of users
 router.get('/', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
@@ -105,6 +110,7 @@ router.get('/',
   }
 );
 
+// get a list of users starting with username
 router.get('/:username', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {

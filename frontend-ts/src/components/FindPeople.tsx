@@ -10,8 +10,7 @@ interface Users {
   username: string
 }
 
-// make sure to make it case insensitive => database query
-// add refresh button
+// TODO: add a refresh button
 function FindPeople() {
   const navigate = useNavigate();
   const currentUser = useBoundStore(state => state.currentUser);

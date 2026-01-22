@@ -17,7 +17,7 @@ function Home() {
   const setConversations = useBoundStore(state => state.setConversations);
   const [atHome, isMobile] = useIsMobile();
 
-  // holds uuid of person you are chatting with
+  // holds uuid of conversation you are chatting on
   const [activeMessage, setActiveMessage] = useState<string | null | undefined>(null);
 
   useEffect(() => {

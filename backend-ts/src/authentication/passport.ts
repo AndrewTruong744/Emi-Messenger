@@ -7,6 +7,12 @@ import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import { customAlphabet } from 'nanoid';
 import generalQuery from '../db/generalQuery.js';
 
+/*
+  Contains all of the Authentication Strategies used in this application
+
+  TODO: implement Microsoft OIDC
+*/
+
 interface JwtPayload {
   id: string,
   username: string,
@@ -15,16 +21,20 @@ interface JwtPayload {
 }
 
 passport.use(
+  // username and password sign in
   new LocalStrategy(async (username, password, done) => {
     try {
       const user = await authQuery.getUser(username, "");
 
+      // if user previously signed in with Single Sign On (Like through Google)
       if (user?.sub !== null) {
         return done(null, false, { message: "Use Single Sign On" });
       }
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
+
+      // hash the password user entered and compare with hashed password stored in database
       const match = await bcrypt.compare(password, user.password!);
       if (!match) {
         return done(null, false, { message: "Incorrect password" })
@@ -42,6 +52,7 @@ const jwtOptions = {
   session: false
 };
 
+// authenticates the access token a user enters (accessed through passport.authenticate)
 passport.use('access-token',
   new JwtStrategy(jwtOptions, async (jwt_payload : JwtPayload, done : VerifiedCallback) => {
     try {
@@ -57,6 +68,7 @@ passport.use('access-token',
   })
 );
 
+// Google sign in
 passport.use('google', new GoogleStrategy({
     clientID: process.env['GOOGLE_CLIENT_ID']!,
     clientSecret: process.env['GOOGLE_CLIENT_SECRET']!,
@@ -64,24 +76,8 @@ passport.use('google', new GoogleStrategy({
     scope: ['profile', 'email']
   },
   async (accessToken, refreshToken, profile, done) => {
-    const googleSub = profile.id;
-
-    const nanoid = customAlphabet('23456789BCDFGHJKLMNPQRSTVWXYZ', 16);
-    let username = nanoid().match(/.{1,4}/g)!.join('-');
-    while (true) {
-      const users = await generalQuery.getUsers(username, null);
-
-      if (users.length === 0)
-        break;
-      else
-        username = nanoid().match(/.{1,4}/g)!.join('-');
-    }
-
-    const userContents = {
-      email: profile.emails?.[0]?.value,
-      sub: googleSub,
-      username: username,
-    }
+    // gets unique id that Google assigned this account
+    const googleSub = profile.id; 
 
     try {
       const user = await authQuery.getUserBySub(googleSub);
@@ -89,6 +85,24 @@ passport.use('google', new GoogleStrategy({
       if (user) {
         return done(null, user);
       } else {
+        // creates a unique username in the format xxxx-xxxx-xxxxx-xxxx
+        const nanoid = customAlphabet('23456789BCDFGHJKLMNPQRSTVWXYZ', 16);
+        let username = nanoid().match(/.{1,4}/g)!.join('-');
+        while (true) {
+          const users = await generalQuery.getUsers(username, null);
+
+          if (users.length === 0)
+            break;
+          else
+            username = nanoid().match(/.{1,4}/g)!.join('-');
+        }
+
+        const userContents = {
+          email: profile.emails?.[0]?.value,
+          sub: googleSub,
+          username: username,
+        }
+
         const createdUser = await authQuery.createUser(userContents);
         console.log('authenticated');
         return done(null, createdUser);

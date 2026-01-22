@@ -1,12 +1,15 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
 import passport from "passport";
-import {type User as PrismaUser, Prisma} from '@prisma/client'
+import {type User as PrismaUser} from '@prisma/client'
 import redis from "../cache/redisClient.js";
+
+/*
+  TO DO: make error codes more accurate
+*/
 
 const router = express.Router();
 
-// implement pagination
 router.get('/',
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
@@ -24,7 +27,7 @@ router.get('/',
   }
 );
 
-// make sure to limit each user to 500 conversations
+// TODO: limit every user to 500 conversations
 router.post('/', 
   passport.authenticate('access-token', {session: false}),
   async (req, res) => {
@@ -32,7 +35,7 @@ router.post('/',
       const io = req.io;
       const userIds = req.body.userIds;
       const usernames = req.body.usernames;
-      const addedConversation = await generalQuery.addConversation(userIds as string[], usernames as string[]);
+      const addedConversation = await generalQuery.addConversation(userIds as string[]);
       
       if (addedConversation && addedConversation.created) {
         const conversation = addedConversation.conversation;
@@ -41,6 +44,10 @@ router.post('/',
           await io.in(`user-${userId}`).socketsJoin(`room-${conversation.id}`);
         }
 
+        /*
+          if conversation is 1 to 1, emit to each participant the conversation and the other user's
+          online status
+        */
         if (userIds.length < 3) {
           const userAOnline = await redis.exists(`user-${userIds[0]}-online`);
           const userBOnline = await redis.exists(`user-${userIds[1]}-online`);

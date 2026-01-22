@@ -3,6 +3,16 @@ import jwt from 'jsonwebtoken';
 import { type Response } from 'express';
 import {type User as PrismaUser} from '@prisma/client'
 
+/*
+  This application uses a both JWT token method:
+  - Access Token (short lived): lives in a frontend store (in our case, zustand)
+    and gets invalidated every 15 mins (XSS risk)
+  - Refresh Token (long lived): lives in a HTTPOnly cookie, with data inside cookie inaccessible
+    and gets invalidated every 7 days (prevents XSS risk but has CSRF risk)
+  
+  TODO: implement CSRF tokens to prevent CSRF attacks
+*/
+
 const ACCESS_SECRET = process.env['ACCESS_TOKEN_SECRET'];   
 const REFRESH_SECRET = process.env['REFRESH_TOKEN_SECRET'];
 
@@ -31,6 +41,7 @@ async function generateJwt(
 
   await authQuery.saveRefreshToken(user.id, refreshToken);
 
+  // deletes old refresh token (Token Rotation)
   if (refreshTokenCookie) {
     await authQuery.deleteRefreshToken(user.id, refreshTokenCookie);
   }
@@ -44,6 +55,7 @@ async function generateJwt(
     path: '/'
   });
 
+  // if logged in with Single Sign On, just return the access token
   if (isOdic)
     return accessToken;
   else {

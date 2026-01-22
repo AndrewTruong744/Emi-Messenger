@@ -86,7 +86,6 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
       }
     });
 
-    // convert to array and sort based on timeStamp in ConversationList.tsx
     socket.on("sentMessage", (sentMessage : Message) => {
       const conversationId = sentMessage.conversationId;
 

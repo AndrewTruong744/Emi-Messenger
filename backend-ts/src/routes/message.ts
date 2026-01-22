@@ -3,6 +3,10 @@ import generalQuery from "../db/generalQuery.js";
 import {type User as PrismaUser, Prisma} from '@prisma/client'
 import passport from "passport";
 
+/*
+  TO DO: make error codes more accurate
+*/
+
 const router = express.Router();
 
 router.get('/:conversationid',
@@ -12,7 +16,6 @@ router.get('/:conversationid',
       const userId = (req.user as PrismaUser).id;
       const conversationId = req.params.conversationid;
       const prevMessageId = req.query['prevMessageId'] as string | null;
-      console.log("prev: " + prevMessageId);
       const messages = await generalQuery.getMessages(conversationId, prevMessageId, userId);
       if (!messages){
         return res.status(404).json({
@@ -46,7 +49,6 @@ router.post('/:conversationId',
       return res.status(201).json({message: "success!"});
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        // The .code property is a string
         if (err.code === 'P2025') {
           console.log("Authorization failed: Record not found.");
           return res.status(404).json({

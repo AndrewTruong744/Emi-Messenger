@@ -16,6 +16,8 @@ export async function getUsernames(userIdList : string[]) {
   p3Result?.forEach((result, index) => {
     if (result[1])
       userIdToUsernames[userIdList[index]!] = result[1] as string;
+
+    // if user data is not in redis, query using prisma later
     else
       queryUsernames.push(userIdList[index]!);
   });
@@ -57,6 +59,7 @@ export async function getUsersOnline(userIdList : string[]) {
     return acc;
   }, new Set());
 
+  // returns a list of userIds that are online
   return onlineResult;
 }
 
@@ -85,7 +88,7 @@ export async function getUsers(username : string, currUserId : string | null) {
     where: {
       username: {
         startsWith: username,
-        mode: 'insensitive'
+        mode: 'insensitive' // capitalization does not matter
       },
     },
     select: {
@@ -156,6 +159,7 @@ export async function deleteUserData(userId : string) {
     },
   });
 
+  // deletes all conversations a user is in for all participants of a conversation
   await prisma.conversation.deleteMany({
     where: {
       participants: {
@@ -166,12 +170,14 @@ export async function deleteUserData(userId : string) {
     }
   });
 
+  // deletes all user data
   await prisma.user.delete({
     where: {
       id: userId
     }
   });
 
+  // remove all data related to user from redis as well
   const p1 = redis.pipeline();
   p1.del(`user-${userId}-conversations`);
   p1.del(`user-${userId}`);

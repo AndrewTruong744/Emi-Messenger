@@ -1,3 +1,4 @@
+// to let TypeScript know the structure of environment variables
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

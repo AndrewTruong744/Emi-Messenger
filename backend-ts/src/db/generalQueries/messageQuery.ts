@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import {prisma} from '../prisma.js';
 import redis from '../../cache/redisClient.js';
 
+// utilizes cursor pagination, where you get the messages that come before this prevMessageId
 export async function getMessages(conversationId : string, prevMessageId : string | null, userId : string) {
   
   // gets conversation to check if user is a participant (authorization)
@@ -43,11 +44,15 @@ export async function getMessages(conversationId : string, prevMessageId : strin
     await redis.hset(`conversation-${conversationId}`, redisConversation);
   }
 
+  /* 
+    if getting the first 50 messages, check redis first since redis will only hold the first 50 messages
+  */
   const redisMessages = (!prevMessageId) ? 
     await redis.lrange(`conversation-${conversationId}-messages`, 0, 49) : [];
   
   let messages;
   if (redisMessages.length > 0) {
+    // need to reverse the messages since it is latest at first index
     messages = redisMessages
       .map((message) => JSON.parse(message))
       .reverse();
@@ -69,7 +74,7 @@ export async function getMessages(conversationId : string, prevMessageId : strin
 
     if (prevMessageId) {
       prismaQuery['cursor'] = {id: prevMessageId};
-      prismaQuery['skip'] = 1;
+      prismaQuery['skip'] = 1; // to prevent getting the same previous message that was passed in
     }
 
     messages = await prisma.message.findMany(prismaQuery);
@@ -86,13 +91,14 @@ export async function getMessages(conversationId : string, prevMessageId : strin
     }
   }
 
+  // need to reverse the messages since it is latest at first index
   return messages?.reverse();
 }
 
-// check for userid
 export async function addMessage(conversationId : string, senderId : string, message : string) {
   const timeStamp = new Date();
   const [authCheck, messageCreated, updatedConversation] = await prisma.$transaction([
+    // if user does not belong to conversation, prevent adding the message
     prisma.conversationParticipant.findUniqueOrThrow({
       where: {
         userId_conversationId: {
@@ -124,6 +130,7 @@ export async function addMessage(conversationId : string, senderId : string, mes
 
   const p1 = redis.pipeline();
 
+  // update to move this conversation to the top of each user's conversation lists
   updatedConversation.participants.forEach((participant) => {
     p1.zadd(`user-${participant.userId}-conversations`, timeStamp.getTime(), conversationId);
   });

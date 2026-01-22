@@ -56,6 +56,7 @@ export const createChatSlice : StateCreator<FullStore, [], [], ChatSlice> = (set
   },
   updateConversationsAndMessages: (messages, conversationId) => {
     set((state) => {
+      // if no messages are in the database, set in a way to prevent unnecessary requests
       if (messages.length === 0) {
         return {
           conversationsAndMessages: {
@@ -69,6 +70,8 @@ export const createChatSlice : StateCreator<FullStore, [], [], ChatSlice> = (set
       const currentMessages = state.conversationsAndMessages?.[messages[0].conversationId]
       if (currentMessages) {
         const currentIds = new Set(currentMessages.map(message => message.id));
+
+        // gets rid of duplicate messages
         updatedMessages = updatedMessages.filter(message => !currentIds.has(message.id));
         updatedMessages = [...updatedMessages, ...currentMessages];
       }
