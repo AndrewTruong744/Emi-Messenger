@@ -89,24 +89,29 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
     socket.on("sentMessage", (sentMessage : Message) => {
       const conversationId = sentMessage.conversationId;
 
-      set((state) => ({
-        conversationsAndMessages: {
-          ...state.conversationsAndMessages,
-          [conversationId]: [
-            ...((state.conversationsAndMessages as ConversationsAndMessages)[conversationId] ?? []),
-            sentMessage
-          ]
-        },
-        conversationList: {
-          ...state.conversationList,
-          [conversationId]: {
-            ...state.conversationList![conversationId],
-            recentMessage: sentMessage.content,
-            timeStamp: sentMessage.sent
+      set((state) => {
+        if (!state.conversationList)
+          return state;
+
+        return {
+          conversationsAndMessages: {
+            ...state.conversationsAndMessages,
+            [conversationId]: [
+              ...(state.conversationsAndMessages?.[conversationId] ?? []),
+              sentMessage
+            ]
+          },
+          conversationList: {
+            ...state.conversationList,
+            [conversationId]: {
+              ...state.conversationList[conversationId],
+              recentMessage: sentMessage.content,
+              timeStamp: sentMessage.sent
+            }
           }
         }
-      }));
-    })
+      });
+    });
 
     socket.on("addConversation", (conversation : Conversation) => {
       console.log(conversation);

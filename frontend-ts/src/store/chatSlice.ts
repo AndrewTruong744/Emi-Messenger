@@ -17,7 +17,7 @@ export interface ConversationsAndMessages {
 export interface ChatSlice {
   uuidToUsername : UuidToUsername | null,
   conversationList : {[conversationId : string]: Conversation} | null,
-  conversationsAndMessages: ConversationsAndMessages | null,
+  conversationsAndMessages: ConversationsAndMessages,
   setConversations: (
     conversationList : Conversation[], 
     userIdToUsernames : Record<string,string>
@@ -29,7 +29,7 @@ export interface ChatSlice {
 export const createChatSlice : StateCreator<FullStore, [], [], ChatSlice> = (set) => ({
   uuidToUsername: null,
   conversationList : null,
-  conversationsAndMessages: null,
+  conversationsAndMessages: {},
   setConversations: (
       conversationList : Conversation[], 
       userIdToUsernames : Record<string,string>
@@ -88,7 +88,7 @@ export const createChatSlice : StateCreator<FullStore, [], [], ChatSlice> = (set
     set({
       uuidToUsername: null,
       conversationList: null,
-      conversationsAndMessages: null,
+      conversationsAndMessages: {},
     });
   }
 });

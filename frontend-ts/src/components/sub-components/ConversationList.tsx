@@ -26,7 +26,7 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
     sortedConversationList = sortedConversationList.filter(conversation => {
       return conversation.name.toLowerCase().includes(findConversation.toLowerCase());
     }).sort((a,b) => {
-      return new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime();
+      return new Date(Number(b.timeStamp)).getTime() - new Date(Number(a.timeStamp)).getTime();
     })
 
     console.log(sortedConversationList);

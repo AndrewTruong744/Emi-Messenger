@@ -19,7 +19,7 @@ function Settings() {
     e.preventDefault();
     if (currentUser?.username !== newUsername && newUsername && newUsername.length > 0) {
       try {
-        await api.put("/user/me", {username: newUsername});
+        await api.put("/users/me", {username: newUsername});
       } catch (err) {
         console.log(err);
         setNewUsername(null);
@@ -39,7 +39,7 @@ function Settings() {
 
   async function handleDeleteAccount() {
     try {
-      await api.delete("/general/current-user");
+      await api.delete("/users/me");
       console.log("success!!!");
     } catch (err) {
       console.log(err);
