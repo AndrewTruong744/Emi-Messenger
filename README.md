@@ -1,4 +1,11 @@
 # Emi-Messenger
+
+
+
+https://github.com/user-attachments/assets/84792ae8-97b1-4a98-b558-ab0ea0115c1d
+
+
+
 ## About
 This is a real time web based chat application that supports a variety of features:
 - 1 to 1 and Group Chats
@@ -15,6 +22,14 @@ This is a real time web based chat application that supports a variety of featur
 The goal of this project is to create a security focused chat application using cloud only E2EE:
 - prevents unencrypted data from being stored on user devices (prevents leakage if their device is stolen)
 - data is held in a central location that even the application administrator can not view
+
+## Tech Stack
+- Languages: TypeScript, HTML/CSS
+- Frontend: React.js
+- Backend: Express.js
+- Database: PostgreSQL
+- Caching: Redis
+- Real Time Updates: Socket.io
 
 ## Get Started
 ### Prerequisites:
@@ -38,6 +53,24 @@ The goal of this project is to create a security focused chat application using 
 - put url of where Redis server is being hosted on
 - run by entering npm run dev
 
+## Planned Additions
+- Changing email and password
+- 2 Factor authentication (email or TOTP)
+- typing and read status
+- CSRF Tokens
+- AWS Hosting
 
+<details>
+  <summary>App screenshots</summary>
+  
+  <p align="center">
+    <img src="./.github/Emi-Messenger-1.png" width="300">
+    <img src="./.github/Emi-Messenger-2.png" width="300">
+    <img src="./.github/Emi-Messenger-3.png" width="300">
+    <img src="./.github/Emi-Messenger-4.png" width="300">
+    <img src="./.github/Emi-Messenger-5.png" width="300">
+    <img src="./.github/Emi-Messenger-6.png" width="300">
+  </p>
+</details>
 
 
