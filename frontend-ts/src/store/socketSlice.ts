@@ -3,7 +3,6 @@ import {io, Socket} from 'socket.io-client';
 import { type NavigateFunction } from 'react-router-dom';
 import { type FullStore } from './useBoundStore';
 import type { Message, Conversation } from '../types/storeTypes';
-import { type ConversationsAndMessages } from './chatSlice';
 
 export interface SocketSlice {
   socket: Socket | null,

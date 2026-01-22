@@ -59,17 +59,19 @@ The goal of this project is to create a security focused chat application using 
 - typing and read status
 - CSRF Tokens
 - AWS Hosting
+- E2EE
 
 <details>
   <summary>App screenshots</summary>
   
   <p align="center">
-    <img src="./.github/Emi-Messenger-1.png" width="300">
-    <img src="./.github/Emi-Messenger-2.png" width="300">
-    <img src="./.github/Emi-Messenger-3.png" width="300">
-    <img src="./.github/Emi-Messenger-4.png" width="300">
-    <img src="./.github/Emi-Messenger-5.png" width="300">
-    <img src="./.github/Emi-Messenger-6.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-1.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-2.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-3.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-7.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-4.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-5.png" width="300">
+    <img src="./.github/assets/Emi-Messenger-6.png" width="300">
   </p>
 </details>
 
