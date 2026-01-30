@@ -21,7 +21,7 @@ function Messages({conversationId} : Props) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
-  const [userNotFound, setUserNotFound] = useState(false);
+  // const [userNotFound, setUserNotFound] = useState(false);
   const lastScrollHeight = useRef(0);
   const prevMessageId = useRef<string | null>(null); // used for cursor pagination
   const messagesRef = useRef<HTMLDivElement>(null); 
@@ -51,7 +51,7 @@ function Messages({conversationId} : Props) {
         setIsLoading(false);
       } catch (err) {
         console.log(err);
-        setUserNotFound(true);
+        // setUserNotFound(true);
       }
     }
   }

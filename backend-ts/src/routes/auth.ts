@@ -3,7 +3,7 @@ import authQuery from '../db/authQuery.js';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import passport from "passport";
 import generateJwt from "../authentication/jwt.js";
-import type { User as PrismaUser } from "@prisma/client";
+import type { User as PrismaUser } from '../generated/prisma/client.js';
 
 /*
   TO DO: make error codes more accurate

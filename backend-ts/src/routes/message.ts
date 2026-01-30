@@ -1,6 +1,6 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
-import {type User as PrismaUser, Prisma} from '@prisma/client'
+import {type User as PrismaUser, Prisma} from '../generated/prisma/client.js'
 import passport from "passport";
 
 /*

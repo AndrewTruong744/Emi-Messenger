@@ -1,10 +1,16 @@
 import { type Server, type Socket } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
 import cookie from 'cookie';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import generalQuery from "../db/generalQuery.js";
 import redis from "../cache/redisClient.js";
 
+const pubClient = redis;
+const subClient = pubClient.duplicate();
+
 function handleSocketEvents(io : Server) {
+  // socket.io uses redis to communicate with other server instances
+  io.adapter(createAdapter(pubClient, subClient));
 
   // provides information stored in the refresh token to the socket handlers
   io.use((socket : Socket, next : (err?: Error) => void) => {

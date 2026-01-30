@@ -14,7 +14,7 @@ function MessageBox({conversationId} : Props) {
     if (e.key === "Enter" && message.length > 0) {
       try {
         setDisableSendMessage(true);
-        const axiosRes = await api.post(`/messages/${conversationId}`, {message: message});
+        await api.post(`/messages/${conversationId}`, {message: message});
         setMessage("");
         setDisableSendMessage(false);
       } catch (err) {

@@ -4,9 +4,23 @@ import { Redis }  from "ioredis";
   connects to Redis server
 */
 
-const redis = new Redis({
-  host: process.env['REDIS_HOST'],
-  port: 6379
-});
+interface RedisOptions {
+  host: string,
+  port: number,
+  password?: string,
+  tls?: {}
+}
+
+const redisOptions : RedisOptions = {
+  host: process.env['REDIS_HOST']!,
+  port: Number(process.env['REDIS_PORT']),
+};
+
+if (process.env['MODE'] === 'production') {
+  redisOptions.password = process.env['REDIS_PASSWORD']!;
+  redisOptions.tls = {}
+}
+
+const redis = new Redis(redisOptions);
 
 export default redis;

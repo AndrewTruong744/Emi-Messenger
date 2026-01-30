@@ -1,9 +1,7 @@
-import {useState, useEffect} from 'react';
-import styles from "../styles/Home.module.css";
-import NotFound from './NotFound';
+import { Navigate } from 'react-router-dom';
 
 function Welcome() {
-  return <NotFound />;
+  return <Navigate to="/login" replace={true} />;
 }
 
 export default Welcome;

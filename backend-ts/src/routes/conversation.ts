@@ -1,7 +1,7 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
 import passport from "passport";
-import {type User as PrismaUser} from '@prisma/client'
+import {type User as PrismaUser} from '../generated/prisma/client.js';
 import redis from "../cache/redisClient.js";
 
 /*
@@ -105,7 +105,7 @@ router.put('/:id',
         });
       }
 
-      io.in(`room-${conversationId}`).emit('conversationNameChange', {
+      await io.in(`room-${conversationId}`).emit('conversationNameChange', {
         conversationId: conversationId,
         name: newName
       });

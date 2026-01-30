@@ -1,7 +1,7 @@
 import authQuery from '../db/authQuery.js';
 import jwt from 'jsonwebtoken';
 import { type Response } from 'express';
-import {type User as PrismaUser} from '@prisma/client'
+import {type User as PrismaUser} from '../generated/prisma/client.js';
 
 /*
   This application uses a both JWT token method:
@@ -52,7 +52,8 @@ async function generateJwt(
     secure: (process.env['MODE'] === 'production') ? true : false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, //7 days in milliseconds
-    path: '/'
+    path: '/',
+    domain: (process.env['MODE'] === 'production') ? process.env['SUBDOMAIN'] : 'localhost'
   });
 
   // if logged in with Single Sign On, just return the access token

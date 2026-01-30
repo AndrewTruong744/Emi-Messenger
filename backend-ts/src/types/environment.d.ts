@@ -7,8 +7,11 @@ declare global {
       ACCESS_TOKEN_SECRET: string;
       MODE: string;
       ORIGIN: string;
+      SUBDOMAIN: string;
       GOOGLE_CLIENT_ID: string;
       GOOGLE_CLIENT_SECRET: string;
+      REDIS_HOST: string,
+      REDIS_PORT: string,
     }
   }
 }

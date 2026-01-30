@@ -17,12 +17,17 @@ import handleSocketEvents from "./sockets/socket.js";
 const app = express();
 const httpServer = createServer(app);
 
+// trust AWS Load Balancer
+if (process.env['MODE'] === 'production')
+  app.set('trust proxy', 1);
+
 // allows webSockets on this server
 const io = new Server(httpServer, {
   cors: {
     origin: process.env['ORIGIN'],
     credentials: true
-  }
+  },
+  transports: ['websocket']
 });
 
 // allows io to be used in REST APIs

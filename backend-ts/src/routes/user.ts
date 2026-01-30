@@ -1,6 +1,6 @@
 import express from "express";
 import generalQuery from "../db/generalQuery.js";
-import {type User as PrismaUser, Prisma} from '@prisma/client'
+import {type User as PrismaUser, Prisma} from '../generated/prisma/client.js'
 import passport from "passport";
 
 /*
@@ -45,7 +45,7 @@ router.put('/me',
       }
 
       for (const conversationId of result) {
-        io.in(`room-${conversationId}`).emit('usernameChange', {
+        await io.in(`room-${conversationId}`).emit('usernameChange', {
           userId: userId,
           username: newUsername
         });

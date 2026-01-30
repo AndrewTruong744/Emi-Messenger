@@ -16,7 +16,11 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
     if (get().socket != null)
       return;
 
-    const socket = io(import.meta.env.VITE_API_DOMAIN, {withCredentials: true});
+    const socket = io(import.meta.env.VITE_API_DOMAIN, {
+      withCredentials: true,
+      transports: ['websocket'],
+      upgrade: false,
+    });
 
     socket.on('userOnline', (conversationId) => {
       

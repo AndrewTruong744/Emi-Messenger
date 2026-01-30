@@ -23,6 +23,7 @@ function Settings() {
       } catch (err) {
         console.log(err);
         setNewUsername(null);
+        setNewPassword("");
       }
     }
   }

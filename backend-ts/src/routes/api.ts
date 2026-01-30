@@ -11,4 +11,8 @@ router.use('/conversations', conversationRouter);
 router.use('/messages', messageRouter);
 router.use('/users', userRouter);
 
+router.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 export default router;
