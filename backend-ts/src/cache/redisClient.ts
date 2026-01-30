@@ -23,4 +23,8 @@ if (process.env['MODE'] === 'production') {
 
 const redis = new Redis(redisOptions);
 
+redis.on('error', (err) => {
+  console.error('Redis Error');
+});
+
 export default redis;
