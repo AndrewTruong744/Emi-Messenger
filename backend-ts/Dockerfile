@@ -13,6 +13,8 @@ COPY package*.json ./
 COPY src/prisma.config.ts ./src/
 COPY prisma ./prisma/
 
+COPY global-bundle.pem ./
+
 RUN npm ci
 COPY . .
 
@@ -35,6 +37,8 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/generated ./src/generated
+
+COPY global-bundle.pem ./
 
 EXPOSE 3000
 

@@ -17,7 +17,7 @@ const redisOptions : RedisOptions = {
 };
 
 if (process.env['MODE'] === 'production') {
-  redisOptions.password = process.env['REDIS_PASSWORD']!;
+  // redisOptions.password = process.env['REDIS_PASSWORD']!;
   redisOptions.tls = {}
 }
 

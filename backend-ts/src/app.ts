@@ -59,6 +59,7 @@ app.use((err : any, req : Request, res : Response, next : NextFunction) => {
 handleSocketEvents(io);
 
 const PORT = 3000;
-httpServer.listen(PORT, () => {
+const HOST = '0.0.0.0'
+httpServer.listen(PORT, HOST, () => {
   console.log(`Express app - listening on port ${PORT}!`);
 });

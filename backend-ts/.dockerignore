@@ -2,7 +2,10 @@ node_modules
 npm-debug.log
 dist
 .env
+.env.example
 .git
 .github
 Dockerfile
+Dockerfile.migration
 .dockerignore
+src/generated

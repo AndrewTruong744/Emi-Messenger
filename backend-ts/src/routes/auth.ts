@@ -25,7 +25,7 @@ router.post('/signup', async (req, res, next) => {
     const createdUser = await authQuery.createUser(req.body);
     return res.json({message: 'Success'});
   } catch (err) {
-    console.error('Trouble connecting to database');
+    console.error('Trouble connecting to database' + err);
     return res.status(503).json({
       message: 'Database offline'
     });

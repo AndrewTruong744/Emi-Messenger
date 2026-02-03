@@ -73,7 +73,7 @@ passport.use('google', new GoogleStrategy({
     clientID: process.env['GOOGLE_CLIENT_ID']!,
     clientSecret: process.env['GOOGLE_CLIENT_SECRET']!,
     // make sure to put http://localhost:3000/ into a .env var
-    callbackURL: 'http://localhost:3000/api/auth/oauth2/redirect/google',
+    callbackURL: `${process.env['BACKEND']}/api/auth/oauth2/redirect/google`,
     scope: ['profile', 'email']
   },
   async (accessToken, refreshToken, profile, done) => {
