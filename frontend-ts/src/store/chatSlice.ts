@@ -38,11 +38,9 @@ export const createChatSlice : StateCreator<FullStore, [], [], ChatSlice> = (set
       const newUuidToUsername = { ...state.uuidToUsername };
       const newConversationList = {...state.conversationList};
 
-      console.log(conversationList);
       conversationList.forEach((conversation) => {
         newConversationList[conversation.id] = conversation;
       });
-      console.log(newConversationList);
 
       Object.entries(userIdToUsernames).forEach((userIdToUsername) => {
         newUuidToUsername[userIdToUsername[0]] = userIdToUsername[1];

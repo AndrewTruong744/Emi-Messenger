@@ -50,19 +50,14 @@ function MessageHeader({conversationId} : Props) {
 
     resetState();
   }, [conversationId])
-  
-  console.log(newConversationName);
 
   let conversationName = conversation?.name ?? "Loading";
   if (conversationName === "" && conversation && uuidToUsername && currentUser) {
-    console.log("ENTEREDD!!!!!")
     conversationName = conversation.participants
       .filter(participantId => participantId != currentUser.id)
       .map(participantId => uuidToUsername[participantId])
       .join(', ');
   }
-
-  console.log(conversationName);
 
   return (
     <header className={styles.header}>

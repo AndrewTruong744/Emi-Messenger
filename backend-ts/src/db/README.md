@@ -12,8 +12,8 @@ user-${userId} (HSET):
 - username: string
 - picture: (implement later)
 
-// a list of conversations a user is in sorted from latest to earliest
 user-${userId}-conversations (ZSET):
+- !!! a list of conversations a user is in sorted from latest to earliest
 - [timeStamp, conversation][] 
 
 conversation-${conversationId} (HSET):
@@ -25,6 +25,7 @@ conversation-${conversationId} (HSET):
 - timestamp: string
 - picture: (implement later)
 
-// Latest conversations at index 0
-conversation-${conversationId}-messages (List): Message[] JSON.stringify
+conversation-${conversationId}-messages (List): 
+- !!! Latest conversations are at index 0
+- Message[] JSON.stringify
 - ttl: 7d

@@ -31,7 +31,6 @@ function Settings() {
   async function handleSignout() {
     try {
       await api.post("/auth/signout");
-      console.log("success!!!");
     } catch (err) {
       console.log(err);
     }
@@ -41,7 +40,6 @@ function Settings() {
   async function handleDeleteAccount() {
     try {
       await api.delete("/users/me");
-      console.log("success!!!");
     } catch (err) {
       console.log(err);
     }

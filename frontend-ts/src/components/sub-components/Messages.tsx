@@ -32,7 +32,6 @@ function Messages({conversationId} : Props) {
         // get current scroll height to be able to correctly position scrollbar when new messages come in
         lastScrollHeight.current = messagesRef.current?.scrollHeight || 0;
         setIsLoading(true);
-        console.log('prevMessage!!! ' + prevMessageId.current);
         const axiosRes = await api.get(`/messages/${conversationId}`, 
           {params: {prevMessageId: prevMessageId.current}});
         const messagesObj = axiosRes.data;
@@ -62,7 +61,6 @@ function Messages({conversationId} : Props) {
 
     // if scrollbar is at the top, request for more older messages
     if (messagesRef.current.scrollTop === 0) {
-      console.log('entered!!!');
       getMessages(true);
     }
   }

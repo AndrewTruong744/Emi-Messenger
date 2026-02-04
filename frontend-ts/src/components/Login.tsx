@@ -51,7 +51,6 @@ function Login() {
     try {
       const res = await api.post('/auth/login', loginData);
       const accessToken = res.data.accessToken;
-      console.log('Login successful!', res.data);
       setAccessToken(accessToken);
       
       clearStore();

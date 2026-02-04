@@ -28,8 +28,6 @@ function ConversationList({activeMessage, onSetActiveMessage} : Props) {
     }).sort((a,b) => {
       return new Date(Number(b.timeStamp)).getTime() - new Date(Number(a.timeStamp)).getTime();
     })
-
-    console.log(sortedConversationList);
   }
 
   function formatTimeShort(date : string | number) {

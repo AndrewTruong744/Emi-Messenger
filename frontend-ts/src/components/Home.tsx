@@ -32,7 +32,6 @@ function Home() {
       const axiosRes = await api.get('/conversations');
       const conversationsObj = axiosRes.data;
       setConversations(conversationsObj.conversationList, conversationsObj.userIdToUsernames);
-      console.log(conversationsObj);
     }
 
     async function initialize() {

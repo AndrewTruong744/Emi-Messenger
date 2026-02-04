@@ -32,7 +32,6 @@ function FindPeople() {
         setUsers(usersObj.users);
 
         if (currentUser) {
-          console.log(currentUser);
           setUserIdsSelected([currentUser.id]);
           setUsernamesSelected([currentUser.username]);
         }
@@ -81,9 +80,6 @@ function FindPeople() {
         userIds: userIdsSelected, 
         usernames: usernamesSelected
       });
-      console.log(axiosRes);
-      console.log(userIdsSelected);
-      console.log(usernamesSelected);
       onSetActiveMessage(axiosRes.data.conversationId);
       navigate(`/home/conversation/${axiosRes.data.conversationId}`);
     } catch (err) {

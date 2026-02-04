@@ -117,7 +117,6 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
     });
 
     socket.on("addConversation", (conversation : Conversation) => {
-      console.log(conversation);
       const participants = conversation.participants.reduce((acc, participant, index) => {
         acc[participant] = conversation.participantNames![index];
         return acc;
@@ -143,7 +142,6 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
       conversationId : string,
       name: string
     }) => {
-      console.log("newConversationData!!!: " + data)
       set(state => {
         if (!state.conversationList?.[data.conversationId])
           return state;
@@ -171,8 +169,6 @@ export const createSocketSlice : StateCreator<FullStore, [], [], SocketSlice> = 
     socket.on("conversationDeleted", (conversationId : string) => {
       if (window.location.href.includes(conversationId))
         navigate('/home');
-      console.log(conversationId);
-      console.log(window.location.href);
 
       // find a way to cleanly remove the username and id of participants
       set((state) => {

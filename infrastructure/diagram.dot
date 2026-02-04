@@ -1,0 +1,779 @@
+digraph "Diagram" {
+  splines = "ortho";
+  pad = 1;
+  nodesep = 0.6;
+  ranksep = 0.75;
+  fontname = "Sans-Serif";
+  fontsize = 15;
+  dpi = 200;
+  rankdir = "BT";
+  compound = true;
+  fontcolor = "#222222";
+  edge [
+    color = "#D5871488";
+    penwidth = 2;
+    arrowhead = "dot";
+    arrowtail = "dot";
+  ];
+  node [
+    shape = "box";
+    style = "rounded";
+    fixedsize = true;
+    width = 1.7;
+    height = 1.7;
+    labelloc = "c";
+    imagescale = true;
+    fontname = "Sans-Serif";
+    fontsize = 8;
+    margin = 8;
+  ];
+  subgraph "InfrastructureStack" {
+    subgraph "cluster-SubGraph.InfrastructureStack" {
+      graph [
+        label = "InfrastructureStack";
+        labelloc = "b";
+        labeljust = "l";
+        margin = 10;
+        fontsize = 16;
+        penwidth = 2;
+        pencolor = "#888888";
+        style = "filled,rounded";
+        fillcolor = "#e4e4e4";
+      ];
+      "InfrastructureStack/Custom__CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C" [
+        label = " Custom \nCDKBucketDeployment86";
+        fontsize = 12;
+        image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_AWS-Lambda_64@5x.png";
+        imagescale = "true";
+        imagepos = "tc";
+        penwidth = 0;
+        shape = "node";
+        fixedsize = "true";
+        labelloc = "b";
+        width = 2;
+        height = 2.4819999999999998;
+      ];
+      "InfrastructureStack/MySecretsmanager/Secrets" [
+        label = " Secrets";
+        fontsize = 12;
+        image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Security-Identity-Compliance/64/Arch_AWS-Secrets-Manager_64@5x.png";
+        imagescale = "true";
+        imagepos = "tc";
+        penwidth = 0;
+        shape = "node";
+        fixedsize = "true";
+        labelloc = "b";
+        width = 1.2;
+        height = 1.466;
+      ];
+      subgraph "cluster-SubGraph.MyVpc" {
+        graph [
+          label = "MyVpc";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyVpc/VpcService" [
+          label = " VpcService";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Amazon-Virtual-Private-Cloud_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyVpc/NatEIP" [
+          label = " EC2 EIP NatEIP";
+          fontsize = 12;
+        ];
+        "InfrastructureStack/MyVpc/NatEIPAssociation0" [
+          label = " EC2 EIPAssociation\nNatEIPAssociation0";
+          fontsize = 12;
+        ];
+        "InfrastructureStack/MyVpc/EcsSG" [
+          label = " EcsSG";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/security_group.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyVpc/ElasticacheSG" [
+          label = " ElasticacheSG";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/security_group.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyVpc/RdsSG" [
+          label = " RdsSG";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/security_group.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+      }
+      subgraph "cluster-SubGraph.MyCloudfront" {
+        graph [
+          label = "MyCloudfront";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyCloudfront/WebsiteBucket" [
+          label = " WebsiteBucket";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Storage/64/Arch_Amazon-S3-Standard_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyCloudfront/RedirectFunction" [
+          label = " RedirectFunction";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Amazon-CloudFront_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+          label = " WebsiteDistribution";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Amazon-CloudFront_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyCloudfront/WwwAliasARecord" [
+          label = " WwwAliasARecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyCloudfront/WwwAliasAaaaRecord" [
+          label = " WwwAliasAaaaRecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyCloudfront/AliasARecord" [
+          label = " AliasARecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyCloudfront/AliasAaaaRecord" [
+          label = " AliasAaaaRecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        subgraph "cluster-SubGraph.DeployWebsite" {
+          graph [
+            label = "DeployWebsite";
+            labelloc = "b";
+            labeljust = "l";
+            margin = 10;
+            fontsize = 16;
+            penwidth = 2;
+            pencolor = "#888888";
+            style = "filled,rounded";
+            fillcolor = "#c7c7c7";
+          ];
+          "InfrastructureStack/MyCloudfront/DeployWebsite/AwsCliLayer" [
+            label = " AwsCliLayer";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_AWS-Lambda_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 2;
+            height = 2.266;
+          ];
+          "InfrastructureStack/MyCloudfront/DeployWebsite/CustomResource" [
+            label = " CloudFormation\nCustomResource\nCustomResource";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_AWS-CloudFormation_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 1.2;
+            height = 1.898;
+          ];
+        }
+      }
+      subgraph "cluster-SubGraph.MyElasticache" {
+        graph [
+          label = "MyElasticache";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyElasticache/RedisSubnetGroup" [
+          label = " ELASTICACHE\nSUBNETGROUP\nRedisSubnetGroup";
+          fontsize = 12;
+        ];
+        "InfrastructureStack/MyElasticache/ElasticacheService" [
+          label = " ELASTICACHE\nREPLICATIONGROUP\nElasticacheService";
+          fontsize = 12;
+        ];
+      }
+      subgraph "cluster-SubGraph.MyRds" {
+        graph [
+          label = "MyRds";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyRds/RdsParameterGroup" [
+          label = " RdsParameterGroup";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Database/64/Arch_Amazon-RDS_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyRds/RdsInstance" [
+          label = " RdsInstance";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Compute/Res_48_Dark/Res_Amazon-EC2_T3-Instance_48_Dark.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+      }
+      subgraph "cluster-SubGraph.MyEcs" {
+        graph [
+          label = "MyEcs";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyEcs/MyCluster" [
+          label = " MyCluster";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_Amazon-Elastic-Container-Service_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyEcs/MyTaskDef" [
+          label = " MyTaskDef";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Containers/Res_48_Dark/Res_Amazon-Elastic-Container-Service_Task_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyEcs/AsgProvider/AsgProvider" [
+          label = " ECS CapacityProvider\nAsgProvider";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Containers/Res_48_Dark/Res_Amazon-Elastic-Container-Service_Container-1_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.4819999999999998;
+        ];
+        "InfrastructureStack/MyEcs/EcsService/Service" [
+          label = " ECS Service Service";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Containers/Res_48_Dark/Res_Amazon-Elastic-Container-Service_Service_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        subgraph "cluster-SubGraph.MyAsg" {
+          graph [
+            label = "MyAsg";
+            labelloc = "b";
+            labeljust = "l";
+            margin = 10;
+            fontsize = 16;
+            penwidth = 2;
+            pencolor = "#888888";
+            style = "filled,rounded";
+            fillcolor = "#c7c7c7";
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/InstanceRole" [
+            label = " InstanceRole";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Security-Identity-Compliance/64/Arch_AWS-Identity-and-Access-Management_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 1.2;
+            height = 1.466;
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/InstanceProfile" [
+            label = " IAM InstanceProfile\nInstanceProfile";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Security-Identity-and-Compliance/Res_48_Dark/Res_AWS-Identity-Access-Management_Permissions_48_Dark_gen.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 2;
+            height = 2.4819999999999998;
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/LaunchTemplate" [
+            label = " LaunchTemplate";
+            fontsize = 12;
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/ASG" [
+            label = " AutoScaling\nAutoScalingGroup ASG";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_Amazon-EC2-Auto-Scaling_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 2;
+            height = 2.4819999999999998;
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/LifecycleHookDrainHook" [
+            label = "\nLifecycleHookDrainHoo";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_Amazon-EC2-Auto-Scaling_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 1.2;
+            height = 1.682;
+          ];
+          "InfrastructureStack/MyEcs/MyAsg/DrainECSHook/Function" [
+            label = " Function";
+            fontsize = 12;
+            image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_AWS-Lambda_64@5x.png";
+            imagescale = "true";
+            imagepos = "tc";
+            penwidth = 0;
+            shape = "node";
+            fixedsize = "true";
+            labelloc = "b";
+            width = 2;
+            height = 2.266;
+          ];
+        }
+      }
+      subgraph "cluster-SubGraph.MyAlb" {
+        graph [
+          label = "MyAlb";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyAlb/MyAlb" [
+          label = " MyAlb";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Networking-Content/64/Arch_Elastic-Load-Balancing_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyAlb/ApiAliasARecord" [
+          label = " ApiAliasARecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyAlb/ApiAliasAaaaRecord" [
+          label = " ApiAliasAaaaRecord";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Amazon-Route-53-Hosted-Zone_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+        "InfrastructureStack/MyAlb/TargetGroup" [
+          label = " TargetGroup";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Resource/Res_Networking-and-Content-Delivery/Res_48_Dark/Res_Elastic-Load-Balancing_Application-Load-Balancer_48_Dark_gen.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.466;
+        ];
+      }
+      subgraph "cluster-SubGraph.MyLambda" {
+        graph [
+          label = "MyLambda";
+          labelloc = "b";
+          labeljust = "l";
+          margin = 10;
+          fontsize = 16;
+          penwidth = 2;
+          pencolor = "#888888";
+          style = "filled,rounded";
+          fillcolor = "#d6d6d6";
+        ];
+        "InfrastructureStack/MyLambda/MigrationLambdaSG" [
+          label = " MigrationLambdaSG";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/security_group.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyLambda/MigrationLambda" [
+          label = " MigrationLambda";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_AWS-Lambda_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 2;
+          height = 2.266;
+        ];
+        "InfrastructureStack/MyLambda/RunMigration/Default" [
+          label = " CloudFormation\nCustomResource\nDefault";
+          fontsize = 12;
+          image = "/home/nateclickbait/downloads/repos/Emi-Messenger/infrastructure/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_AWS-CloudFormation_64@5x.png";
+          imagescale = "true";
+          imagepos = "tc";
+          penwidth = 0;
+          shape = "node";
+          fixedsize = "true";
+          labelloc = "b";
+          width = 1.2;
+          height = 1.898;
+        ];
+      }
+    }
+  }
+  "InfrastructureStack/MyVpc/NatEIPAssociation0" -> "InfrastructureStack/MyVpc/NatEIP" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/NatEIPAssociation0" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/EcsSG" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/EcsSG" -> "InfrastructureStack/MyAlb/MyAlb" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/ElasticacheSG" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/ElasticacheSG" -> "InfrastructureStack/MyVpc/EcsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/RdsSG" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/RdsSG" -> "InfrastructureStack/MyVpc/EcsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyVpc/RdsSG" -> "InfrastructureStack/MyLambda/MigrationLambdaSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/WebsiteBucket" -> "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/WebsiteDistribution" -> "InfrastructureStack/MyCloudfront/WebsiteBucket" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/WebsiteDistribution" -> "InfrastructureStack/MyCloudfront/RedirectFunction" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/WwwAliasARecord" -> "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/WwwAliasAaaaRecord" -> "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/AliasARecord" -> "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyCloudfront/AliasAaaaRecord" -> "InfrastructureStack/MyCloudfront/WebsiteDistribution" [
+    dir = "both";
+  ];
+  "InfrastructureStack/Custom__CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C" -> "InfrastructureStack/MyCloudfront/WebsiteBucket" [
+    dir = "both";
+  ];
+  "InfrastructureStack/Custom__CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C" -> "InfrastructureStack/MyCloudfront/DeployWebsite/AwsCliLayer" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyElasticache/RedisSubnetGroup" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyElasticache/ElasticacheService" -> "InfrastructureStack/MyElasticache/RedisSubnetGroup" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyElasticache/ElasticacheService" -> "InfrastructureStack/MyVpc/ElasticacheSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyRds/RdsInstance" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyRds/RdsInstance" -> "InfrastructureStack/MyVpc/RdsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyRds/RdsInstance" -> "InfrastructureStack/MyRds/RdsParameterGroup" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyCluster" -> "InfrastructureStack/MyEcs/AsgProvider/AsgProvider" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/InstanceRole" -> "InfrastructureStack/MyEcs/MyCluster" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/InstanceProfile" -> "InfrastructureStack/MyEcs/MyAsg/InstanceRole" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/LaunchTemplate" -> "InfrastructureStack/MyEcs/MyAsg/InstanceProfile" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/LaunchTemplate" -> "InfrastructureStack/MyVpc/EcsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/LaunchTemplate" -> "InfrastructureStack/MyEcs/MyCluster" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/ASG" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/ASG" -> "InfrastructureStack/MyEcs/MyAsg/LaunchTemplate" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/LifecycleHookDrainHook" -> "InfrastructureStack/MyEcs/MyAsg/ASG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/DrainECSHook/Function" -> "InfrastructureStack/MyEcs/MyAsg/ASG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/DrainECSHook/Function" -> "InfrastructureStack/MyEcs/MyCluster" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyAsg/DrainECSHook/Function" -> "InfrastructureStack/MyEcs/MyAsg/LifecycleHookDrainHook" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyTaskDef" -> "InfrastructureStack/MyElasticache/ElasticacheService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyTaskDef" -> "InfrastructureStack/MySecretsmanager/Secrets" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/MyTaskDef" -> "InfrastructureStack/MyRds/RdsInstance" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/AsgProvider/AsgProvider" -> "InfrastructureStack/MyEcs/MyAsg/ASG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyEcs/AsgProvider/AsgProvider" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyVpc/EcsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyEcs/MyCluster" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyEcs/MyTaskDef" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyEcs/EcsService/Service" -> "InfrastructureStack/MyAlb/TargetGroup" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/MyAlb" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/MyAlb" -> "InfrastructureStack/MyVpc/EcsSG" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/MyAlb" -> "InfrastructureStack/MyAlb/TargetGroup" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/ApiAliasARecord" -> "InfrastructureStack/MyAlb/MyAlb" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/ApiAliasAaaaRecord" -> "InfrastructureStack/MyAlb/MyAlb" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyAlb/TargetGroup" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyLambda/MigrationLambdaSG" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyLambda/MigrationLambda" -> "InfrastructureStack/MyRds/RdsInstance" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyLambda/MigrationLambda" -> "InfrastructureStack/MyVpc/VpcService" [
+    dir = "both";
+  ];
+  "InfrastructureStack/MyLambda/MigrationLambda" -> "InfrastructureStack/MyLambda/MigrationLambdaSG" [
+    dir = "both";
+  ];
+}

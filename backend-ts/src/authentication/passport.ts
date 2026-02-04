@@ -57,7 +57,6 @@ passport.use('access-token',
   new JwtStrategy(jwtOptions, async (jwt_payload : JwtPayload, done : VerifiedCallback) => {
     try {
       const user = await authQuery.getUserById(jwt_payload.id);
-      console.log(user);
       if (user)
         return done(null, user);
       else
@@ -105,7 +104,6 @@ passport.use('google', new GoogleStrategy({
         }
 
         const createdUser = await authQuery.createUser(userContents);
-        console.log('authenticated');
         return done(null, createdUser);
       }
     } catch (err) {

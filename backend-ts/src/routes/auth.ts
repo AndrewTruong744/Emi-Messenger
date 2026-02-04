@@ -107,7 +107,6 @@ router.post('/signout', async (req, res, next) => {
 
       const io = req.io;
       io.to(`user-${decoded["id"]}`).emit('signout');
-      console.log(message);
     } catch (err) {
       console.log("Token invalid during logout, proceeding to clear cookies");
     }
@@ -125,7 +124,6 @@ router.post('/signout', async (req, res, next) => {
 router.post('/refresh', async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  console.log(refreshToken);
   if (!refreshToken) {
     return res.status(401).json(
       { message: 'No Refresh Token provided. Please log in.' });
